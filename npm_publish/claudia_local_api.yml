@@ -1,0 +1,19 @@
+- name: claudia-local-api
+  hosts: local
+  gather_facts: no
+
+  vars:
+    repo_name: claudia-local-api
+    repo_url: git@github.com:suddi/claudia-local-api.git
+    temp_dir: "{{ work_dir }}/{{ repo_name }}"
+    version: master
+    version_increment_level: "{{ update_type | default('patch') }}"
+
+  pre_tasks:
+    - assert:
+        that: "version_increment_level in ['major', 'minor', 'patch']"
+
+  tasks:
+    - name: publish {{ repo_name }} to NPM
+      include_role:
+        name: common
