@@ -1,0 +1,52 @@
+- name: empty the temp_dir
+  file:
+    path: "{{ temp_dir }}"
+    state: absent
+
+- name: create the temp_dir
+  file:
+    path: "{{ temp_dir }}"
+    state: directory
+
+- name: get source code
+  git:
+    repo: "{{ repo_url }}"
+    dest: "{{ temp_dir }}"
+    force: yes
+    version: "{{ version }}"
+
+- name: switch to .nvmrc version
+  command: "nvm use"
+  args:
+    chdir: "{{ temp_dir }}"
+    removes: ".nvmrc"
+
+- name: install npm dependencies for build
+  npm:
+    path: "{{ temp_dir }}"
+    production: no
+
+- name: run npm test
+  command: "npm test"
+  args:
+    chdir: "{{ temp_dir }}"
+
+- name: increment package version
+  command: "npm version {{ version_increment_level }}"
+  args:
+    chdir: "{{ temp_dir }}"
+
+- name: commit package version increment
+  command: "git push origin {{ version }}"
+  args:
+    chdir: "{{ temp_dir }}"
+
+- name: publish npm package
+  command: "npm publish"
+  args:
+    chdir: "{{ temp_dir }}"
+
+- name: empty the temp_dir
+  file:
+    path: "{{ temp_dir }}"
+    state: absent

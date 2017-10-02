@@ -1,0 +1,19 @@
+- name: generator-backend-scaffolder
+  hosts: local
+  gather_facts: no
+
+  vars:
+    repo_name: generator-backend-scaffolder
+    repo_url: git@github.com:suddi/generator-backend-scaffolder.git
+    temp_dir: "{{ work_dir }}/{{ repo_name }}"
+    version: master
+    version_increment_level: "{{ update_type | default('patch') }}"
+
+  pre_tasks:
+    - assert:
+        that: "version_increment_level in ['major', 'minor', 'patch']"
+
+  tasks:
+    - name: publish {{ repo_name }} to NPM
+      include_role:
+        name: common
