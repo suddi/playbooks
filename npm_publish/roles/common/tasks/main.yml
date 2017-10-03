@@ -16,10 +16,10 @@
     version: "{{ version }}"
 
 - name: switch to .nvmrc version
-  command: "nvm use"
+  shell: nvm use
   args:
     chdir: "{{ temp_dir }}"
-    removes: ".nvmrc"
+    removes: .nvmrc
 
 - name: install npm dependencies for build
   npm:
@@ -27,7 +27,7 @@
     production: no
 
 - name: run npm test
-  command: "npm test"
+  command: npm test
   args:
     chdir: "{{ temp_dir }}"
 
@@ -42,7 +42,7 @@
     chdir: "{{ temp_dir }}"
 
 - name: publish npm package
-  command: "npm publish"
+  command: npm publish
   args:
     chdir: "{{ temp_dir }}"
 
