@@ -85,3 +85,12 @@
   file:
     path: "{{ temp_dir }}"
     state: absent
+
+- name: notify knightwatcher
+  command: utils/knightwatcher.js
+    --message-type deploy
+    --repo-name {{ repo_name }}
+    --link {{ deployed_link }}
+    --username {{ lookup('env', 'USER') }}
+  args:
+    chdir: "{{ inventory_dir }}"

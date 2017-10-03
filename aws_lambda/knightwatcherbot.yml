@@ -5,7 +5,8 @@
   vars:
     repo_name: knightwatcherbot
     service_name: bot-suddi-io-lambda
-    deployer_name: suddi
+    deployer_name: "{{ lookup('env', 'USER') }}"
+    deployed_link: https://bot.suddi.io
     repo_url: git@github.com:suddi/knightwatcherbot.git
     temp_dir: "{{ work_dir }}/{{ repo_name }}"
     version: master

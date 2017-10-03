@@ -32,12 +32,12 @@
     chdir: "{{ temp_dir }}"
 
 - name: increment package version
-  command: "npm version {{ version_increment_level }}"
+  command: npm version {{ version_increment_level }}
   args:
     chdir: "{{ temp_dir }}"
 
 - name: commit package version increment
-  command: "git push origin {{ version }}"
+  command: git push origin {{ version }}
   args:
     chdir: "{{ temp_dir }}"
 
@@ -50,3 +50,12 @@
   file:
     path: "{{ temp_dir }}"
     state: absent
+
+- name: notify knightwatcher
+  command: utils/knightwatcher.js
+    --message-type npm-publish
+    --repo-name {{ repo_name }}
+    --link https://www.npmjs.com/package/{{ repo_name }}
+    --username {{ lookup('env', 'USER') }}
+  args:
+    chdir: "{{ inventory_dir }}"
