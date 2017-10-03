@@ -1,0 +1,70 @@
+- name: jenkins
+  hosts: local
+  gather_facts: no
+
+  vars:
+    service_name: jenkins
+    temp_dir: "{{ work_dir }}/{{ service_name }}"
+    version: master
+
+    # GCP
+    gcp_region: us-east1-d
+    gcp_project_name: cicd
+    gcp_project_id: cicd-181808
+    disk_size: 30
+    instance_type: f1-micro
+
+    # Jenkins
+    jenkins_image: jenkins-home
+    jenkins_image_url: https://storage.googleapis.com/solutions-public-assets/jenkins-cd/jenkins-home-v3.tar.gz
+    jenkins_options_file: jenkins/k8s/options
+    cert_file: tls.crt
+    key_file: tls.key
+
+  tasks:
+    - name: get {{ jenkins_image }} image
+      command: gcloud compute images describe {{ jenkins_image }}
+      register: get_image_result
+      failed_when: "get_image_result.stderr and
+        'was not found' not in get_image_result.stderr"
+
+    - name: download {{ jenkins_image }} image
+      command: gcloud compute images create {{ jenkins_image }}
+        --source-uri {{ jenkins_image_url }}
+        --labels service={{ service_name }},deployment-method={{ deployment_method }},project={{ gcp_project_name }}
+      when: "get_image_result.stderr and
+        'was not found' in get_image_result.stderr"
+
+    - name: get {{ jenkins_image }} disk
+      command: gcloud compute disks describe {{ jenkins_image }}
+        --zone {{ gcp_region }}
+      register: get_disk_result
+      failed_when: "get_disk_result.stderr and
+        'was not found' not in get_disk_result.stderr and
+        'HTTPError 404' not in get_disk_result.stderr"
+
+    - name: create {{ jenkins_image }} disk
+      command: gcloud compute disks create {{ jenkins_image }}
+        --image {{ jenkins_image }}
+        --labels service={{ service_name }},deployment-method={{ deployment_method }},project={{ gcp_project_name }}
+        --size {{ disk_size }}
+        --zone {{ gcp_region }}
+      when: "get_disk_result.stderr and
+        'was not found' in get_disk_result.stderr and
+        'HTTPError 404' in get_disk_result.stderr"
+
+    - name: get {{ service_name }} instance
+      command: gcloud compute instances describe {{ service_name }}
+        --zone {{ gcp_region }}
+      register: get_instance_result
+      failed_when: "get_instance_result.stderr and
+        'was not found' not in get_instance_result.stderr"
+
+    - name: create {{ service_name }} instance
+      command: gcloud compute instances create {{ service_name }}
+        --disk name={{ jenkins_image }}
+        --machine-type {{ instance_type }}
+        --labels service={{ service_name }},deployment-method={{ deployment_method }},project={{ gcp_project_name }}
+        --zone {{ gcp_region }}
+      when: "get_instance_result.stderr and
+        'was not found' in get_instance_result.stderr"

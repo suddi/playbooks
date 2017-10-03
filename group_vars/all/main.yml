@@ -1,3 +1,5 @@
 aws_profile: suddi
 
+deployment_method: ansible
+
 work_dir: "{{ inventory_dir }}/tmp"
