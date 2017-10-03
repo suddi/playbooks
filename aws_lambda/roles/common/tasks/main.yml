@@ -1,0 +1,87 @@
+- name: empty the temp_dir
+  file:
+    path: "{{ temp_dir }}"
+    state: absent
+
+- name: create the temp_dir
+  file:
+    path: "{{ temp_dir }}"
+    state: directory
+
+- name: get source code
+  git:
+    repo: "{{ repo_url }}"
+    dest: "{{ temp_dir }}"
+    force: yes
+    version: "{{ version }}"
+
+- name: switch to .nvmrc version
+  shell: nvm use
+  args:
+    chdir: "{{ temp_dir }}"
+    removes: .nvmrc
+
+- name: install npm dependencies for build
+  npm:
+    path: "{{ temp_dir }}"
+    production: no
+
+- name: get lambda function
+  command: aws lambda get-function
+    --profile {{ aws_profile }}
+    --function-name {{ function_name }}
+    --region {{ aws_region }}
+  register: get_function_result
+  failed_when: "get_function_result.stderr and
+    'ResourceNotFoundException' not in get_function_result.stderr"
+
+- name: create lambda function
+  command: node_modules/.bin/claudia create
+    --name {{ function_name }}
+    --runtime {{ runtime }}
+    --role {{ role_name }}
+    --region {{ aws_region }}
+    --api-module {{ api_module }}
+    --config {{ config_json }}
+    --version {{ api_version }}
+    --timeout {{ timeout }}
+    --memory {{ memory }}
+    --security-group-ids {{ sg_ids }}
+    --subnet-ids {{ subnet_ids }}
+    --set-env AWS_PROFILE={{ aws_profile }}
+  args:
+    chdir: "{{ temp_dir }}"
+  when: "get_function_result.stderr and 'ResourceNotFoundException' in get_function_result.stderr"
+
+- name: update lambda function code
+  command: node_modules/.bin/claudia update
+    --config {{ config_json }}
+    --version {{ api_version }}
+    --set-env AWS_PROFILE={{ aws_region }}
+  args:
+    chdir: "{{ temp_dir }}"
+  register: lambda_update
+  when: get_function_result.stdout
+
+- name: get lambda function
+  command: aws lambda get-function
+    --profile {{ aws_region }}
+    --function-name "{{ function_name }}"
+  register: get_new_function_result
+  failed_when: "get_function_result.stderr and
+    'ResourceNotFoundException' not in get_function_result.stderr"
+
+- set_fact:
+    lambda_arn="{{ (get_new_function_result.stdout | from_json).Configuration.FunctionArn }}"
+
+- name: tag lambda function
+  command: aws lambda tag-resource
+    --resource "{{ lambda_arn }}"
+    --region "{{ aws_region }}"
+    --tags Service="{{ service_name }}",Name="{{ deployer_name }}",DeploymentMethod="ansible"
+    --profile {{ aws_region }}
+
+- name: empty the temp_dir
+  file:
+    path: "{{ temp_dir }}"
+    state: absent

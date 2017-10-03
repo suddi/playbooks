@@ -1,0 +1,27 @@
+- name: knightwatcherbot
+  hosts: local
+  gather_facts: no
+
+  vars:
+    repo_name: knightwatcherbot
+    service_name: bot-suddi-io-lambda
+    deployer_name: suddi
+    repo_url: git@github.com:suddi/knightwatcherbot.git
+    temp_dir: "{{ work_dir }}/{{ repo_name }}"
+    version: master
+    function_name: "{{ repo_name }}"
+    aws_region: ap-northeast-1
+    runtime: nodejs4.3
+    role_name: "{{ repo_name }}-executor"
+    api_module: lib/app
+    config_json: "{{ inventory_dir }}/aws_lambda/files/{{ repo_name }}/claudia.json"
+    api_version: production
+    timeout: 30
+    memory: 128
+    sg_ids: ""
+    subnet_ids: ""
+
+  tasks:
+    - name: deploy {{ repo_name }} to aws lambda
+      include_role:
+        name: common
