@@ -47,6 +47,7 @@ function runCmd(sendMessageFn) {
     return sendMessageFn(program);
 }
 
+/* istanbul ignore else */
 if (module.parent) {
     module.exports = {
         getMessage,

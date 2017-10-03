@@ -28,12 +28,11 @@
   },
   "scripts": {
     "check-coverage": "istanbul check-coverage",
-    "coverage": "istanbul cover _mocha -- --opts test/options/default.opts",
-    "doctest": "mocha --opts test/options/doctest.opts",
+    "coverage": "istanbul cover _mocha",
     "lint": "eslint .",
     "prepush": "npm test",
     "security-check": "nsp check --output summary",
-    "test": "npm run lint && npm run security-check"
+    "test": "npm run lint && npm run security-check && npm run coverage && npm run check-coverage"
   },
   "dependencies": {
     "axios": "^0.16.1",
@@ -41,13 +40,15 @@
   },
   "devDependencies": {
     "chai": "^4.0.0",
+    "co-mocha": "^1.2.0",
     "eslint": "^4.0.0",
     "eslint-config-suddi": "^4.0.0",
     "husky": "^0.14.0",
     "istanbul": "^0.4.0",
-    "jsdoctest": "^1.0.0",
     "mocha": "^3.0.0",
-    "nsp": "^2.0.0"
+    "nock": "^9.0.22",
+    "nsp": "^2.0.0",
+    "sinon": "^4.0.0"
   },
   "eslintConfig": {
     "extends": "suddi/backend"
