@@ -1,4 +1,4 @@
-- name: "{{ package_name }}"
+- name: publish "{{ package_name }}" to npm
   hosts: local
   gather_facts: no
 

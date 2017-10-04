@@ -12,7 +12,7 @@
 
 Ansible playbooks for publishing packages to NPM, PyPy and deployment to AWS, Heroku
 
-## Setup
+## Installation
 
 ### Prerequisities
 
@@ -36,7 +36,7 @@ ansible-playbook <PLAYBOOK_NAME>
 
 #### Sensitive files handling
 
-`ansible-vault` and the true `inventory` files are maintained in S3
+`ansible-vault` and the true `inventory.ini` files are maintained in S3
 
 To download sensitive-files:
 
@@ -49,3 +49,19 @@ To upload sensitive-files:
 ````
 make upload-sensitive-files
 ````
+
+#### Protecting `inventory.ini`
+
+In order to ensure that changes to `inventory.ini` does not get accidently committed:
+
+````
+git update-index --assume-unchanged inventory.ini
+````
+
+If you need to revert this action:
+
+````
+git update-index --no-assume-unchanged inventory.ini
+````
+
+

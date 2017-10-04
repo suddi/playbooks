@@ -1,4 +1,4 @@
-- name: knightwatcherbot
+- name: deploy knightwatcherbot to aws lambda
   hosts: local
   gather_facts: no
 
