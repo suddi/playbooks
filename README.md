@@ -1,6 +1,6 @@
 # playbooks
 
-[![CircleCI](https://img.shields.io/circleci/project/suddi/playbooks.svg)](https://circleci.com/gh/suddi/playbooks)
+[![CircleCI](https://img.shields.io/circleci/project/suddi/playbooks/master.svg)](https://circleci.com/gh/suddi/playbooks)
 [![codecov](https://codecov.io/gh/suddi/playbooks/branch/master/graph/badge.svg)](https://codecov.io/gh/suddi/playbooks)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/2266d25d464344c6a3a6eefdbc2934b5)](https://www.codacy.com/app/Suddi/playbooks)
 [![Greenkeeper badge](https://badges.greenkeeper.io/suddi/playbooks.svg)](https://greenkeeper.io/)
