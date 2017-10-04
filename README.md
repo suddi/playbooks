@@ -18,9 +18,14 @@ Ansible playbooks for publishing packages to NPM, PyPy and deployment to AWS, He
 
 - python
 - pip
+- nvm
+- npm
+- node
 
 ````
 pip install -r requirements.txt
+
+npm install
 ````
 
 ### Usage
