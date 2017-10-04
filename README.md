@@ -33,3 +33,19 @@ npm install
 ````
 ansible-playbook <PLAYBOOK_NAME>
 ````
+
+#### Sensitive files handling
+
+`ansible-vault` and the true `inventory` files are maintained in S3
+
+To download sensitive-files:
+
+````
+make download-sensitive-files
+````
+
+To upload sensitive-files:
+
+````
+make upload-sensitive-files
+````
