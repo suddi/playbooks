@@ -1,3 +1,8 @@
+- name: verify that version_increment_level is appropriate
+  assert:
+    that:
+      - "version_increment_level in ['major', 'minor', 'patch']"
+
 - name: empty the temp_dir
   file:
     path: "{{ temp_dir }}"

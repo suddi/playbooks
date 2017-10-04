@@ -1,0 +1,15 @@
+- name: check if nvm is installed
+  shell: nvm
+    --version
+  register: nvm_version_result
+  failed_when: "nvm_version_result.stderr and
+    'command not found' not in nvm_version_result.stderr"
+
+- name: install nvm
+  shell: curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.5/install.sh | bash
+  when: "nvm_version_result.stderr and
+    'command not found' in nvm_version_result.stderr"
+
+- name: nvm install node
+  shell: nvm install {{ item }}
+  with_items: "{{ node_versions }}"

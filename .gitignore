@@ -57,3 +57,4 @@ jspm_packages
 
 tmp/
 *.retry
+*.encrypted.yml

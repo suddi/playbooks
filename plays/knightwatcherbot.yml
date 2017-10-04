@@ -5,17 +5,11 @@
   vars:
     repo_name: knightwatcherbot
     service_name: bot-suddi-io-lambda
-    deployer_name: "{{ lookup('env', 'USER') }}"
     deployed_link: https://bot.suddi.io
     repo_url: "{{ github_account }}/{{ repo_name }}.git"
-    temp_dir: "{{ work_dir }}/{{ repo_name }}"
-    version: "{{ branch_name | default('master') }}"
-    function_name: "{{ repo_name }}"
     aws_region: ap-northeast-1
     runtime: nodejs4.3
-    role_name: "{{ repo_name }}-executor"
     api_module: lib/app
-    config_json: "{{ inventory_dir }}/plays/files/{{ repo_name }}/claudia.json"
     api_version: production
     timeout: 30
     memory: 128
@@ -25,4 +19,4 @@
   tasks:
     - name: deploy {{ repo_name }} to aws lambda
       include_role:
-        name: aws_lambda
+        name: deploy_lambda_function
