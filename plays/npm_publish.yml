@@ -1,0 +1,21 @@
+- name: "{{ package_name }}"
+  hosts: local
+  gather_facts: no
+
+  vars:
+    repo_name: "{{ package_name }}"
+    repo_url: "{{ github_account }}/{{ package_name }}.git"
+    temp_dir: "{{ work_dir }}/{{ repo_name }}"
+    version: "{{ branch_name | default('master') }}"
+    version_increment_level: "{{ update_type | default('patch') }}"
+
+  pre_tasks:
+    - name: verify that version_increment_level is appropriate
+      assert:
+        that:
+          - "version_increment_level in ['major', 'minor', 'patch']"
+
+  tasks:
+    - name: publish {{ repo_name }} to npm
+      include_role:
+        name: npm_publish

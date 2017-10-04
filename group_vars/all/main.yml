@@ -1,5 +1,7 @@
 aws_profile: suddi
+github_account: git@github.com:suddi
+bitbucket_account: git@bitbucket.org:suddir
 
 deployment_method: ansible
-
 work_dir: "{{ inventory_dir }}/tmp"
+
