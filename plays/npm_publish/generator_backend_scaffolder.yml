@@ -1,0 +1,13 @@
+- name: publish generator-backend-scaffolder to npm
+  hosts: local
+  gather_facts: no
+
+  vars:
+    repo_name: generator-backend-scaffolder
+    repo_url: "{{ github_account }}/{{ repo_name }}.git"
+
+  roles:
+    - role: publish_npm_package
+      tags:
+          - publish
+          - npm

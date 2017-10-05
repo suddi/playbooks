@@ -1,0 +1,7 @@
+- name: get {{ package_name }} version
+  command: "{{ package_name }} --version"
+  register: package_version_result
+
+- name: print {{ package_name }} version
+  debug:
+    msg: "{{ package_version_result.stdout }}"

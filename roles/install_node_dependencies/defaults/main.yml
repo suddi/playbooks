@@ -1,0 +1,4 @@
+install_nvm_url: https://raw.githubusercontent.com/creationix/nvm/v0.33.5/install.sh
+nvm_install_sh_path: "{{ ssh_user_home_dir }}/nvm_install.sh"
+
+nvm_sh_path: "{{ ssh_user_home_dir }}/.nvm/nvm.sh"

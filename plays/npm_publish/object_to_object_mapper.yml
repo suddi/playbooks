@@ -1,0 +1,13 @@
+- name: publish object-to-object-mapper to npm
+  hosts: local
+  gather_facts: no
+
+  vars:
+    repo_name: object-to-object-mapper
+    repo_url: "{{ github_account }}/node-{{ repo_name }}.git"
+
+  roles:
+    - role: publish_npm_package
+      tags:
+          - publish
+          - npm

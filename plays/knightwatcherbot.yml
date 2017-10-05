@@ -16,7 +16,8 @@
     sg_ids: ""
     subnet_ids: ""
 
-  tasks:
-    - name: deploy {{ repo_name }} to aws lambda
-      include_role:
-        name: deploy_lambda_function
+  roles:
+    - role: deploy_lambda_function
+      tags:
+        - lambda
+        - claudia

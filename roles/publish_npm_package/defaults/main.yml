@@ -1,4 +1,2 @@
-temp_dir: "{{ work_dir }}/{{ repo_name }}"
-
-version: "{{ branch_name | default('master') }}"
-version_increment_level: "{{ update_type | default('patch') }}"
+version: master
+version_increment_level: patch

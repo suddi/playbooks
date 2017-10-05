@@ -61,6 +61,6 @@
     --message-type npm-publish
     --repo-name {{ repo_name }}
     --link https://www.npmjs.com/package/{{ repo_name }}
-    --username {{ lookup('env', 'USER') }}
+    --username {{ deploy_user }}
   args:
     chdir: "{{ inventory_dir }}"

@@ -1,0 +1,3 @@
+ssh_directory: .ssh
+ssh_key_file: "{{ inventory_hostname }}"
+ssh_pub_key_file: "{{ ssh_key_file }}.pub"

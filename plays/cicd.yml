@@ -1,0 +1,42 @@
+- name: setup cicd server
+  hosts: cicd
+  gather_facts: no
+
+  vars:
+    machine_name: cicd
+    ssh_key_file: id_rsa
+    ssh_user: jenkins
+    ssh_user_home_dir: /var/lib/jenkins
+    shell_profile_file: "{{ ssh_user_home_dir }}/.profile"
+
+    node_versions:
+      - "4"
+      - "6"
+      - "8"
+
+  roles:
+    - role: install_general_dependencies
+      tags:
+        - packages
+      become: yes
+
+    - role: install_python_dependencies
+      tags:
+        - packages
+        - python
+      become: yes
+
+    - role: generate_ssh_keys
+      become: yes
+      become_user: "{{ ssh_user }}"
+      tags:
+        - ssh
+
+    - role: install_node_dependencies
+      tags:
+        - packages
+        - node
+      become: yes
+      become_user: "{{ ssh_user }}"
+
+

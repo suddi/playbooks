@@ -1,7 +1,17 @@
+deploy_user: lookup('env', 'USER')
+deploy_user_home_dir: lookup('env', 'HOME')
 aws_profile: suddi
 github_account: git@github.com:suddi
 bitbucket_account: git@bitbucket.org:suddir
 
 deployment_method: ansible
 work_dir: "{{ inventory_dir }}/tmp"
+temp_dir: "{{ work_dir }}/{{ repo_name }}"
 
+# Remote package versions
+# This should be kept in sync with requirements.txt
+boto_version: "2.48.0"
+boto3_version: "1.4.7"
+python-apt: ""
+python_dateutil_version: "2.6.1"
+pyOpenSSL_version: "17.3.0"

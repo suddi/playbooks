@@ -1,0 +1,12 @@
+- name: install git
+  apt:
+    autoclean: yes
+    autoremove: yes
+    name: git
+    state: present
+
+- name: print git version
+  include_role:
+    name: print_package_version
+  vars:
+    package_name: git

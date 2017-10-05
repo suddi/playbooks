@@ -1,4 +1,4 @@
-- name: handle sensitive files to/from s3
+- name: upload sensitive files to s3
   hosts: local
   gather_facts: no
 
@@ -8,7 +8,6 @@
     bucket_name: vault.suddi.io
     aws_region: ap-northeast-1
     acl: private
-    perform_action: "{{ sensitive_files_action | default('upload') }}"
     sensitive_files:
       - group_vars/all/vault.encrypted.yml
       - inventory.ini
@@ -30,8 +29,7 @@
         --create-bucket-configuration LocationConstraint={{ aws_region }}
         --profile {{ aws_profile }}
         --region {{ aws_region }}
-      when: "perform_action == 'upload' and
-        'Not Found' in head_bucket_result.stderr"
+      when: "'Not Found' in head_bucket_result.stderr"
 
     - name: set versioning for {{ bucket_name }} s3 bucket
       command: aws s3api put-bucket-versioning
@@ -39,8 +37,7 @@
         --versioning-configuration MFADelete=Disabled,Status=Enabled
         --profile {{ aws_profile }}
         --region {{ aws_region }}
-      when: "perform_action == 'upload' and
-        'Not Found' in head_bucket_result.stderr"
+      when: "'Not Found' in head_bucket_result.stderr"
 
     - name: set tags for {{ bucket_name }} s3 bucket
       command: aws s3api put-bucket-tagging
@@ -48,8 +45,7 @@
         --profile {{ aws_profile }}
         --region {{ aws_region }}
         --tagging TagSet=[{Key=project,Value={{ project }}},{Key=service,Value={{ service }}},{Key=deployment_method,Value={{ deployment_method }}}]
-      when: "perform_action == 'upload' and
-        'Not Found' in head_bucket_result.stderr"
+      when: "'Not Found' in head_bucket_result.stderr"
 
     - name: put objects to {{ bucket_name }} s3 bucket
       command: aws s3api put-object
@@ -62,14 +58,3 @@
         --server-side-encryption AES256
         --tagging project={{ project }}&service={{ service }}&deployment_method={{ deployment_method }}
       with_items: "{{ sensitive_files }}"
-      when: "perform_action == 'upload'"
-
-    - name: get objects from {{ bucket_name }} s3 bucket
-      command: aws s3api get-object
-        --bucket {{ bucket_name }}
-        --key {{ item }}
-        --profile {{ aws_profile }}
-        --region {{ aws_region }}
-        "{{ inventory_dir }}/{{ item }}"
-      with_items: "{{ sensitive_files }}"
-      when: "perform_action == 'download'"

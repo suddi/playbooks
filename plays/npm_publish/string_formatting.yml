@@ -1,0 +1,13 @@
+- name: publish string-formatting to npm
+  hosts: local
+  gather_facts: no
+
+  vars:
+    repo_name: string-formatting
+    repo_url: "{{ github_account }}/{{ repo_name }}.git"
+
+  roles:
+    - role: publish_npm_package
+      tags:
+          - publish
+          - npm

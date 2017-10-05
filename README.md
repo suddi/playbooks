@@ -41,13 +41,13 @@ ansible-playbook <PLAYBOOK_NAME>
 To download sensitive-files:
 
 ````
-make download-sensitive-files
+ansible-playbook plays/sensitive_files/download.yml
 ````
 
 To upload sensitive-files:
 
 ````
-make upload-sensitive-files
+ansible-playbook plays/sensitive_files/upload.yml
 ````
 
 #### Protecting `inventory.ini`

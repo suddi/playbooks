@@ -78,7 +78,7 @@
   command: aws lambda tag-resource
     --resource "{{ lambda_arn }}"
     --region "{{ aws_region }}"
-    --tags Service="{{ service_name }}",Name="{{ deployer_name }}",DeploymentMethod="ansible"
+    --tags Service="{{ service_name }}",Name="{{ deploy_user }}",DeploymentMethod="ansible"
     --profile {{ aws_region }}
 
 - name: empty the temp_dir
@@ -91,6 +91,6 @@
     --message-type deploy
     --repo-name {{ repo_name }}
     --link {{ deployed_link }}
-    --username {{ lookup('env', 'USER') }}
+    --username {{ deploy_user }}
   args:
     chdir: "{{ inventory_dir }}"

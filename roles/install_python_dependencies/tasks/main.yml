@@ -1,0 +1,29 @@
+- name: test pip command
+  command: which pip
+  register: which_result
+
+- name: download get-pip.py
+  get_url:
+    dest: "{{ ssh_user_home_dir }}/get-pip.py"
+    force: no
+    url: "{{ get_pip_url }}"
+  when: "'pip' not in which_result"
+
+- name: install pip
+  command: python get-pip.py
+  become: yes
+  when: "'pip' not in which_result"
+
+- name: print python version
+  include_role:
+    name: print_package_version
+  vars:
+    package_name: python
+
+- name: pip install dependencies
+  command: pip install
+    boto=={{ boto_version }}
+    boto3=={{ boto3_version }}
+    python-dateutil=={{ python_dateutil_version }}
+    pyOpenSSL=={{ pyOpenSSL_version }}
+  become: yes

@@ -1,0 +1,13 @@
+- name: publish eslint-config-suddi to npm
+  hosts: local
+  gather_facts: no
+
+  vars:
+    repo_name: eslint-config-suddi
+    repo_url: "{{ github_account }}/{{ repo_name }}.git"
+
+  roles:
+    - role: publish_npm_package
+      tags:
+          - publish
+          - npm
