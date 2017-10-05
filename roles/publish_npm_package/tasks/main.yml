@@ -20,12 +20,6 @@
     force: yes
     version: "{{ version }}"
 
-- name: switch to .nvmrc version
-  shell: nvm use
-  args:
-    chdir: "{{ temp_dir }}"
-    removes: .nvmrc
-
 - name: install npm dependencies for build
   npm:
     path: "{{ temp_dir }}"
