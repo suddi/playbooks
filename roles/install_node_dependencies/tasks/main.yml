@@ -60,3 +60,10 @@
 - name: print node version
   debug:
     msg: "{{ node_version_result.stdout }}"
+
+- name: copy .npmrc to host
+  copy:
+    src: "{{ inventory_dir }}/roles/install_node_dependencies/files/.npmrc"
+    dest: "{{ ssh_user_home_dir }}/.npmrc"
+    owner: "{{ ssh_user }}"
+    mode: 0600
