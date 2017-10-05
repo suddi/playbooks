@@ -49,3 +49,20 @@
         dest: "{{ repo_dir }}"
         force: yes
         version: "{{ version }}"
+      become: yes
+      become_user: "{{ ssh_user }}"
+
+    - name: pip install dependencies
+      command: pip install
+        --requirement requirements.txt
+      args:
+        chdir: "{{ repo_dir }}"
+      become: yes
+
+    - name: npm install
+      shell: source {{ ssh_user_home_dir }}/.nvm/nvm.sh; npm install
+      args:
+        chdir: "{{ repo_dir }}"
+        executable: /bin/bash
+      become: yes
+      become_user: "{{ ssh_user }}"
