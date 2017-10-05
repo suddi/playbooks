@@ -13,6 +13,10 @@
       - "6"
       - "8"
 
+    repo_url: git@github.com:suddi/playbooks.git
+    repo_dir: "{{ ssh_user_home_dir }}/playbooks"
+    version: master
+
   roles:
     - role: install_general_dependencies
       become: yes
@@ -38,4 +42,10 @@
         - packages
         - node
 
-
+  tasks:
+    - name: clone playbooks repo
+      git:
+        repo: "{{ repo_url }}"
+        dest: "{{ repo_dir }}"
+        force: yes
+        version: "{{ version }}"
