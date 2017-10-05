@@ -7,7 +7,6 @@
     ssh_key_file: id_rsa
     ssh_user: jenkins
     ssh_user_home_dir: /var/lib/jenkins
-    shell_profile_file: "{{ ssh_user_home_dir }}/.profile"
 
     node_versions:
       - "4"
@@ -16,15 +15,15 @@
 
   roles:
     - role: install_general_dependencies
+      become: yes
       tags:
         - packages
-      become: yes
 
     - role: install_python_dependencies
+      become: yes
       tags:
         - packages
         - python
-      become: yes
 
     - role: generate_ssh_keys
       become: yes
@@ -33,10 +32,10 @@
         - ssh
 
     - role: install_node_dependencies
+      become: yes
+      become_user: "{{ ssh_user }}"
       tags:
         - packages
         - node
-      become: yes
-      become_user: "{{ ssh_user }}"
 
 

@@ -1,58 +1,62 @@
-# - name: test nvm command
-#   shell: nvm
-#     --version
-#   register: nvm_version_result
-#   failed_when: "nvm_version_result.stderr and
-#     'command not found' not in nvm_version_result.stderr"
+- name: test nvm command
+  shell: source {{ nvm_sh_path }}; nvm --version
+  args:
+    executable: /bin/bash
+  register: nvm_version_result
+  failed_when: "nvm_version_result.stderr and
+    'command not found' not in nvm_version_result.stderr"
 
-# - name: download nvm_install.sh
-#   get_url:
-#     dest: "{{ nvm_install_sh_path }}"
-#     force: no
-#     url: "{{ install_nvm_url }}"
-#   when: "nvm_version_result.stderr and
-#     'command not found' in nvm_version_result.stderr"
+- name: install nvm
+  git:
+    repo: "{{ nvm_repo_url }}"
+    dest: "{{ nvm_dir }}"
+    force: yes
+    version: "{{ nvm_version }}"
 
-# - name: install nvm
-#   shell: source {{ nvm_install_sh_path }}
-#   when: "nvm_version_result.stderr and
-#     'command not found' in nvm_version_result.stderr"
+- name: add nvm initialization to {{ shell_profile_file }}
+  blockinfile:
+    path: "{{ shell_profile_file }}"
+    block: "{{ code_block }}"
 
-# - name: add nvm initialization to {{ shell_profile_file }}
-#   blockinfile:
-#     path: "{{ shell_profile_file }}"
-#     block: |
-#       export NVM_DIR="$HOME/.nvm"
-#       export NODE_VERSION="6"
-
-#       if [ -s "$NVM_DIR/nvm.sh" ]; then
-#           source "$NVM_DIR/nvm.sh"
-#       fi
-
-#       if [ -s "$NVM_DIR/bash_completion" ]; then
-#           source "$NVM_DIR/bash_completion"
-#       fi
-
-#       if [ "$(nvm alias default)" != $NODE_VERSION ]; then
-#           nvm alias default $NODE_VERSION > /dev/null
-#           nvm use $NODE_VERSION > /dev/null
-#       fi
+- name: add nvm initialization to {{ shell_rc_file }}
+  blockinfile:
+    path: "{{ shell_rc_file }}"
+    block: "{{ code_block }}"
 
 - name: nvm install node
-  shell: source {{ nvm_sh_path }} && nvm install {{ item }}
-  with_items: "{{ node_versions }}"
+  shell: source {{ nvm_sh_path }}; nvm install {{ item }}
+  args:
+    executable: /bin/bash
   register: nvm_install_result
-  failed_when: "nvm_install_result.stderr and
-    'nvm install N/A' not in nvm_install_result.stderr"
+  changed_when: "'is already installed.' not in nvm_install_result.stdout"
+  with_items: "{{ node_versions }}"
 
-- name: print default npm version
-  include_role:
-    name: print_package_version
-  vars:
-    package_name: npm
+- name: get nvm version
+  shell: source {{ nvm_sh_path }}; nvm --version
+  args:
+    executable: /bin/bash
+  register: nvm_version_result
 
-- name: print default node version
-  include_role:
-    name: print_package_version
-  vars:
-    package_name: node
+- name: print nvm version
+  debug:
+    msg: "{{ nvm_version_result.stdout }}"
+
+- name: get npm version
+  shell: source {{ nvm_sh_path }}; npm --version
+  args:
+    executable: /bin/bash
+  register: npm_version_result
+
+- name: print npm version
+  debug:
+    msg: "{{ npm_version_result.stdout }}"
+
+- name: get node version
+  shell: source {{ nvm_sh_path }}; node --version
+  args:
+    executable: /bin/bash
+  register: node_version_result
+
+- name: print node version
+  debug:
+    msg: "{{ node_version_result.stdout }}"
