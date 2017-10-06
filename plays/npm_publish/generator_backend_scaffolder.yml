@@ -1,9 +1,9 @@
-- name: publish gnerator-backend-scaffolder to npm
+- name: publish generator-backend-scaffolder to npm
   hosts: local
   gather_facts: no
 
   vars:
-    service_name: gnerator-backend-scaffolder
+    service_name: generator-backend-scaffolder
     service_url: https://www.npmjs.com/package/{{ service_name }}
 
     repo_name: "{{ service_name }}"
