@@ -11,9 +11,9 @@
     version: "{{ repo_version }}"
 
 - name: install npm dependencies for build
-  npm:
-    path: "{{ work_dir }}"
-    production: no
+  command: npm install
+  args:
+    chdir: "{{ work_dir }}"
 
 - name: run npm test
   command: npm test
