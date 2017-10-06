@@ -5,24 +5,22 @@
 
   vars:
     service_name: jenkins
-    repo_url: git@github.com:GoogleCloudPlatform/continuous-deployment-on-kubernetes.git
-    temp_dir: "{{ work_dir }}/{{ service_name }}"
-    version: master
 
-    # GCP
+    repo_url: git@github.com:GoogleCloudPlatform/continuous-deployment-on-kubernetes.git
+    repo_version: master
+
     gcp_region: us-east1-d
     gcp_project_id: cicd-181808
-    cluster_name: jenkins-cd
-    deployment_nodes: 1
-    disk_size: 30
-    instance_type: f1-micro
+    gcp_gce_cluster_name: jenkins-cd
+    gcp_gce_deployment_nodes: 1
+    gcp_gce_instance_type: f1-micro
+    gcp_gce_disk_size: 30
+    gcp_lb_cert_file: tls.crt
+    gcp_lb_key_file: tls.key
 
-    # Jenkins
     jenkins_image: jenkins-home
     jenkins_image_url: https://storage.googleapis.com/solutions-public-assets/jenkins-cd/jenkins-home-v3.tar.gz
     jenkins_options_file: jenkins/k8s/options
-    cert_file: tls.crt
-    key_file: tls.key
 
   tasks:
     - name: install kubernetes command-line interface
@@ -69,21 +67,21 @@
         'HTTPError 404' in get_disk_result.stderr"
 
     - name: get kubernetes cluster
-      command: gcloud container clusters describe {{ cluster_name }}
+      command: gcloud container clusters describe {{ gcp_gce_cluster_name }}
       register: get_cluster_result
       failed_when: "get_cluster_result.stderr and
         'No cluster named' not in get_cluster_result.stderr"
 
     - name: create kubernetes cluster
-      command: gcloud container clusters create {{ cluster_name }}
-        --num-nodes {{ deployment_nodes }}
-        --disk-size {{ disk_size }}
-        --machine-type {{ instance_type }}
+      command: gcloud container clusters create {{ gcp_gce_cluster_name }}
+        --num-nodes {{ gcp_gce_deployment_nodes }}
+        --disk-size {{ gcp_gce_disk_size }}
+        --machine-type {{ gcp_gce_instance_type }}
         --scopes "https://www.googleapis.com/auth/projecthosting,storage-rw"
       when: "get_cluster_result.stderr and 'No cluster named' in get_cluster_result.stderr"
 
     - name: download cluster endpoint and auth data
-      command: gcloud container clusters get-credentials {{ cluster_name }}
+      command: gcloud container clusters get-credentials {{ gcp_gce_cluster_name }}
 
     - name: get kubernetes pods
       command: kubectl get pods
@@ -108,20 +106,20 @@
     - name: get source code
       git:
         repo: "{{ repo_url }}"
-        dest: "{{ temp_dir }}"
+        dest: "{{ work_dir }}"
         force: yes
-        version: "{{ version }}"
+        version: "{{ repo_version }}"
 
     - name: generate jenkins password
       command: PASSWORD=`openssl rand -base64 15`; echo "Your password is $PASSWORD"; sed -i.bak s#CHANGE_ME#$PASSWORD# {{ jenkins_options_file }}
       args:
-        chdir: "{{ temp_dir }}"
+        chdir: "{{ work_dir }}"
         removes: "{{ jenkins_options_file }}"
       register: jenkins_password
 
     - name: print jenkins password
       debug:
-        var: jenkins_password.stdout
+        msg: jenkins_password.stdout
 
     - name: get kubernetes secret
       command: kubectl get secret generic {{ service_name }}
@@ -134,7 +132,7 @@
         --from-file={{ jenkins_options_file }}
         --namespace={{ service_name }}
       args:
-        chdir: "{{ temp_dir }}"
+        chdir: "{{ work_dir }}"
         removes: "{{ jenkins_options_file }}"
       when: "get_secret_result.stderr and
         'Error from server (NotFound)' in get_secret_result.stderr"
@@ -143,7 +141,7 @@
       command: kubectl apply
         --filename jenkins/k8s/
       args:
-        chdir: "{{ temp_dir }}"
+        chdir: "{{ work_dir }}"
         removes: "{{ jenkins_options_file }}"
 
     - name: get kubernetes pods
@@ -173,23 +171,23 @@
         -nodes
         -days 365
         -newkey rsa:2048
-        -keyout {{ key_file }}
-        -out {{ cert_file }}
+        -keyout {{ gcp_lb_key_file }}
+        -out {{ gcp_lb_cert_file }}
         -subj "/CN=jenkins/O=jenkins"
       args:
-        chdir: "{{ temp_dir }}"
+        chdir: "{{ work_dir }}"
 
     - name: upload certs to kubernetes
       command: kubectl create secret generic tls
-        --from-file={{ cert_file }}
-        --from-file={{ key_file }}
+        --from-file={{ gcp_lb_cert_file }}
+        --from-file={{ gcp_lb_key_file }}
         --namespace {{ service_name }}
       args:
-        chdir: "{{ temp_dir }}"
+        chdir: "{{ work_dir }}"
 
     - name: apply certs to load-balancer
       command: kubectl apply
         --filename jenkins/k8s/lb
       args:
-        chdir: "{{ temp_dir }}"
+        chdir: "{{ work_dir }}"
         removes: "{{ jenkins_options_file }}"

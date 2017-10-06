@@ -1,0 +1,10 @@
+- name: get running node version
+  command: node
+    --version
+  register: node_version_result
+
+# NOTE: "expected_node_version" below is a variable
+- name: check node version is {{ expected_node_version }}
+  assert:
+    that:
+      - "expected_node_version in node_version_result.stdout"

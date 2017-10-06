@@ -1,17 +1,74 @@
-deploy_user: lookup('env', 'USER')
-deploy_user_home_dir: lookup('env', 'HOME')
-aws_profile: suddi
-github_account: git@github.com:suddi
-bitbucket_account: git@bitbucket.org:suddir
-
+# ------------------------------------------------------------------------------
+# GENERAL
+# ------------------------------------------------------------------------------
 deployment_method: ansible
-work_dir: "{{ inventory_dir }}/tmp"
-temp_dir: "{{ work_dir }}/{{ repo_name }}"
+sensitive_files:
+  - group_vars/all/vault.encrypted.yml
+  - inventory.ini
 
-# Remote package versions
+# ------------------------------------------------------------------------------
+# DIRECTORIES
+# ------------------------------------------------------------------------------
+project_root_dir: "{{ inventory_dir }}"
+files_dir: "{{ inventory_dir }}/files"
+temp_dir: "{{ inventory_dir }}/tmp"
+# NOTE: "repo_name" needs to be specified in order to use "work_dir"
+work_dir: "{{ temp_dir }}/{{ repo_name }}"
+
+# ------------------------------------------------------------------------------
+# VERSION CONTROL
+# ------------------------------------------------------------------------------
+github_account: "{{ vault_github_account }}"
+bitbucket_account: "{{ vault_bitbucket_account }}"
+
+# ------------------------------------------------------------------------------
+# RUNTIME USER SPECIFICS
+# ------------------------------------------------------------------------------
+runtime_user: lookup('env', 'USER')
+runtime_user_home_dir: lookup('env', 'HOME')
+
+# ------------------------------------------------------------------------------
+# DEPLOYMENT USER SPECIFICS
+# ------------------------------------------------------------------------------
+deployment_user: deploy
+deployment_user_home_dir: /home/deploy
+
+# ------------------------------------------------------------------------------
+# CICD USER SPECIFICS
+# ------------------------------------------------------------------------------
+cicd_user: jenkins
+cicd_user_home_dir: /var/lib/jenkins
+cicd_user_machine_name: cicd
+
+# AWS
+cicd_user_aws_access_key_id: "{{ vault_cicd_user_aws_access_key_id }}"
+cicd_user_aws_secret_access_key: "{{ vault_cicd_user_aws_secret_access_key }}"
+
+# NPM
+cicd_user_npm_auth_token: "{{ vault_cicd_user_npm_auth_token }}"
+
+# ------------------------------------------------------------------------------
+# SERVICES
+# ------------------------------------------------------------------------------
+# General
+general_aws_profile: "{{ vault_general_aws_profile }}"
+
+# Knightwatcher
+knightwatcher_service_name: "{{ vault_knightwatcher_service_name }}"
+knightwatcher_service_url: "{{ vault_knightwatcher_service_url }}"
+
+# CICD
+cicd_service_name: "{{ vault_cicd_service_name }}"
+cicd_service_url: "{{ vault_cicd_service_url }}"
+
+# ------------------------------------------------------------------------------
+# PACKAGE VERSIONS
+# ------------------------------------------------------------------------------
 # This should be kept in sync with requirements.txt
+ansible_version: "2.4.0.0"
 boto_version: "2.48.0"
 boto3_version: "1.4.7"
-python-apt: ""
 python_dateutil_version: "2.6.1"
 pyOpenSSL_version: "17.3.0"
+
+# ------------------------------------------------------------------------------

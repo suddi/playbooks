@@ -1,35 +1,19 @@
-- name: empty the temp_dir
-  file:
-    path: "{{ temp_dir }}"
-    state: absent
-
-- name: create the temp_dir
-  file:
-    path: "{{ temp_dir }}"
-    state: directory
-
 - name: get source code
   git:
     repo: "{{ repo_url }}"
-    dest: "{{ temp_dir }}"
+    dest: "{{ work_dir }}"
     force: yes
-    version: "{{ version }}"
-
-- name: switch to .nvmrc version
-  shell: nvm use
-  args:
-    chdir: "{{ temp_dir }}"
-    removes: .nvmrc
+    version: "{{ repo_version }}"
 
 - name: install npm dependencies for build
   npm:
-    path: "{{ temp_dir }}"
+    path: "{{ work_dir }}"
     production: no
 
 - name: get lambda function
   command: aws lambda get-function
     --profile {{ aws_profile }}
-    --function-name {{ function_name }}
+    --function-name {{ aws_lambda_function_name }}
     --region {{ aws_region }}
   register: get_function_result
   failed_when: "get_function_result.stderr and
@@ -37,60 +21,46 @@
 
 - name: create lambda function
   command: node_modules/.bin/claudia create
-    --name {{ function_name }}
-    --runtime {{ runtime }}
-    --role {{ role_name }}
+    --name {{ aws_lambda_function_name }}
+    --runtime {{ aws_lambda_runtime }}
+    --role {{ aws_lambda_role_name }}
     --region {{ aws_region }}
-    --api-module {{ api_module }}
-    --config {{ config_json }}
-    --version {{ api_version }}
-    --timeout {{ timeout }}
-    --memory {{ memory }}
-    --security-group-ids {{ sg_ids }}
-    --subnet-ids {{ subnet_ids }}
+    --api-module {{ aws_lambda_module }}
+    --config {{ aws_lambda_config_json }}
+    --version {{ aws_lambda_version }}
+    --timeout {{ aws_lambda_timeout }}
+    --memory {{ aws_lambda_memory }}
+    --security-group-ids {{ aws_lambda_sg_ids }}
+    --subnet-ids {{ aws_lambda_subnet_ids }}
     --set-env AWS_PROFILE={{ aws_profile }}
   args:
-    chdir: "{{ temp_dir }}"
+    chdir: "{{ work_dir }}"
   when: "get_function_result.stderr and 'ResourceNotFoundException' in get_function_result.stderr"
 
 - name: update lambda function code
   command: node_modules/.bin/claudia update
-    --config {{ config_json }}
-    --version {{ api_version }}
+    --config {{ aws_lambda_config_json }}
+    --version {{ aws_lambda_version }}
     --set-env AWS_PROFILE={{ aws_region }}
   args:
-    chdir: "{{ temp_dir }}"
+    chdir: "{{ work_dir }}"
   register: lambda_update
   when: get_function_result.stdout
 
 - name: get lambda function
   command: aws lambda get-function
     --profile {{ aws_region }}
-    --function-name "{{ function_name }}"
+    --function-name "{{ aws_lambda_function_name }}"
   register: get_new_function_result
   failed_when: "get_function_result.stderr and
     'ResourceNotFoundException' not in get_function_result.stderr"
 
 - set_fact:
-    lambda_arn="{{ (get_new_function_result.stdout | from_json).Configuration.FunctionArn }}"
+    aws_lambda_arn="{{ (get_new_function_result.stdout | from_json).Configuration.FunctionArn }}"
 
 - name: tag lambda function
   command: aws lambda tag-resource
-    --resource "{{ lambda_arn }}"
+    --resource "{{ aws_lambda_arn }}"
     --region "{{ aws_region }}"
-    --tags Service="{{ service_name }}",Name="{{ deploy_user }}",DeploymentMethod="ansible"
+    --tags Service="{{ service_name }}",Name="{{ user }}",DeploymentMethod="{{ deployment_method }}"
     --profile {{ aws_region }}
-
-- name: empty the temp_dir
-  file:
-    path: "{{ temp_dir }}"
-    state: absent
-
-- name: notify knightwatcher
-  command: utils/knightwatcher.js
-    --message-type deploy
-    --repo-name {{ repo_name }}
-    --link {{ deployed_link }}
-    --username {{ deploy_user }}
-  args:
-    chdir: "{{ inventory_dir }}"

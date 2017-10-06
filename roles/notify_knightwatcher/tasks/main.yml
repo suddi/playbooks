@@ -1,0 +1,8 @@
+- name: notify knightwatcher
+  command: utils/knightwatcher.js
+    --message-type {{ message_type }}
+    --repo-name {{ message_repo_name }}
+    --link {{ message_link }}
+    --username {{ message_username }}
+  args:
+    chdir: "{{ project_root_dir }}"

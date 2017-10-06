@@ -1,0 +1,4 @@
+- name: empty the working directory {{ work_dir }}
+  file:
+    path: "{{ work_dir }}"
+    state: absent

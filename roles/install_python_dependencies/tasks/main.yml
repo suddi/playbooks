@@ -1,29 +1,113 @@
+- name: install python dependencies
+  apt:
+    autoclean: yes
+    autoremove: yes
+    name: "{{ item }}"
+    state: present
+  become: yes
+  with_items:
+    - gcc
+    - libssl-dev
+    - zlib1g-dev
+    - libbz2-dev
+    - libsqlite3-dev
+    - libreadline-dev
+
+- name: clone pyenv repo
+  git:
+      repo: "{{ dependency_pyenv_url }}"
+      dest: "{{ dependency_pyenv_dir }}"
+      force: no
+      version: "{{ dependency_pyenv_version }}"
+  become: yes
+  become_user: "{{ user }}"
+
+- name: setup virtualenvwrapper
+  git:
+    repo: "{{ dependency_pyenv_virtualenvwrapper_url }}"
+    dest: "{{ dependency_pyenv_virtualenvwrapper_dir }}"
+    force: no
+    version: "{{ dependency_pyenv_virtualenvwrapper_version }}"
+  become: yes
+  become_user: "{{ user }}"
+
+- name: add .pyenvrc to {{ user_home_dir }}/.pyenvrc
+  template:
+    src: .pyenvrc
+    dest: "{{ user_home_dir }}/.pyenvrc"
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    mode: "0644"
+  become: yes
+  become_user: "{{ user }}"
+
+- name: add .pyenvrc initialization into {{ user_shell_rc_file }}
+  lineinfile:
+    dest: "{{ user_shell_rc_file }}"
+    create: yes
+    regexp: "^. $HOME/.pyenvrc$"
+    state: present
+    line: . "$HOME/.pyenvrc"
+  when: pyenv_virtualenv
+  become: yes
+  become_user: "{{ user }}"
+
+
+- name: pyenv install python
+  shell: . {{ user_home_dir }}/.pyenvrc && pyenv install --skip-existing {{ item }}
+  register: pyenv_install_result
+  become: yes
+  become_user: "{{ user }}"
+  with_items: "{{ python_versions }}"
+  changed_when: "pyenv_install_result.stdout"
+
+- name: pyenv install virtualenvwrapper
+  shell: . {{ user_home_dir }}/.pyenvrc && pyenv virtualenvwrapper
+  register: pyenv_install_result
+  become: yes
+  become_user: "{{ user }}"
+  changed_when: "pyenv_install_result.stdout"
+
 - name: test pip command
-  command: which pip
-  register: which_result
+  shell: . {{ user_home_dir }}/.pyenvrc && pip --version
+  register: pip_version_result
+  become: yes
+  become_user: "{{ user }}"
+  changed_when: "False"
+  failed_when: "pip_version_result.stderr and
+    'command not found' not in pip_version_result.stderr"
 
 - name: download get-pip.py
   get_url:
-    dest: "{{ ssh_user_home_dir }}/get-pip.py"
+    dest: "{{ user_home_dir }}/get-pip.py"
     force: no
-    url: "{{ get_pip_url }}"
-  when: "'pip' not in which_result"
+    url: "{{ dependency_pip_url }}"
+  become: yes
+  become_user: "{{ user }}"
+  when: "pip_version_result.stderr and
+    'command not found' in pip_version_result.stderr"
 
 - name: install pip
-  command: python get-pip.py
+  shell: . {{ user_home_dir }}/.pyenvrc && python get-pip.py
   become: yes
-  when: "'pip' not in which_result"
+  become_user: "{{ user }}"
+  when: "pip_version_result.stderr and
+    'command not found' in pip_version_result.stderr"
+
+- name: get python version
+  shell: . {{ user_home_dir }}/.pyenvrc && python --version
+  register: python_version_result
+  changed_when: "False"
 
 - name: print python version
-  include_role:
-    name: print_package_version
-  vars:
-    package_name: python
+  debug:
+    msg: "{{ python_version_result.stderr }}"
 
-- name: pip install dependencies
-  command: pip install
-    boto=={{ boto_version }}
-    boto3=={{ boto3_version }}
-    python-dateutil=={{ python_dateutil_version }}
-    pyOpenSSL=={{ pyOpenSSL_version }}
-  become: yes
+- name: get pip version
+  shell: . {{ user_home_dir }}/.pyenvrc && pip --version
+  register: pip_version_result
+  changed_when: "False"
+
+- name: print pip version
+  debug:
+    msg: "{{ pip_version_result.stdout }}"

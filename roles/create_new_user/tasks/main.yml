@@ -1,0 +1,29 @@
+- name: create new user {{ user }} if it does not exist
+  user:
+    createhome: yes
+    expires: no
+    force: no
+    group: "{{ user }}"
+    home: "{{ user_home_dir }}"
+    name: "{{ user }}"
+    state: present
+
+- name: add .bash_profile to {{ user_home_dir }}/.bash_profile
+  template:
+    src: .bash_profile
+    dest: "{{ user_home_dir }}/.bash_profile"
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    mode: "0644"
+  become: yes
+  become_user: "{{ user }}"
+
+- name: add .bashrc to {{ user_home_dir }}/.bashrc
+  template:
+    src: .bashrc
+    dest: "{{ user_home_dir }}/.bashrc"
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    mode: "0644"
+  become: yes
+  become_user: "{{ user }}"

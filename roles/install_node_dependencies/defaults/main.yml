@@ -1,21 +1,3 @@
-install_nvm_url: https://raw.githubusercontent.com/creationix/nvm/v0.33.5/install.sh
-nvm_install_sh_path: "{{ ssh_user_home_dir }}/nvm_install.sh"
-
-nvm_repo_url: git@github.com:creationix/nvm.git
-nvm_version: v0.33.5
-
-nvm_dir: "{{ ssh_user_home_dir }}/.nvm"
-nvm_sh_path: "{{ nvm_dir }}/nvm.sh"
-
-shell_profile_file: "{{ ssh_user_home_dir }}/.bash_profile"
-shell_rc_file: "{{ ssh_user_home_dir }}/.bashrc"
-code_block: |
-  export NVM_DIR="$HOME/.nvm"
-
-  if [ -s "$NVM_DIR/nvm.sh" ]; then
-      source "$NVM_DIR/nvm.sh"
-  fi
-
-  if [ -s "$NVM_DIR/bash_completion" ]; then
-      source "$NVM_DIR/bash_completion"
-  fi
+dependency_nvm_dir: "{{ user_home_dir }}/.nvm"
+dependency_nvm_url: git@github.com:creationix/nvm.git
+dependency_nvm_version: v0.33.5

@@ -5,22 +5,15 @@
 
   vars:
     service_name: jenkins
-    temp_dir: "{{ work_dir }}/{{ service_name }}"
-    version: master
 
-    # GCP
     gcp_region: us-east1-d
     gcp_project_name: cicd
     gcp_project_id: cicd-181808
-    disk_size: 30
-    instance_type: f1-micro
+    gcp_gce_instance_type: f1-micro
+    gcp_gce_disk_size: 30
 
-    # Jenkins
     jenkins_image: jenkins-home
     jenkins_image_url: https://storage.googleapis.com/solutions-public-assets/jenkins-cd/jenkins-home-v3.tar.gz
-    jenkins_options_file: jenkins/k8s/options
-    cert_file: tls.crt
-    key_file: tls.key
 
   tasks:
     - name: get {{ jenkins_image }} image
@@ -48,7 +41,7 @@
       command: gcloud compute disks create {{ jenkins_image }}
         --image {{ jenkins_image }}
         --labels service={{ service_name }},deployment-method={{ deployment_method }},project={{ gcp_project_name }}
-        --size {{ disk_size }}
+        --size {{ gcp_gce_disk_size }}
         --zone {{ gcp_region }}
       when: "get_disk_result.stderr and
         'was not found' in get_disk_result.stderr and
@@ -64,7 +57,7 @@
     - name: create {{ service_name }} instance
       command: gcloud compute instances create {{ service_name }}
         --disk name={{ jenkins_image }}
-        --machine-type {{ instance_type }}
+        --machine-type {{ gcp_gce_instance_type }}
         --labels service={{ service_name }},deployment-method={{ deployment_method }},project={{ gcp_project_name }}
         --zone {{ gcp_region }}
       when: "get_instance_result.stderr and

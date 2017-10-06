@@ -1,60 +1,36 @@
 - name: verify that version_increment_level is appropriate
   assert:
     that:
-      - "version_increment_level in ['major', 'minor', 'patch']"
-
-- name: empty the temp_dir
-  file:
-    path: "{{ temp_dir }}"
-    state: absent
-
-- name: create the temp_dir
-  file:
-    path: "{{ temp_dir }}"
-    state: directory
+      - "npm_package_version_increment_level in ['major', 'minor', 'patch']"
 
 - name: get source code
   git:
     repo: "{{ repo_url }}"
-    dest: "{{ temp_dir }}"
+    dest: "{{ work_dir }}"
     force: yes
-    version: "{{ version }}"
+    version: "{{ repo_version }}"
 
 - name: install npm dependencies for build
   npm:
-    path: "{{ temp_dir }}"
+    path: "{{ work_dir }}"
     production: no
 
 - name: run npm test
   command: npm test
   args:
-    chdir: "{{ temp_dir }}"
+    chdir: "{{ work_dir }}"
 
 - name: increment package version
-  command: npm version {{ version_increment_level }}
+  command: npm version {{ npm_package_version_increment_level }}
   args:
-    chdir: "{{ temp_dir }}"
+    chdir: "{{ work_dir }}"
 
 - name: commit package version increment
-  command: git push origin {{ version }}
+  command: git push origin {{ repo_version }}
   args:
-    chdir: "{{ temp_dir }}"
+    chdir: "{{ work_dir }}"
 
 - name: publish npm package
   command: npm publish
   args:
-    chdir: "{{ temp_dir }}"
-
-- name: empty the temp_dir
-  file:
-    path: "{{ temp_dir }}"
-    state: absent
-
-- name: notify knightwatcher
-  command: utils/knightwatcher.js
-    --message-type npm-publish
-    --repo-name {{ repo_name }}
-    --link https://www.npmjs.com/package/{{ repo_name }}
-    --username {{ deploy_user }}
-  args:
-    chdir: "{{ inventory_dir }}"
+    chdir: "{{ work_dir }}"

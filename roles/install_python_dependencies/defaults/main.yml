@@ -1,1 +1,9 @@
-get_pip_url: https://bootstrap.pypa.io/get-pip.py
+dependency_pyenv_dir: "{{ user_home_dir }}/.pyenv"
+dependency_pyenv_url: git@github.com:pyenv/pyenv.git
+dependency_pyenv_version: v1.1.4
+
+dependency_pyenv_virtualenvwrapper_dir: "{{ dependency_pyenv_dir }}/plugins/pyenv-virtualenvwrapper"
+dependency_pyenv_virtualenvwrapper_url: git@github.com:pyenv/pyenv-virtualenvwrapper.git
+dependency_pyenv_virtualenvwrapper_version: v20140609
+
+dependency_pip_url: https://bootstrap.pypa.io/get-pip.py

@@ -1,15 +1,20 @@
 - name: generate private key file {{ ssh_key_file }}
   user:
-    name: "{{ ssh_user }}"
+    name: "{{ user }}"
     generate_ssh_key: yes
-    ssh_key_comment: "{{ ssh_user }}@{{ machine_name }}"
+    ssh_key_comment: "{{ user }}@{{ user_machine_name }}"
     ssh_key_file: "{{ ssh_directory }}/{{ ssh_key_file }}"
     ssh_key_type: rsa
     state: present
+  become: yes
+  become_user: "{{ user }}"
 
 - name: read public key file {{ ssh_pub_key_file }}
-  command: cat "{{ ssh_user_home_dir }}/{{ ssh_directory }}/{{ ssh_pub_key_file }}"
+  command: cat "{{ user_home_dir }}/{{ ssh_directory }}/{{ ssh_pub_key_file }}"
   register: cat_public_key_file_result
+  become: yes
+  become_user: "{{ user }}"
+  changed_when: "False"
 
 - name: print public key file {{ ssh_pub_key_file }}
   debug:

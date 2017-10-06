@@ -1,0 +1,10 @@
+- name: sync jenkins jobs
+  hosts: local
+  gather_facts: no
+
+  vars:
+    playbooks_jobs_dir: "{{ files_dir }}/jenkins_jobs"
+    jenkins_jobs_dir: ~/jobs
+
+  tasks:
+    - name: synchronize jenkins jobs from

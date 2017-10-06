@@ -1,1 +1,7 @@
-get_pip_url: https://bootstrap.pypa.io/get-pip.py
+dependency_git_install: no
+dependency_git_version: "2.11.0"
+
+dependency_make_install: no
+dependency_make_version: "4.1"
+
+dependency_zsh_install: no

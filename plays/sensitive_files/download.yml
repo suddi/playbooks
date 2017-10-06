@@ -1,0 +1,25 @@
+- name: download sensitive files from s3
+  hosts: local
+  gather_facts: no
+
+  vars:
+    project: ansible
+    service_name: "{{ project }}-sensitive-files"
+
+    aws_profile: "{{ general_aws_profile }}"
+    aws_region: ap-northeast-1
+    aws_s3_bucket_name: vault.suddi.io
+
+    download_root_dir: "{{ project_root_dir }}"
+
+    files: "{{ sensitive_files }}"
+
+  tasks:
+    - name: get objects from {{ aws_s3_bucket_name }} s3 bucket
+      command: aws s3api get-object
+        --bucket {{ aws_s3_bucket_name }}
+        --key {{ item }}
+        --profile {{ aws_profile }}
+        --region {{ aws_region }}
+        "{{ download_root_dir }}/{{ item }}"
+      with_items: "{{ files }}"

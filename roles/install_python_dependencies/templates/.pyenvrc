@@ -1,0 +1,15 @@
+export PYENV_ROOT="$HOME/.pyenv"
+export PATH="$PYENV_ROOT/bin:$PATH"
+
+if command -v pyenv 1>/dev/null 2>&1; then
+    eval "$(pyenv init -)"
+fi
+
+export PYENV_VERSION="{{ python_default_version }}"
+export WORKON_HOME=$HOME/.virtualenvs
+export PIP_VIRTUALENV_BASE=$WORKON_HOME
+
+if [ -s "$HOME/.pyenv/versions/{{ python_default_version }}/bin/virtualenvwrapper.sh" ]; then
+    export VIRTUALENVWRAPPER_PYTHON="$HOME/.pyenv/versions/{{ python_default_version }}/bin/python"
+    source $HOME/.pyenv/versions/{{ python_default_version }}/bin/virtualenvwrapper.sh
+fi

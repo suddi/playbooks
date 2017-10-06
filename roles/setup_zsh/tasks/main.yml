@@ -1,0 +1,26 @@
+- name: install zsh
+  apt:
+    autoclean: yes
+    autoremove: yes
+    name: zsh
+    state: present
+  become: yes
+
+- name: add .zshrc to {{ user_home_dir }}/.zshrc
+  template:
+    src: .zshrc
+    dest: "{{ user_home_dir }}/.zshrc"
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    mode: "0644"
+  become: yes
+  become_user: "{{ user }}"
+
+- name: clone oh-my-zsh repo
+  git:
+    repo: "{{ dependency_oh_my_zsh_url }}"
+    dest: "{{ dependency_oh_my_zsh_dir }}"
+    force: no
+    version: "{{ dependency_oh_my_zsh_version }}"
+  become: yes
+  become_user: "{{ user }}"

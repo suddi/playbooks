@@ -4,9 +4,23 @@
     autoremove: yes
     name: git
     state: present
+  become: yes
+  when: "dependency_git_install"
 
-- name: print git version
-  include_role:
-    name: print_package_version
-  vars:
-    package_name: git
+- name: install make
+  apt:
+    autoclean: yes
+    autoremove: yes
+    name: make
+    state: present
+  become: yes
+  when: "dependency_make_install"
+
+- name: install zsh
+  apt:
+    autoclean: yes
+    autoremove: yes
+    name: zsh
+    state: present
+  become: yes
+  when: "dependency_zsh_install"

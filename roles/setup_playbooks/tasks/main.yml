@@ -1,0 +1,74 @@
+- name: clone playbooks repo
+  git:
+    repo: "{{ repo_url }}"
+    dest: "{{ work_dir }}"
+    force: no
+    version: "{{ repo_version }}"
+  become: yes
+  become_user: "{{ user }}"
+
+- name: ignore changes to inventory.ini
+  command: git update-index
+    --assume-unchanged inventory.ini
+  args:
+    chdir: "{{ work_dir }}"
+  become: yes
+  become_user: "{{ user }}"
+
+- name: check if virtualenv {{ repo_name }} exists
+  shell: . {{ user_home_dir }}/.pyenvrc && workon
+  become: yes
+  become_user: "{{ user }}"
+  register: workon_result
+  changed_when: "workon_result.rc != 0 and
+    workon_result.rc != 1"
+  failed_when: "workon_result.rc != 0 and
+    workon_result.rc != 1"
+
+- name: create virtualenv {{ repo_name }}
+  shell: . {{ user_home_dir }}/.pyenvrc && mkvirtualenv {{ repo_name }}
+  become: yes
+  become_user: "{{ user }}"
+  when: "repo_name not in workon_result.stdout"
+
+- name: pip install dependencies
+  shell: . {{ user_home_dir }}/.pyenvrc && workon {{ repo_name }} && pip install
+    --requirement requirements.txt
+  args:
+    chdir: "{{ work_dir }}"
+  become: yes
+  become_user: "{{ user }}"
+
+- name: npm install
+  shell: . {{ user_home_dir }}/.nvmrc && nvm use && npm install
+  args:
+    chdir: "{{ work_dir }}"
+  become: yes
+  become_user: "{{ user }}"
+
+- name: create {{ user_home_dir }}/.aws directory
+  file:
+    path: "{{ user_home_dir }}/.aws"
+    state: directory
+  become: yes
+  become_user: "{{ user }}"
+
+- name: add aws credentials to {{ user_home_dir }}/.aws/credentials
+  template:
+    src: credentials
+    dest: "{{ user_home_dir }}/.aws/credentials"
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    mode: "0644"
+  become: yes
+  become_user: "{{ user }}"
+
+- name: add .npmrc to {{ user_home_dir }}/.npmrc
+  template:
+    src: .npmrc
+    dest: "{{ user_home_dir }}/.npmrc"
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    mode: "0644"
+  become: yes
+  become_user: "{{ user }}"

@@ -3,11 +3,30 @@
   gather_facts: no
 
   vars:
-    repo_name: string-formatting
+    service_name: string-formatting
+    service_url: https://www.npmjs.com/package/{{ service_name }}
+
+    repo_name: "{{ service_name }}"
     repo_url: "{{ github_account }}/{{ repo_name }}.git"
 
+    deploy_user: "{{ runtime_user }}"
+    deploy_node_version: v6
+
   roles:
+    - role: assert_node_version
+      expected_node_version: "{{ deploy_node_version }}"
+
+    - role: empty_work_dir
+
     - role: publish_npm_package
       tags:
           - publish
           - npm
+
+    - role: empty_work_dir
+
+    - role: notify_knightwatcher
+      message_username: "{{ deploy_user }}"
+      message_type: npm-publish
+      message_link: "{{ service_url }}"
+      message_repo_name: "{{ service_name }}"

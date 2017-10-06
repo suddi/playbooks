@@ -1,68 +1,64 @@
 - name: setup cicd server
   hosts: cicd
   gather_facts: no
+  strategy: debug
 
   vars:
-    machine_name: cicd
-    ssh_key_file: id_rsa
-    ssh_user: jenkins
-    ssh_user_home_dir: /var/lib/jenkins
+    service_name: "{{ cicd_service_name }}"
+    service_url: "{{ cicd_service_url }}"
+
+    repo_name: playbooks
+    repo_url: "{{ github_account }}/playbooks.git"
+
+    work_dir: "{{ cicd_user_home_dir }}/playbooks"
+
+    user: "{{ cicd_user }}"
+    user_home_dir: "{{ cicd_user_home_dir }}"
+    user_machine_name: "{{ cicd_user_machine_name }}"
+    user_shell: /bin/bash
+    user_shell_profile_file: "{{ deploy_user_home_dir }}/.bash_profile"
+    user_shell_rc_file: "{{ deploy_user_home_dir }}/.bashrc"
+
+    python_versions:
+      - "2.7.14"
+    python_default_version: "{{ python_versions[0] }}"
 
     node_versions:
       - "4"
       - "6"
       - "8"
+    node_default_version: "{{ node_versions[1] }}"
+    npm_auth_token: "{{ cicd_user_npm_auth_token }}"
 
-    repo_url: git@github.com:suddi/playbooks.git
-    repo_dir: "{{ ssh_user_home_dir }}/playbooks"
-    version: master
+    aws_profile: "{{ general_aws_profile }}"
+    aws_access_key_id: "{{ cicd_user_aws_access_key_id }}"
+    aws_secret_access_key: "{{ cicd_user_aws_secret_access_key }}"
 
   roles:
-    - role: install_general_dependencies
-      become: yes
-      tags:
-        - packages
-
-    - role: install_python_dependencies
-      become: yes
-      tags:
-        - packages
-        - python
+    - role: create_new_user
 
     - role: generate_ssh_keys
-      become: yes
-      become_user: "{{ ssh_user }}"
       tags:
         - ssh
 
-    - role: install_node_dependencies
-      become: yes
-      become_user: "{{ ssh_user }}"
+    - role: install_general_dependencies
+      dependency_git_install: yes
+      dependency_make_install: yes
       tags:
-        - packages
+        - dependencies
+
+    - role: install_python_dependencies
+      tags:
+        - dependencies
+        - python
+
+    - role: install_node_dependencies
+      tags:
+        - dependencies
         - node
 
-  tasks:
-    - name: clone playbooks repo
-      git:
-        repo: "{{ repo_url }}"
-        dest: "{{ repo_dir }}"
-        force: yes
-        version: "{{ version }}"
-      become: yes
-      become_user: "{{ ssh_user }}"
+    - role: setup_playbooks
+      tags:
+        - playbooks
 
-    - name: pip install dependencies
-      command: pip install
-        --requirement requirements.txt
-      args:
-        chdir: "{{ repo_dir }}"
-      become: yes
-
-    - name: npm install
-      shell: source {{ ssh_user_home_dir }}/.nvm/nvm.sh; npm install
-      args:
-        chdir: "{{ repo_dir }}"
-        executable: /bin/bash
-      become: yes
-      become_user: "{{ ssh_user }}"
+- import_playbook: sensitive_files/download.yml

@@ -4,57 +4,60 @@
 
   vars:
     project: ansible
-    service: "{{ project }}-sensitive-files"
-    bucket_name: vault.suddi.io
+    service_name: "{{ project }}-sensitive-files"
+
+    aws_profile: "{{ general_aws_profile }}"
     aws_region: ap-northeast-1
-    acl: private
-    sensitive_files:
-      - group_vars/all/vault.encrypted.yml
-      - inventory.ini
+    aws_s3_bucket_name: vault.suddi.io
+    aws_s3_acl: private
+
+    upload_root_dir: "{{ project_root_dir }}"
+
+    files: "{{ sensitive_files }}"
 
   tasks:
-    - name: check if {{ bucket_name }} s3 bucket exists
+    - name: check if {{ aws_s3_bucket_name }} s3 bucket exists
       command: aws s3api head-bucket
-        --bucket {{ bucket_name }}
+        --bucket {{ aws_s3_bucket_name }}
         --profile {{ aws_profile }}
         --region {{ aws_region }}
       register: head_bucket_result
       failed_when: "head_bucket_result.stderr and
         'Not Found' not in head_bucket_result.stderr"
 
-    - name: create {{ bucket_name }} s3 bucket
+    - name: create {{ aws_s3_bucket_name }} s3 bucket
       command: aws s3api create-bucket
-        --acl {{ acl }}
-        --bucket {{ bucket_name }}
+        --acl {{ aws_s3_acl }}
+        --bucket {{ aws_s3_bucket_name }}
         --create-bucket-configuration LocationConstraint={{ aws_region }}
         --profile {{ aws_profile }}
         --region {{ aws_region }}
       when: "'Not Found' in head_bucket_result.stderr"
 
-    - name: set versioning for {{ bucket_name }} s3 bucket
+    - name: set versioning for {{ aws_s3_bucket_name }} s3 bucket
       command: aws s3api put-bucket-versioning
-        --bucket {{ bucket_name }}
+        --bucket {{ aws_s3_bucket_name }}
         --versioning-configuration MFADelete=Disabled,Status=Enabled
         --profile {{ aws_profile }}
         --region {{ aws_region }}
       when: "'Not Found' in head_bucket_result.stderr"
 
-    - name: set tags for {{ bucket_name }} s3 bucket
+    - name: set tags for {{ aws_s3_bucket_name }} s3 bucket
       command: aws s3api put-bucket-tagging
-        --bucket {{ bucket_name }}
+        --bucket {{ aws_s3_bucket_name }}
         --profile {{ aws_profile }}
         --region {{ aws_region }}
-        --tagging TagSet=[{Key=project,Value={{ project }}},{Key=service,Value={{ service }}},{Key=deployment_method,Value={{ deployment_method }}}]
+        --tagging TagSet=[{Key=project,Value={{ project }}},{Key=service,Value={{ service_name }}},{Key=deployment_method,Value={{ deployment_method }}}]
       when: "'Not Found' in head_bucket_result.stderr"
 
-    - name: put objects to {{ bucket_name }} s3 bucket
+    - name: put objects to {{ aws_s3_bucket_name }} s3 bucket
       command: aws s3api put-object
-        --acl {{ acl }}
-        --body {{ inventory_dir }}/{{ item }}
-        --bucket {{ bucket_name }}
+        --acl {{ aws_s3_acl }}
+        --body {{ upload_root_dir }}/{{ item }}
+        --bucket {{ aws_s3_bucket_name }}
         --key {{ item }}
         --profile {{ aws_profile }}
         --region {{ aws_region }}
         --server-side-encryption AES256
-        --tagging project={{ project }}&service={{ service }}&deployment_method={{ deployment_method }}
-      with_items: "{{ sensitive_files }}"
+        --tagging project={{ project }}&service={{ service_name }}&deployment_method={{ deployment_method }}
+      with_items: "{{ files }}"
