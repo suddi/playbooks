@@ -6,9 +6,9 @@
     version: "{{ repo_version }}"
 
 - name: install npm dependencies for build
-  npm:
-    path: "{{ work_dir }}"
-    production: no
+  command: npm install
+  args:
+    chdir: "{{ work_dir }}"
 
 - name: get lambda function
   command: aws lambda get-function
