@@ -7,6 +7,22 @@
   become: yes
   when: "dependency_git_install"
 
+- name: set git user
+  command: git config --global user.name "{{ user }}"
+  when: "dependency_git_install"
+
+- name: set git user email
+  command: git config --global user.email "{{ user }}@{{ user_machine_name }}"
+  when: "dependency_git_install"
+
+- name: set git editor
+  command: git config --global core.editor "nano"
+  when: "dependency_git_install"
+
+- name: set git push nature
+  command: git config --global push.default simple
+  when: "dependency_git_install"
+
 - name: install make
   apt:
     autoclean: yes

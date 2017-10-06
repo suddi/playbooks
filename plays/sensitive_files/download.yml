@@ -6,7 +6,7 @@
     project: ansible
     service_name: "{{ project }}-sensitive-files"
 
-    aws_profile: "{{ general_aws_profile | default('suddi') }}"
+    aws_profile: "{{ general_aws_profile }}"
     aws_region: ap-northeast-1
     aws_s3_bucket_name: vault.suddi.io
 
