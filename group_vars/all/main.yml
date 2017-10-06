@@ -24,8 +24,8 @@ bitbucket_account: "{{ vault_bitbucket_account }}"
 # ------------------------------------------------------------------------------
 # RUNTIME USER SPECIFICS
 # ------------------------------------------------------------------------------
-runtime_user: lookup('env', 'USER')
-runtime_user_home_dir: lookup('env', 'HOME')
+runtime_user: "{{ lookup('env', 'USER') }}"
+runtime_user_home_dir: "{{ lookup('env', 'HOME') }}"
 
 # ------------------------------------------------------------------------------
 # DEPLOYMENT USER SPECIFICS
