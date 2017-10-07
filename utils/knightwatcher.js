@@ -19,11 +19,13 @@ function getMessage(options) {
         }
     }
 
+    const timestamp = `${new Date().toISOString().split('.')[0]}Z`;
     return `${getFirstLine(options.messageType)}\n
-        **username**: \`${options.username}\`
-        **repository**: \`${options.repoName}\`
-        **link**: ${options.link}
-        **timestamp**: \`${new Date().toISOString()}\``.replace(/ +/g, ' ');
+        username: \`${options.username}\`
+        repository: \`${options.repoName}\`
+        link: ${options.link}
+        timestamp: \`${timestamp}\``
+        .replace(/ +/g, ' ');
 }
 
 function sendMessage(options) {

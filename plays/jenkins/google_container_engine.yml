@@ -4,13 +4,16 @@
   gather_facts: no
 
   vars:
-    service_name: jenkins
+    project_name: "{{ cicd_project_name }}"
+    service_name: "{{ cicd_service_prefix }}jenkins"
+    service_url: "{{ cicd_service_url }}"
 
     repo_url: git@github.com:GoogleCloudPlatform/continuous-deployment-on-kubernetes.git
     repo_version: master
 
     gcp_region: us-east1-d
-    gcp_project_id: cicd-181808
+    gcp_project_name: "{{ project_name }}"
+    gcp_project_id: "{{ gcp_project_name }}-181808"
     gcp_gce_cluster_name: jenkins-cd
     gcp_gce_deployment_nodes: 1
     gcp_gce_instance_type: f1-micro

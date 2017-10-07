@@ -3,19 +3,18 @@
   gather_facts: no
 
   vars:
-    service_name: load-directory
-    service_url: https://www.npmjs.com/package/{{ service_name }}
+    project_name: "{{ general_project_name }}"
+    package_name: load-directory
+    service_name: "{{ general_service_prefix }}npm-{{ package_name }}"
+    service_url: https://www.npmjs.com/package/{{ package_name }}
 
-    repo_name: "{{ service_name }}"
+    repo_name: "{{ package_name }}"
     repo_url: "{{ github_account }}/{{ repo_name }}.git"
 
     deploy_user: "{{ runtime_user }}"
     deploy_node_version: v6
 
   roles:
-    - role: assert_node_version
-      expected_node_version: "{{ deploy_node_version }}"
-
     - role: empty_work_dir
 
     - role: publish_npm_package

@@ -4,11 +4,13 @@
   gather_facts: no
 
   vars:
-    service_name: jenkins
+    project_name: "{{ cicd_project_name }}"
+    service_name: "{{ cicd_service_prefix }}jenkins"
+    service_url: "{{ cicd_service_url }}"
 
     gcp_region: us-east1-d
-    gcp_project_name: cicd
-    gcp_project_id: cicd-181808
+    gcp_project_name: "{{ project_name }}"
+    gcp_project_id: "{{ gcp_project_name }}-181808"
     gcp_gce_instance_type: f1-micro
     gcp_gce_disk_size: 30
 

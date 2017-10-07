@@ -1,6 +1,5 @@
 'use strict';
 
-require('co-mocha');
 const expect = require('chai').expect;
 const nock = require('nock');
 const sinon = require('sinon');
@@ -24,11 +23,12 @@ describe('Unit tests for utils/knightwatcher', function () {
                 username: 'user42',
                 link: 'https://www.user42.com'
             };
+            const timestamp = `${new Date().toISOString().split('.')[0]}Z`;
             const expectedResult = `Published package on NPM\n
-                **username**: \`${options.username}\`
-                **repository**: \`${options.repoName}\`
-                **link**: ${options.link}
-                **timestamp**: \`${new Date().toISOString()}\``.replace(/ +/g, ' ');
+                username: \`${options.username}\`
+                repository: \`${options.repoName}\`
+                link: ${options.link}
+                timestamp: \`${timestamp}\``.replace(/ +/g, ' ');
 
             const result = knightwatcher.getMessage(options);
 
@@ -42,11 +42,12 @@ describe('Unit tests for utils/knightwatcher', function () {
                 username: 'user42',
                 link: 'https://www.user42.com'
             };
+            const timestamp = `${new Date().toISOString().split('.')[0]}Z`;
             const expectedResult = `Deployed service\n
-                **username**: \`${options.username}\`
-                **repository**: \`${options.repoName}\`
-                **link**: ${options.link}
-                **timestamp**: \`${new Date().toISOString()}\``.replace(/ +/g, ' ');
+                username: \`${options.username}\`
+                repository: \`${options.repoName}\`
+                link: ${options.link}
+                timestamp: \`${timestamp}\``.replace(/ +/g, ' ');
 
             const result = knightwatcher.getMessage(options);
 
@@ -55,11 +56,12 @@ describe('Unit tests for utils/knightwatcher', function () {
 
         it('CASE 3: Should handle unknown messageType', function () {
             const options = {};
+            const timestamp = `${new Date().toISOString().split('.')[0]}Z`;
             const expectedResult = `Managed service\n
-                **username**: \`${options.username}\`
-                **repository**: \`${options.repoName}\`
-                **link**: ${options.link}
-                **timestamp**: \`${new Date().toISOString()}\``.replace(/ +/g, ' ');
+                username: \`${options.username}\`
+                repository: \`${options.repoName}\`
+                link: ${options.link}
+                timestamp: \`${timestamp}\``.replace(/ +/g, ' ');
 
             const result = knightwatcher.getMessage(options);
 
@@ -89,18 +91,19 @@ describe('Unit tests for utils/knightwatcher', function () {
             this.clock.restore();
         });
 
-        it('CASE 1: Should be able to send message', function* () {
+        it('CASE 1: Should be able to send message', function () {
             const options = {
                 messageType: 'deploy',
                 repoName: 'package',
                 username: 'user42',
                 link: 'https://www.user42.com'
             };
+            const timestamp = `${new Date().toISOString().split('.')[0]}Z`;
             const message = `Deployed service\n
-                **username**: \`${options.username}\`
-                **repository**: \`${options.repoName}\`
-                **link**: ${options.link}
-                **timestamp**: \`${new Date().toISOString()}\``.replace(/ +/g, ' ');
+                username: \`${options.username}\`
+                repository: \`${options.repoName}\`
+                link: ${options.link}
+                timestamp: \`${timestamp}\``.replace(/ +/g, ' ');
             const expectedStatusCode = 200;
             const expectedResponseBody = {
                 meta: {
@@ -112,9 +115,11 @@ describe('Unit tests for utils/knightwatcher', function () {
             };
 
             applyNock(message, expectedStatusCode, expectedResponseBody);
-            const response = yield knightwatcher.sendMessage(options);
-            expect(response.status).to.be.eql(expectedStatusCode);
-            expect(response.data).to.deep.eql(expectedResponseBody);
+            knightwatcher.sendMessage(options)
+            .then(function (response) {
+                expect(response.status).to.be.eql(expectedStatusCode);
+                expect(response.data).to.deep.eql(expectedResponseBody);
+            });
         });
     });
 

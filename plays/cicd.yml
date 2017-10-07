@@ -4,7 +4,8 @@
   strategy: debug
 
   vars:
-    service_name: "{{ cicd_service_name }}"
+    project_name: "{{ cicd_project_name }}"
+    service_name: "{{ cicd_service_prefix }}cicd"
     service_url: "{{ cicd_service_url }}"
 
     repo_name: playbooks

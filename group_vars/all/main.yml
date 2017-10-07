@@ -48,25 +48,49 @@ cicd_user_aws_secret_access_key: "{{ vault_cicd_user_aws_secret_access_key }}"
 cicd_user_npm_auth_token: "{{ vault_cicd_user_npm_auth_token }}"
 
 # ------------------------------------------------------------------------------
-# SERVICES
+# PROJECTS
 # ------------------------------------------------------------------------------
 # General
-general_aws_profile: "{{ vault_general_aws_profile }}"
+general_project_name: suddi
+general_service_prefix: "{{ general_project_name }}-"
+general_service_url: "{{ vault_general_service_url }}"
+general_aws_profile: suddi
 
 # Knightwatcher
-knightwatcher_service_name: "{{ vault_knightwatcher_service_name }}"
+knightwatcher_project_name: knightwatcher
+knightwatcher_service_prefix: "{{ knightwatcher_project_name }}-"
 knightwatcher_service_url: "{{ vault_knightwatcher_service_url }}"
 
+knightwatcher_config_tablename: "{{ vault_knightwatcher_config_tablename }}"
+knightwatcher_config_telegram_api_key: "{{ vault_knightwatcher_config_telegram_api_key }}"
+knightwatcher_config_default_notifier: "{{ vault_knightwatcher_config_default_notifier }}"
+
 # CICD
-cicd_service_name: "{{ vault_cicd_service_name }}"
+cicd_project_name: cicd
+cicd_service_prefix: "{{ cicd_project_name }}-"
 cicd_service_url: "{{ vault_cicd_service_url }}"
+
+# BuildGreenr
+buildgreenr_project_name: buildgreenr
+buildgreenr_service_prefix: "{{ buildgreenr_project_name }}-"
+buildgreenr_service_url: "{{ vault_buildgreenr_service_url }}"
+
+# OnePusher
+onepusher_project_name: onepusher
+onepusher_service_prefix: "{{ onepusher_project_name }}-"
+onepusher_service_url: "{{ vault_onepusher_service_url }}"
+
+# ThinkTech Industries
+thinktech_industries_project_name: thinktech_industries
+thinktech_industries_service_prefix: "{{ thinktech_industries_project_name }}-"
+thinktech_industries_service_url: "{{ vault_thinktech_industries_service_url }}"
 
 # ------------------------------------------------------------------------------
 # PACKAGE VERSIONS
 # ------------------------------------------------------------------------------
 # This should be kept in sync with requirements.txt
 ansible_version: "2.4.0.0"
-awscli: "1.11.166"
+awscli_version: "1.11.166"
 boto_version: "2.48.0"
 boto3_version: "1.4.7"
 python_dateutil_version: "2.6.1"
