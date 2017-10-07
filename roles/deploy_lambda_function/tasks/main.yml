@@ -25,7 +25,7 @@
 
 - name: print cost of modules
   debug:
-    msg: "{{ cost_of_modules_result.stdout_lines }}"
+    msg: "{{ cost_of_modules_result.stdout }}"
 
 - name: get lambda function
   command: aws lambda get-function
