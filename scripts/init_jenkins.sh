@@ -50,6 +50,9 @@ function run() {
     # Switch to "playbooks" virtualenv
     workon playbooks
 
+    # Switch to required node version
+    nvm use ${1:-"6"}
+
     print_runtime_versions
 }
 
