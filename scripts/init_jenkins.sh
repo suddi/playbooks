@@ -1,8 +1,6 @@
 #!/bin/sh
 
 function print_python_runtime_versions() {
-    PYTHON_VERSION_RESULT=``
-
     echo "python runtime environment -----------"
     echo 'running "python --version"'
     python --version
