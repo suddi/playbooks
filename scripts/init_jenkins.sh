@@ -32,6 +32,7 @@ function print_node_runtime_versions() {
 }
 
 function print_runtime_versions() {
+    echo
     print_python_runtime_versions
     echo
     print_node_runtime_versions
