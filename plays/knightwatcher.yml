@@ -20,6 +20,9 @@
     aws_lambda_environment_variables: TABLENAME={{ knightwatcher_config_tablename }},TELEGRAM_API_KEY={{ knightwatcher_config_telegram_api_key }},DEFAULT_NOTIFIER={{ knightwatcher_config_default_notifier }}
 
   roles:
+    - role: assert_node_version
+      expected_node_version: "{{ node_version }}"
+
     - role: empty_work_dir
 
     - role: deploy_lambda_function

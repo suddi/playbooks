@@ -5,11 +5,11 @@
     force: yes
     version: "{{ repo_version }}"
 
-- name: switch to .nvmrc node version
-  shell: nvm use
-  args:
-    chdir: "{{ work_dir }}"
-    removes: .nvmrc
+# - name: switch to .nvmrc node version
+#   shell: nvm use
+#   args:
+#     chdir: "{{ work_dir }}"
+#     removes: .nvmrc
 
 - name: install npm dependencies for build
   command: npm install

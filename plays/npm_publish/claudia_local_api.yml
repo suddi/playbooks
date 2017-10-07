@@ -12,9 +12,13 @@
     repo_url: "{{ github_account }}/{{ repo_name }}.git"
 
     deploy_user: "{{ runtime_user }}"
-    deploy_node_version: v6
+
+    node_version: v6
 
   roles:
+    - role: assert_node_version
+      expected_node_version: "{{ node_version }}"
+
     - role: empty_work_dir
 
     - role: publish_npm_package
