@@ -32,4 +32,4 @@
       message_username: "{{ deploy_user }}"
       message_type: npm-publish
       message_link: "{{ service_url }}"
-      message_repo_name: "{{ service_name }}"
+      message_repo_name: "{{ repo_name }}"

@@ -38,4 +38,4 @@
       message_username: "{{ user }}"
       message_type: deploy
       message_link: "{{ service_url }}"
-      message_repo_name: "{{ service_name }}"
+      message_repo_name: "{{ repo_name }}"
