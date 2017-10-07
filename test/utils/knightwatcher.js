@@ -116,10 +116,10 @@ describe('Unit tests for utils/knightwatcher', function () {
 
             applyNock(message, expectedStatusCode, expectedResponseBody);
             knightwatcher.sendMessage(options)
-            .then(function (response) {
-                expect(response.status).to.be.eql(expectedStatusCode);
-                expect(response.data).to.deep.eql(expectedResponseBody);
-            });
+                .then(function (response) {
+                    expect(response.status).to.be.eql(expectedStatusCode);
+                    expect(response.data).to.deep.eql(expectedResponseBody);
+                });
         });
     });
 
