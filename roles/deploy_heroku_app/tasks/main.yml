@@ -47,7 +47,7 @@
   command: heroku apps:info {{ heroku_app_name }}
   register: heroku_apps_result
   failed_when: "heroku_apps_result.stderr and
-    'Couldn\'t find that app' not in heroku_apps_result.stderr"
+    'find that app' not in heroku_apps_result.stderr"
 
 - name: create heroku app
   command: heroku apps:create {{ heroku_app_name }}
@@ -56,7 +56,7 @@
   args:
     chdir: "{{ work_dir }}"
   when: "heroku_apps_result.stderr and
-    'Couldn\'t find that app' in heroku_apps_result.stderr"
+    'find that app' in heroku_apps_result.stderr"
 
 - name: update heroku app
   command: git push heroku master
