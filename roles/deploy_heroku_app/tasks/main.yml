@@ -61,14 +61,10 @@
   when: "heroku_apps_result.stderr and
     'find that app' in heroku_apps_result.stderr"
 
-- set_fact:
-    heroku_app_url: "{{ heroku_apps_result.stdout | regex_search(regexp,'\\1') }}"
-  vars:
-    regexp: 'Git URL: *(.+\.git)'
-  when: "heroku_apps_result.stdout"
-
 - name: add git remote heroku
-  command: git remote add heroku {{ heroku_app_url }}
+  command: heroku git:remote {{ heroku_app_name }}
+  args:
+    chdir: "{{ work_dir }}"
   register: git_remote_add_result
   failed_when: "git_remote_add_result.stderr and
     'already exists' not in git_remote_add_result.stderr"
