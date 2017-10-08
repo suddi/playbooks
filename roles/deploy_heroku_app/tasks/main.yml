@@ -1,0 +1,60 @@
+- name: install heroku-cli globally
+  npm:
+    global: yes
+    name: heroku-cli
+    state: present
+
+- name: get source code
+  git:
+    repo: "{{ repo_url }}"
+    dest: "{{ work_dir }}"
+    force: yes
+    version: "{{ repo_version }}"
+
+# - name: switch to .nvmrc node version
+#   shell: nvm use
+#   args:
+#     chdir: "{{ work_dir }}"
+#     removes: .nvmrc
+
+- name: install npm dependencies for build
+  command: npm install
+  args:
+    chdir: "{{ work_dir }}"
+
+- name: get cost of modules
+  command: node_modules/.bin/cost-of-modules
+    --no-install
+  args:
+    chdir: "{{ work_dir }}"
+  register: cost_of_modules_result
+
+- name: print cost of modules
+  debug:
+    msg: "{{ cost_of_modules_result.stdout }}"
+
+- name: create .env file
+  command: echo "{{ heroku_environment_variables }}" > .env
+  args:
+    chdir: "{{ work_dir }}"
+
+- name: get heroku app
+  command: heroku apps:info {{ heroku_app_name }}
+  register: heroku_apps_result
+  failed_when: "heroku_apps_result.stderr and
+    'Couldn't find that app' not in heroku_apps_result.stderr"
+
+- name: create heroku app
+  command: heroku apps:create {{ heroku_app_name }}
+    --region {{ heroku_region }}
+    --ssh-git
+  args:
+    chdir: "{{ work_dir }}"
+  when: "heroku_apps_result.stderr and
+    'Couldn't find that app' in heroku_apps_result.stderr"
+
+- name: update heroku app
+  command: git push heroku master
+  args:
+    chdir: "{{ work_dir }}"
+  when: "heroku_apps_result.stdout"

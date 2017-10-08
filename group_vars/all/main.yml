@@ -65,6 +65,14 @@ knightwatcher_config_tablename: "{{ vault_knightwatcher_config_tablename }}"
 knightwatcher_config_telegram_api_key: "{{ vault_knightwatcher_config_telegram_api_key }}"
 knightwatcher_config_default_notifier: "{{ vault_knightwatcher_config_default_notifier }}"
 
+# Kobe
+kobe_project_name: kobe
+kobe_service_prefix: "{{ kobe_project_name }}-"
+kobe_service_url: "{{ vault_kobe_service_url }}"
+
+kobe_config_microsoft_app_id: "{{ vault_kobe_config_microsoft_app_id }}"
+kobe_config_microsoft_app_password: "{{ vault_kobe_config_microsoft_app_password }}"
+
 # CICD
 cicd_project_name: cicd
 cicd_service_prefix: "{{ cicd_project_name }}-"
