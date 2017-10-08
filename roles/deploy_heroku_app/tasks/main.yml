@@ -33,6 +33,11 @@
   debug:
     msg: "{{ cost_of_modules_result.stdout }}"
 
+- name: run npm test
+  command: npm test
+  args:
+    chdir: "{{ work_dir }}"
+
 - name: create .env file
   command: echo "{{ heroku_environment_variables }}" > .env
   args:
