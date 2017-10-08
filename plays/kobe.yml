@@ -1,6 +1,7 @@
 - name: deploy kobebot to heroku
   hosts: local
   gather_facts: no
+  strategy: debug
 
   vars:
     project_name: "{{ kobe_project_name }}"

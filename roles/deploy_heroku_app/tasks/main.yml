@@ -49,6 +49,10 @@
   failed_when: "heroku_apps_result.stderr and
     'find that app' not in heroku_apps_result.stderr"
 
+- name: print heroku app result
+  debug:
+    msg: heroku_apps_result.stdout
+
 - name: create heroku app
   command: heroku apps:create {{ heroku_app_name }}
     --region {{ heroku_region }}
