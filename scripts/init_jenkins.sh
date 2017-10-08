@@ -56,4 +56,4 @@ function run() {
     print_runtime_versions
 }
 
-run
+run $1
