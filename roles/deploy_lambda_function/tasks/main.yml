@@ -79,7 +79,7 @@
   changed_when: "False"
 
 - set_fact:
-    aws_lambda_arn="{{ (get_new_function_result.stdout | from_json).Configuration.FunctionArn }}"
+    aws_lambda_arn: "{{ (get_new_function_result.stdout | from_json).Configuration.FunctionArn }}"
 
 - name: tag lambda function
   command: aws lambda tag-resource

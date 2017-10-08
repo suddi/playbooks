@@ -39,7 +39,7 @@
     chdir: "{{ work_dir }}"
 
 - name: create .env file
-  command: echo "{{ heroku_environment_variables }}" > .env
+  command: echo "{{ heroku_app_environment_variables }}" > .env
   args:
     chdir: "{{ work_dir }}"
 
@@ -49,10 +49,6 @@
   failed_when: "heroku_apps_result.stderr and
     'find that app' not in heroku_apps_result.stderr"
 
-- name: print heroku app result
-  debug:
-    msg: heroku_apps_result.stdout
-
 - name: create heroku app
   command: heroku apps:create {{ heroku_app_name }}
     --region {{ heroku_region }}
@@ -61,6 +57,11 @@
     chdir: "{{ work_dir }}"
   when: "heroku_apps_result.stderr and
     'find that app' in heroku_apps_result.stderr"
+
+- name: add git remote heroku
+  command: git remote add heroku {{ heroku_app_url }}
+  args:
+    chdir: "{{ work_dir }}"
 
 - name: update heroku app
   command: git push heroku master

@@ -13,9 +13,9 @@
 
     user: "{{ runtime_user }}"
 
-    heroku_app_name: suddi-kobebot
-    heroku_environment_variables: MICROSOFT_APP_ID={{ kobe_config_microsoft_app_id }}\nMICROSOFT_APP_PASSWORD={{ kobe_config_microsoft_app_password }}\nNODE_ENV=production
     heroku_region: us
+    heroku_app_name: suddi-kobebot
+    heroku_app_environment_variables: MICROSOFT_APP_ID={{ kobe_config_microsoft_app_id }}\nMICROSOFT_APP_PASSWORD={{ kobe_config_microsoft_app_password }}\nNODE_ENV=production
 
     node_version: v8
 
