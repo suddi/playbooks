@@ -1,7 +1,6 @@
 - name: setup cicd server
   hosts: cicd
   gather_facts: no
-  strategy: debug
 
   vars:
     project_name: "{{ cicd_project_name }}"
