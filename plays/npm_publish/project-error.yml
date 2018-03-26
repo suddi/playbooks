@@ -1,0 +1,35 @@
+- name: publish project-error to npm
+  hosts: local
+  gather_facts: no
+
+  vars:
+    project_name: "{{ general_project_name }}"
+    package_name: project-error
+    service_name: "{{ general_service_prefix }}npm-{{ package_name }}"
+    service_url: https://www.npmjs.com/package/{{ package_name }}
+
+    repo_name: "{{ package_name }}"
+    repo_url: "{{ github_account }}/{{ repo_name }}.git"
+
+    deploy_user: "{{ runtime_user }}"
+
+    node_version: v0.12
+
+  roles:
+    - role: assert_node_version
+      expected_node_version: "{{ node_version }}"
+
+    - role: empty_work_dir
+
+    - role: publish_npm_package
+      tags:
+          - publish
+          - npm
+
+    - role: empty_work_dir
+
+    - role: notify_knightwatcher
+      message_username: "{{ deploy_usser }}"
+      message_type: npm-publish
+      message_link: "{{ service_url }}"
+      message_repo_name: "{{ repo_name }}"
