@@ -22,7 +22,7 @@ Ansible playbooks for publishing packages to NPM, PyPy and deployment to AWS, He
 - node
 
 ````
-pip install -r requirements.txt
+pip install --requirement requirements.txt --requirement test_requirements.txt
 
 npm install
 ````
