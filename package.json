@@ -19,7 +19,6 @@
   "files": [
     "utils"
   ],
-  "main": "index.js",
   "license": "MIT",
   "keywords": [],
   "engines": {
@@ -27,12 +26,10 @@
     "npm": ">= 2.0.0"
   },
   "scripts": {
-    "check-coverage": "istanbul check-coverage",
-    "coverage": "istanbul cover _mocha",
+    "coverage": "nyc mocha",
     "lint": "eslint .",
-    "prepush": "npm test",
-    "security-check": "nsp check --output summary",
-    "test": "npm run lint && npm run security-check && npm run coverage && npm run check-coverage"
+    "security-check": "npm audit --audit-level high || true",
+    "test": "npm run lint && npm run security-check && npm run coverage"
   },
   "dependencies": {
     "axios": "^0.19.2",
@@ -42,14 +39,18 @@
     "chai": "^4.0.0",
     "eslint": "^4.0.0",
     "eslint-config-suddi": "^4.0.0",
-    "husky": "^0.14.0",
-    "istanbul": "^0.4.0",
-    "mocha": "^5.0.0",
+    "husky": "^4.2.3",
+    "mocha": "^7.0.0",
     "nock": "^9.0.22",
-    "nsp": "^3.0.0",
+    "nyc": "^15.0.0",
     "sinon": "^5.0.0"
   },
   "eslintConfig": {
     "extends": "suddi/backend"
+  },
+  "husky": {
+    "hooks": {
+      "pre-push": "npm test"
+    }
   }
 }
