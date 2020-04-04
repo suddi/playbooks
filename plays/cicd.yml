@@ -24,9 +24,9 @@
     python_default_version: "{{ python_versions[0] }}"
 
     node_versions:
-      - "4"
-      - "6"
       - "8"
+      - "10"
+      - "12"
     node_default_version: "{{ node_versions[1] }}"
     npm_auth_token: "{{ cicd_user_npm_auth_token }}"
 

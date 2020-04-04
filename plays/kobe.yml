@@ -17,7 +17,7 @@
     heroku_app_name: suddi-kobebot
     heroku_app_environment_variables: MICROSOFT_APP_ID={{ kobe_config_microsoft_app_id }}\nMICROSOFT_APP_PASSWORD={{ kobe_config_microsoft_app_password }}\nNODE_ENV=production
 
-    node_version: v8
+    node_version: v12
 
   roles:
     - role: assert_node_version
