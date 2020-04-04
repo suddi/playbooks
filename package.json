@@ -22,8 +22,8 @@
   "license": "MIT",
   "keywords": [],
   "engines": {
-    "node": ">= 4.0.0",
-    "npm": ">= 2.0.0"
+    "node": ">= 12.0.0",
+    "npm": ">= 6.0.0"
   },
   "scripts": {
     "coverage": "nyc mocha",
