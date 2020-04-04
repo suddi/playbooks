@@ -20,7 +20,8 @@
     user_shell_rc_file: "{{ deploy_user_home_dir }}/.bashrc"
 
     python_versions:
-      - "2.7.14"
+      - "2.7.17"
+      - "3.8.2"
     python_default_version: "{{ python_versions[0] }}"
 
     node_versions:

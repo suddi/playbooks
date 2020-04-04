@@ -52,7 +52,6 @@
   become: yes
   become_user: "{{ user }}"
 
-
 - name: pyenv install python
   shell: . {{ user_home_dir }}/.pyenvrc && pyenv install --skip-existing {{ item }}
   register: pyenv_install_result

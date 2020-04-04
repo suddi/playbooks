@@ -51,7 +51,7 @@ function run() {
     workon playbooks
 
     # Switch to required node version
-    nvm use ${1:-"6"}
+    nvm use ${1:-"12"}
 
     print_runtime_versions
 }
