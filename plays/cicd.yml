@@ -1,5 +1,5 @@
 - name: setup cicd server
-  hosts: cicd
+  hosts: "{{ variable_host | default('cicd') }}"
   gather_facts: no
 
   vars:
