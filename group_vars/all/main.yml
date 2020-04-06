@@ -61,6 +61,7 @@ knightwatcher_project_name: knightwatcher
 knightwatcher_service_prefix: "{{ knightwatcher_project_name }}-"
 knightwatcher_service_url: "{{ vault_knightwatcher_service_url }}"
 
+knightwatcher_config_aws_region: ap-northeast-1
 knightwatcher_config_tablename: "{{ vault_knightwatcher_config_tablename }}"
 knightwatcher_config_telegram_api_key: "{{ vault_knightwatcher_config_telegram_api_key }}"
 knightwatcher_config_default_notifier: "{{ vault_knightwatcher_config_default_notifier }}"
