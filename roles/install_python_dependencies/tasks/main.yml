@@ -49,7 +49,6 @@
     regexp: "^. $HOME/.pyenvrc$"
     state: present
     line: . "$HOME/.pyenvrc"
-  when: pyenv_virtualenv
   become: yes
   become_user: "{{ user }}"
 
