@@ -16,8 +16,8 @@
     user_home_dir: "{{ cicd_user_home_dir }}"
     user_machine_name: "{{ cicd_user_machine_name }}"
     user_shell: /bin/bash
-    user_shell_profile_file: "{{ deploy_user_home_dir }}/.bash_profile"
-    user_shell_rc_file: "{{ deploy_user_home_dir }}/.bashrc"
+    user_shell_profile_file: "{{ user_home_dir }}/.bash_profile"
+    user_shell_rc_file: "{{ user_home_dir }}/.bashrc"
 
     python_versions:
       - "2.7.17"
