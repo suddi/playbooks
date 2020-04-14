@@ -12,6 +12,7 @@
     - libbz2-dev
     - libsqlite3-dev
     - libreadline-dev
+  when: "inventory_hostname != 'localhost'"
 
 - name: clone pyenv repo
   git:
