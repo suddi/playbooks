@@ -38,6 +38,8 @@
   roles:
     - role: print_inventory_hostname
 
+    - role: pull_latest_code
+
     - role: create_new_user
 
     - role: generate_ssh_keys

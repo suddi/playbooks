@@ -3,6 +3,7 @@
     repo: "{{ repo_url }}"
     dest: "{{ work_dir }}"
     force: no
+    update: yes
     version: "{{ repo_version }}"
   become: yes
   become_user: "{{ user }}"

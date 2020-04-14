@@ -19,6 +19,7 @@
       repo: "{{ dependency_pyenv_url }}"
       dest: "{{ dependency_pyenv_dir }}"
       force: no
+      update: yes
       version: "{{ dependency_pyenv_version }}"
   become: yes
   become_user: "{{ user }}"
