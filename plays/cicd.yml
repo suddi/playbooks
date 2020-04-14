@@ -42,6 +42,10 @@
       tags:
         - ssh
 
+    - name: print inventory_hostname
+      debug:
+        var: inventory_hostname
+
     - role: install_general_dependencies
       dependency_git_install: yes
       dependency_make_install: yes
