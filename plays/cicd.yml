@@ -47,6 +47,7 @@
       dependency_make_install: yes
       tags:
         - dependencies
+      when: "inventory_hostname != 'local'"
 
     - role: install_python_dependencies
       tags:

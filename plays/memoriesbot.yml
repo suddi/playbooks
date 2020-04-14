@@ -1,0 +1,37 @@
+- name: deploy memoriesbot to aws lambda
+  hosts: local
+  gather_facts: no
+
+  vars:
+    project_name: "{{ memoriesbot_project_name }}"
+    service_name: "{{ memoriesbot_service_prefix }}lambda"
+
+    repo_name: memoriesbot
+    repo_url: "{{ github_account }}/{{ repo_name }}.git"
+    bin_file: "{{ work_dir }}/build/memoriesbot.zip"
+
+    user: "{{ runtime_user }}"
+
+    aws_profile: "{{ general_aws_profile }}"
+    aws_region: ap-northeast-1
+    aws_lambda_function_description: "Revisit memories and get reminded everyday via Telegram"
+    aws_lambda_runtime: go1.x
+    aws_lambda_role_name: "{{ memoriesbot_aws_lambda_role_name }}"
+    aws_lambda_environment_variables: TELEGRAM_API_KEY={{ memoriesbot_config_telegram_api_key }}
+
+  roles:
+    - role: empty_work_dir
+
+    - role: build_go_package
+
+    - role: deploy_lambda_function
+      tags:
+        - lambda
+
+    - role: empty_work_dir
+
+    - role: notify_knightwatcher
+      message_username: "{{ user }}"
+      message_type: deploy
+      message_link: "{{ service_url }}"
+      message_repo_name: "{{ repo_name }}"

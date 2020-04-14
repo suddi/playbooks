@@ -25,7 +25,7 @@
 
     - role: empty_work_dir
 
-    - role: deploy_lambda_function
+    - role: deploy_claudia
       create_usage_plan: yes
       create_api_key: no
       tags:

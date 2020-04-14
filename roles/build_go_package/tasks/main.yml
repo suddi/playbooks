@@ -1,0 +1,26 @@
+- name: get source code
+  git:
+    repo: "{{ repo_url }}"
+    dest: "{{ work_dir }}"
+    force: yes
+    version: "{{ repo_version }}"
+
+- name: install go dependencies for build
+  command: make install
+  args:
+    chdir: "{{ work_dir }}"
+
+- name: create directory for build
+  command: make builddir
+  args:
+    chdir: "{{ work_dir }}"
+
+- name: build for deployment
+  command: make build
+  args:
+    chdir: "{{ work_dir }}"
+
+- name: zip build for deployment
+  command: make zip
+  args:
+    chdir: "{{ work_dir }}"

@@ -74,6 +74,15 @@ kobe_service_url: "{{ vault_kobe_service_url }}"
 kobe_config_microsoft_app_id: "{{ vault_kobe_config_microsoft_app_id }}"
 kobe_config_microsoft_app_password: "{{ vault_kobe_config_microsoft_app_password }}"
 
+# MemoriesBot
+memoriesbot_project_name: memoriesbot
+memoriesbot_service_prefix: "{{ memoriesbot_project_name }}-"
+memoriesbot_service_url: "{{ vault_memoriesbot_service_url }}"
+
+memoriesbot_config_telegram_api_key: "{{ vault_memoriesbot_config_telegram_api_key }}"
+
+memoriesbot_aws_lambda_role_name: "{{ vault_memoriesbot_aws_lambda_role_name }}"
+
 # CICD
 cicd_project_name: cicd
 cicd_service_prefix: "{{ cicd_project_name }}-"

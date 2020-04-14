@@ -1,123 +1,73 @@
-- name: get source code
-  git:
-    repo: "{{ repo_url }}"
-    dest: "{{ work_dir }}"
-    force: yes
-    version: "{{ repo_version }}"
-
-# - name: switch to .nvmrc node version
-#   shell: nvm use
-#   args:
-#     chdir: "{{ work_dir }}"
-#     removes: .nvmrc
-
-- name: install npm dependencies for build
-  command: npm install
-  args:
-    chdir: "{{ work_dir }}"
-
-- name: get cost of modules
-  command: node_modules/.bin/cost-of-modules
-    --no-install
-  args:
-    chdir: "{{ work_dir }}"
-  register: cost_of_modules_result
-
-- name: print cost of modules
-  debug:
-    msg: "{{ cost_of_modules_result.stdout }}"
-
 - name: get lambda function
   command: aws lambda get-function
     --profile {{ aws_profile }}
-    --function-name {{ aws_lambda_function_name }}
     --region {{ aws_region }}
+    --function-name {{ aws_lambda_function_name }}
   register: get_function_result
-  changed_when: "False"
+  changed_when: False
   failed_when: "get_function_result.stderr and
     'ResourceNotFoundException' not in get_function_result.stderr"
 
 - name: create lambda function
-  command: node_modules/.bin/claudia create
-    --name {{ aws_lambda_function_name }}
+  command: aws lambda create-function
+    --profile {{ aws_profile }}
+    --region {{ aws_region }}
+    --function-name "{{ aws_lambda_function_name }}"
     --description {{ aws_lambda_function_description }}
     --runtime {{ aws_lambda_runtime }}
     --role {{ aws_lambda_role_name }}
-    --region {{ aws_region }}
-    --api-module {{ aws_lambda_module }}
-    --config {{ aws_lambda_config_json }}
+    --handler {{ aws_lambda_handler }}
     --version {{ aws_lambda_version }}
     --timeout {{ aws_lambda_timeout }}
-    --memory {{ aws_lambda_memory }}
-    --security-group-ids {{ aws_lambda_sg_ids }}
-    --subnet-ids {{ aws_lambda_subnet_ids }}
-    --set-env {{ aws_lambda_environment_variables }}
+    --memory-size {{ aws_lambda_memory }}
+    --environment {{ aws_lambda_environment_variables }}
+    --zip-file fileb://{{ bin_file }}
   args:
     chdir: "{{ work_dir }}"
-  environment:
-    AWS_PROFILE: "{{ aws_profile }}"
   when: "get_function_result.stderr and
     'ResourceNotFoundException' in get_function_result.stderr"
 
 - name: update lambda function code
-  command: node_modules/.bin/claudia update
-    --config {{ aws_lambda_config_json }}
-    --version {{ aws_lambda_version }}
-    --set-env {{ aws_lambda_environment_variables }}
+  command: aws lambda update-function-code
+    --profile {{ aws_profile }}
+    --region {{ aws_region }}
+    --function-name "{{ aws_lambda_function_name }}"
+    --zip-file fileb://{{ bin_file }}
   args:
     chdir: "{{ work_dir }}"
-  environment:
-    AWS_PROFILE: "{{ aws_profile }}"
+  when: "get_function_result.stdout"
+
+- name: update lambda function configuration
+  command: aws lambda update-function-configuration
+    --profile {{ aws_profile }}
+    --region {{ aws_region }}
+    --function-name "{{ aws_lambda_function_name }}"
+    --description {{ aws_lambda_function_description }}
+    --runtime {{ aws_lambda_runtime }}
+    --role {{ aws_lambda_role_name }}
+    --handler {{ aws_lambda_handler }}
+    --version {{ aws_lambda_version }}
+    --timeout {{ aws_lambda_timeout }}
+    --memory-size {{ aws_lambda_memory }}
+    --environment {{ aws_lambda_environment_variables }}
+  args:
+    chdir: "{{ work_dir }}"
   when: "get_function_result.stdout"
 
 - name: get lambda function
   command: aws lambda get-function
     --profile {{ aws_profile }}
-    --function-name "{{ aws_lambda_function_name }}"
     --region {{ aws_region }}
+    --function-name "{{ aws_lambda_function_name }}"
   register: get_new_function_result
-  changed_when: "False"
+  changed_when: False
 
 - set_fact:
     aws_lambda_arn: "{{ (get_new_function_result.stdout | from_json).Configuration.FunctionArn }}"
 
 - name: tag lambda function
   command: aws lambda tag-resource
-    --resource "{{ aws_lambda_arn }}"
+    --profile {{ aws_profile }}
     --region "{{ aws_region }}"
+    --resource "{{ aws_lambda_arn }}"
     --tags service="{{ service_name }}",project="{{ project_name }}",deployment_method="{{ deployment_method }}"
-    --profile {{ aws_profile }}
-
-- name: create api gateway usage plan
-  command: aws apigateway create-usage-plan
-    --name {{ aws_lambda_usage_plan_name }}
-    --description "Usage plan for {{ aws_lambda_function_name }}:{{ aws_lambda_version }}"
-    --api-stages apiId={{ (lookup('file', aws_lambda_config_json) | from_json).api.id }},stage={{ aws_lambda_version }}
-    --throttle burstLimit={{ aws_lambda_burstlimit }},rateLimit={{ aws_lambda_ratelimit }}
-    --profile {{ aws_profile }}
-  register: api_gateway_usage_plan_result
-  when: "create_usage_plan and
-    get_function_result.stderr and
-    'ResourceNotFoundException' in get_function_result.stderr"
-
-- name: create api gateway api key
-  command: aws apigateway create-api-key
-    --name {{ aws_lambda_api_key_name }}
-    --description "API Key for {{ aws_lambda_function_name }}:{{ aws_lambda_version }}"
-    --enabled
-    --generate-distinct-id
-    --profile {{ aws_profile }}
-  register: api_gateway_api_key_result
-  when: "create_api_key and
-    get_function_result.stderr and
-    'ResourceNotFoundException' in get_function_result.stderr"
-
-- name: create api gateway usage plan key
-  command: aws apigateway create-usage-plan-key
-    --usage-plan-id {{ (api_gateway_usage_plan_result.stdout | from_json)['id'] }}
-    --key-id {{ (api_gateway_api_key_result.stdout | from_json)['id'] }}
-    --key-type "API_KEY"
-    --profile {{ aws_profile }}
-  when: "create_api_key and
-    get_function_result.stderr and
-    'ResourceNotFoundException' in get_function_result.stderr"

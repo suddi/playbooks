@@ -1,0 +1,44 @@
+- name: create apigateway
+  command: aws apigateway create-rest-api
+    --profile {{ aws_profile }}
+    --region {{ aws_region }}
+    --name {{ aws_lambda_function_name }}
+  register: create_gateway_result
+  changed_when: False
+
+- set_fact:
+    aws_apigateway_id: "{{ (create_gateway_result.stdout | from_json).id }}"
+
+- name: create api gateway usage plan
+  command: aws apigateway create-usage-plan
+    --name {{ aws_lambda_usage_plan_name }}
+    --description "Usage plan for {{ aws_lambda_function_name }}:{{ aws_lambda_version }}"
+    --api-stages apiId={{ (lookup('file', aws_lambda_config_json) | from_json).api.id }},stage={{ aws_lambda_version }}
+    --throttle burstLimit={{ aws_lambda_burstlimit }},rateLimit={{ aws_lambda_ratelimit }}
+    --profile {{ aws_profile }}
+  register: api_gateway_usage_plan_result
+  when: "create_usage_plan and
+    get_function_result.stderr and
+    'ResourceNotFoundException' in get_function_result.stderr"
+
+- name: create api gateway api key
+  command: aws apigateway create-api-key
+    --name {{ aws_lambda_api_key_name }}
+    --description "API Key for {{ aws_lambda_function_name }}:{{ aws_lambda_version }}"
+    --enabled
+    --generate-distinct-id
+    --profile {{ aws_profile }}
+  register: api_gateway_api_key_result
+  when: "create_api_key and
+    get_function_result.stderr and
+    'ResourceNotFoundException' in get_function_result.stderr"
+
+- name: create api gateway usage plan key
+  command: aws apigateway create-usage-plan-key
+    --usage-plan-id {{ (api_gateway_usage_plan_result.stdout | from_json)['id'] }}
+    --key-id {{ (api_gateway_api_key_result.stdout | from_json)['id'] }}
+    --key-type "API_KEY"
+    --profile {{ aws_profile }}
+  when: "create_api_key and
+    get_function_result.stderr and
+    'ResourceNotFoundException' in get_function_result.stderr"
