@@ -2,7 +2,8 @@
   git:
     repo: "{{ repo_url }}"
     dest: "{{ work_dir }}"
-    force: no
+    force: yes
+    update: yes
     version: "{{ repo_version }}"
   become: yes
   become_user: "{{ user }}"

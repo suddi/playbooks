@@ -18,7 +18,7 @@
   git:
       repo: "{{ dependency_pyenv_url }}"
       dest: "{{ dependency_pyenv_dir }}"
-      force: no
+      force: yes
       update: yes
       version: "{{ dependency_pyenv_version }}"
   become: yes
