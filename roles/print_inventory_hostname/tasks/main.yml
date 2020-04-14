@@ -1,0 +1,3 @@
+- name: print inventory_hostname
+  debug:
+    var: inventory_hostname
