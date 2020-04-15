@@ -1,12 +1,18 @@
+- name: get apigateway
+  command: aws apigateway get-rest-api
+    --profile {{ aws_profile }}
+    --region {{ aws_region }}
+
 - name: create apigateway
   command: aws apigateway create-rest-api
     --profile {{ aws_profile }}
     --region {{ aws_region }}
     --name {{ aws_lambda_function_name }}
   register: create_gateway_result
-  changed_when: False
+  changed_when: no
 
-- set_fact:
+- name: store apigateway id as fact
+  set_fact:
     aws_apigateway_id: "{{ (create_gateway_result.stdout | from_json).id }}"
 
 - name: create api gateway usage plan
