@@ -23,6 +23,7 @@
     - role: empty_work_dir
 
     - role: build_go_package
+      make_zip: yes
 
     - role: deploy_lambda_function
       tags:

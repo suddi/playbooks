@@ -3,6 +3,7 @@
     repo: "{{ repo_url }}"
     dest: "{{ work_dir }}"
     force: yes
+    update: yes
     version: "{{ repo_version }}"
 
 - name: install go dependencies for build
@@ -24,3 +25,4 @@
   command: make zip
   args:
     chdir: "{{ work_dir }}"
+  when: "{{ make_zip }}"
