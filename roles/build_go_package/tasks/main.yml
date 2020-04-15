@@ -1,11 +1,3 @@
-- name: get source code
-  git:
-    repo: "{{ repo_url }}"
-    dest: "{{ work_dir }}"
-    force: yes
-    update: yes
-    version: "{{ repo_version }}"
-
 - name: setup a go build
   block:
     - name: install go dependencies for build

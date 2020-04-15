@@ -22,6 +22,8 @@
   roles:
     - role: empty_work_dir
 
+    - role: get_source_code
+
     - role: build_go_package
       make_zip: yes
 
