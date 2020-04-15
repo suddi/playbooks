@@ -71,5 +71,3 @@
     - role: setup_playbooks
       tags:
         - playbooks
-
-- import_playbook: ../sensitive_files/download.yml
