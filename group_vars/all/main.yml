@@ -104,6 +104,13 @@ thinktech_industries_service_prefix: "{{ thinktech_industries_project_name }}-"
 thinktech_industries_service_url: "{{ vault_thinktech_industries_service_url }}"
 
 # ------------------------------------------------------------------------------
+# SOFTWARE RUNTIME VERSIONS
+# ------------------------------------------------------------------------------
+node_version: v12
+python_version: "3.8"
+go_version: "1.14"
+
+# ------------------------------------------------------------------------------
 # PACKAGE VERSIONS
 # ------------------------------------------------------------------------------
 # This should be kept in sync with requirements.txt
@@ -113,5 +120,4 @@ boto_version: "2.48.0"
 boto3_version: "1.4.7"
 python_dateutil_version: "2.6.1"
 pyOpenSSL_version: "17.3.0"
-
 # ------------------------------------------------------------------------------
