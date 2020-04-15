@@ -1,0 +1,25 @@
+applications_to_install:
+  - communication:
+    - skype
+    - whatsapp
+    - zoom
+  - multimedia:
+    - spotify
+    - vlc
+  - organization:
+    - microsoft_todo
+  - programming:
+    - docker
+    - postman
+    - visual_studio_code
+  - security:
+    - authy
+    - keypass
+    - macpass
+    - nordvpn
+  - storage:
+    - google_backup
+    - spideroak_one
+  - tools:
+    - clipmenu
+    - spectacle

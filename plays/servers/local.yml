@@ -1,0 +1,31 @@
+- name: setup local machine
+  hosts: local
+
+  vars:
+    user: "{{ default_user }}"
+    user_email: "{{ default_user_email }}"
+
+    python_versions:
+      - "3.8.2"
+      - "2.7.17"
+    python_default_version: "{{ python_versions[0] }}"
+
+    node_versions:
+      - "12"
+      - "10"
+      - "8"
+    node_default_version: "{{ node_versions[0] }}"
+
+    aws_profile: "{{ default_user_aws_profile }}"
+    aws_region: "{{ default_user_aws_region }}"
+    aws_access_key_id: "{{ default_user_aws_access_key_id }}"
+    aws_secret_access_key: "{{ default_user_aws_secret_access_key }}"
+
+  roles:
+    - role: install_macos_dependencies
+
+    - role: install_git
+
+    - role: install_general_dependencies
+      dependency_make_install: yes
+      dependency_zsh_install: yes

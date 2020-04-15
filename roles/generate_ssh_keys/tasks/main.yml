@@ -6,14 +6,10 @@
     ssh_key_file: "{{ ssh_directory }}/{{ ssh_key_file }}"
     ssh_key_type: rsa
     state: present
-  become: yes
-  become_user: "{{ user }}"
 
 - name: read public key file {{ ssh_pub_key_file }}
   command: cat "{{ user_home_dir }}/{{ ssh_directory }}/{{ ssh_pub_key_file }}"
   register: cat_public_key_file_result
-  become: yes
-  become_user: "{{ user }}"
   changed_when: no
 
 - name: print public key file {{ ssh_pub_key_file }}

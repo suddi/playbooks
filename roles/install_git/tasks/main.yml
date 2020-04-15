@@ -1,0 +1,16 @@
+- name: install git
+  package:
+    name: git
+    state: present
+
+- name: set git user
+  command: git config --global user.name "{{ user }}"
+
+- name: set git user email
+  command: git config --global user.email "{{ user_email }}"
+
+- name: set git editor
+  command: git config --global core.editor "nano"
+
+- name: set git push nature
+  command: git config --global push.default simple

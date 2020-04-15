@@ -15,6 +15,7 @@
     user: "{{ cicd_user }}"
     user_home_dir: "{{ cicd_user_home_dir }}"
     user_machine_name: "{{ cicd_user_machine_name }}"
+    user_email: "{{ user }}/{{ user_machine_name }}"
     user_shell: /bin/bash
     user_shell_profile_file: "{{ user_home_dir }}/.bash_profile"
     user_shell_rc_file: "{{ user_home_dir }}/.bashrc"
@@ -38,17 +39,20 @@
   roles:
     - role: print_inventory_hostname
 
-    - role: pull_latest_code
-
     - role: create_new_user
 
     - role: generate_ssh_keys
+      become: yes
+      become_user: "{{ user }}"
       tags:
         - ssh
+
+    - role: install_git
 
     - role: install_general_dependencies
       dependency_git_install: yes
       dependency_make_install: yes
+      dependency_zsh_install: no
       tags:
         - dependencies
       when: "inventory_hostname != 'localhost'"

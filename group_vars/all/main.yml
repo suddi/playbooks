@@ -34,6 +34,19 @@ deployment_user: deploy
 deployment_user_home_dir: /home/deploy
 
 # ------------------------------------------------------------------------------
+# DEFAULT USER SPECIFICS
+# ------------------------------------------------------------------------------
+default_user: "{{ vault_default_user }}"
+default_user_email: "{{ vault_default_user_email }}"
+
+# AWS
+default_user_aws_access_key_id: "{{ vault_default_user_aws_access_key_id }}"
+default_user_aws_secret_access_key: "{{ vault_default_user_aws_secret_access_key }}"
+
+default_user_aws_profile: "{{ vault_default_user_aws_profile }}"
+default_user_aws_region: "{{ vault_default_user_aws_region }}"
+
+# ------------------------------------------------------------------------------
 # CICD USER SPECIFICS
 # ------------------------------------------------------------------------------
 cicd_user: jenkins
