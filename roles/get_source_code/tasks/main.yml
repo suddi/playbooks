@@ -1,9 +1,7 @@
-- name: clone playbooks repo
+- name: get source code
   git:
     repo: "{{ repo_url }}"
     dest: "{{ work_dir }}"
     force: yes
     update: yes
     version: "{{ repo_version }}"
-  become: yes
-  become_user: "{{ user }}"
