@@ -71,4 +71,4 @@
       tags:
         - playbooks
 
-- import_playbook: sensitive_files/download.yml
+- import_playbook: ../sensitive_files/download.yml
