@@ -36,7 +36,7 @@
 - name: get nvm version
   shell: . {{ user_home_dir }}/.nvmrc && nvm --version
   register: nvm_version_result
-  changed_when: "False"
+  changed_when: no
 
 - name: print nvm version
   debug:
@@ -45,7 +45,7 @@
 - name: get npm version
   shell: . {{ user_home_dir }}/.nvmrc && npm --version
   register: npm_version_result
-  changed_when: "False"
+  changed_when: no
 
 - name: print npm version
   debug:
@@ -54,7 +54,7 @@
 - name: get node version
   shell: . {{ user_home_dir }}/.nvmrc && node --version
   register: node_version_result
-  changed_when: "False"
+  changed_when: no
 
 - name: print node version
   debug:

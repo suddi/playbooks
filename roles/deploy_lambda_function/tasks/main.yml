@@ -4,7 +4,7 @@
     --region {{ aws_region }}
     --function-name {{ aws_lambda_function_name }}
   register: get_function_result
-  changed_when: False
+  changed_when: no
   failed_when: "get_function_result.stderr and
     'ResourceNotFoundException' not in get_function_result.stderr"
 
@@ -60,9 +60,10 @@
     --region {{ aws_region }}
     --function-name "{{ aws_lambda_function_name }}"
   register: get_new_function_result
-  changed_when: False
+  changed_when: no
 
-- set_fact:
+- name: store lambda function arn as fact
+  set_fact:
     aws_lambda_arn: "{{ (get_new_function_result.stdout | from_json).Configuration.FunctionArn }}"
 
 - name: tag lambda function
