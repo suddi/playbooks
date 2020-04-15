@@ -25,7 +25,7 @@
 
     - role: empty_work_dir
 
-    - role: deploy_claudia
+    - role: deploy_claudia_app
       create_usage_plan: yes
       create_api_key: no
       tags:
