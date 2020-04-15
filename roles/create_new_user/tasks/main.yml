@@ -8,22 +8,22 @@
     name: "{{ user }}"
     state: present
 
-- name: add .bash_profile to {{ user_home_dir }}/.bash_profile
-  template:
-    src: .bash_profile
-    dest: "{{ user_home_dir }}/.bash_profile"
-    owner: "{{ user }}"
-    group: "{{ user }}"
-    mode: "0644"
-  become: yes
-  become_user: "{{ user }}"
+- name: become "{{ user }}" and complete user setup
+  block:
+    - name: add .bash_profile to {{ user_home_dir }}/.bash_profile
+      template:
+        src: .bash_profile
+        dest: "{{ user_home_dir }}/.bash_profile"
+        owner: "{{ user }}"
+        group: "{{ user }}"
+        mode: "0644"
 
-- name: add .bashrc to {{ user_home_dir }}/.bashrc
-  template:
-    src: .bashrc
-    dest: "{{ user_home_dir }}/.bashrc"
-    owner: "{{ user }}"
-    group: "{{ user }}"
-    mode: "0644"
+    - name: add .bashrc to {{ user_home_dir }}/.bashrc
+      template:
+        src: .bashrc
+        dest: "{{ user_home_dir }}/.bashrc"
+        owner: "{{ user }}"
+        group: "{{ user }}"
+        mode: "0644"
   become: yes
   become_user: "{{ user }}"

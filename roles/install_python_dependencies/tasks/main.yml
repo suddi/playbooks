@@ -62,13 +62,10 @@
   changed_when: "pyenv_install_result.stdout"
 
 - name: pyenv list python versions
-  shell: . {{ user_home_dir }}/.pyenv && pyenv versions
+  shell: . {{ user_home_dir }}/.pyenvrc && pyenv versions
   register: pyenv_versions_result
   become: yes
   become_user: "{{ user }}"
-
-- name: remove unnecessary pyenv python versions
-  command: echo "{{ pyenv_versions_result }}"
 
 - name: pyenv install virtualenvwrapper
   shell: . {{ user_home_dir }}/.pyenvrc && pyenv virtualenvwrapper

@@ -3,6 +3,7 @@
     repo: "{{ repo_url }}"
     dest: "{{ work_dir }}"
     force: yes
+    update: yes
     version: "{{ repo_version }}"
 
 # - name: switch to .nvmrc node version
