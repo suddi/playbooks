@@ -29,12 +29,21 @@ function print_node_runtime_versions() {
     nvm --version
 }
 
+function print_golang_runtime_versions() {
+    echo "golang runtime environment -----------"
+    echo "running go version"
+    go version
+}
+
 function print_runtime_versions() {
     echo
     print_python_runtime_versions
     echo
     print_node_runtime_versions
     echo
+    print_golang_runtime_versions
+    echo
+    echo "--------------------------------------"
 }
 
 function run() {
