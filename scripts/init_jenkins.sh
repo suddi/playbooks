@@ -51,6 +51,8 @@ function run() {
     . ~/.pyenvrc
     # Will initialize nvm
     . ~/.nvmrc
+    # Will initialize go
+    . /etc/profile.d/golang.sh
 
     # Pull the latest code
     cd ~/playbooks
