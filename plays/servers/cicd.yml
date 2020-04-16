@@ -68,6 +68,11 @@
         - dependencies
         - node
 
+    - role: install_golang_dependencies
+      tags:
+        - dependencies
+        - golang
+
     - role: setup_playbooks
       tags:
         - playbooks
