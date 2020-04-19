@@ -31,7 +31,7 @@ function print_node_runtime_versions() {
 
 function print_golang_runtime_versions() {
     echo "golang runtime environment -----------"
-    echo "running go version"
+    echo 'running "go version"'
     go version
 }
 

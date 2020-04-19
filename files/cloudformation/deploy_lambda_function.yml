@@ -1,0 +1,293 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+Description: CloudFormation template to deploy a Lambda function and create a respective API Gateway
+
+Parameters:
+  Project:
+    Description: Project that the resources in this CloudFormation template is for
+    Type: String
+  Service:
+    Description: Service that the resources in this CloudFormation template is for
+    Type: String
+  ServiceDescription:
+    Description: Description for the service that the resources in this Cloudformation is for
+    Type: String
+  DeployedBy:
+    Description: Deployment user/service
+    Type: String
+    Default: ansible
+
+Resources:
+# ------------------------------------------------------------------------------
+# IDENTITY ACCESS MANAGEMENT ROLES
+# ------------------------------------------------------------------------------
+  LambdaExecutorRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub
+        - "${Service}-lambda-executor"
+        - Service: !Ref Service
+      Description: !Sub
+        - "IAM role to execute ${Service} Lambda function"
+        - Service: !Ref Service
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs
+      Policies:
+        - PolicyName: LambdaExecutorRolePolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                  - s3:Get*
+                  - s3:List*
+                Resource: "*"
+                Effect: Allow
+      Tags:
+        - Key: Name
+          Value: !Sub
+            - "${Service}-lambda-executor"
+            - Service: !Ref Service
+        - Key: Project
+          Value: !Ref Project
+        - Key: Service
+          Value: !Ref Service
+        - Key: DeployedBy
+          Value: !Ref DeployedBy
+
+  ApiGatewayExecutorRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub
+        - "${Service}-apigateway-executor"
+        - Service: !Ref Service
+      Description: !Sub
+        - "IAM role to execute ${Service} API Gateway"
+        - Service: !Ref Service
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: apigateway.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs
+      Policies:
+        - PolicyName: LambdaAPIExecutorRolePolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action: lambda:InvokeFunction
+                Resource: !GetAtt
+                  - LamdbaFunction
+                  - Arn
+                Effect: Allow
+      Tags:
+        - Key: Name
+          Value: !Sub
+            - "${Service}-apigateway-executor"
+            - Service: !Ref Service
+        - Key: Project
+          Value: !Ref Project
+        - Key: Service
+          Value: !Ref Service
+        - Key: DeployedBy
+          Value: !Ref DeployedBy
+
+  CloudWatchLogsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub
+        - "${Service}-cloudwatch-logger"
+        - Service: !Ref Service
+      Description: !Sub
+        - "IAM role to log for ${Service} API Gateway"
+        - Service: !Ref Service
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+              - apigateway.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: LambdaCloudwatchLoggerPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:DescribeLogGroups
+                  - logs:DescribeLogStreams
+                  - logs:PutLogEvents
+                  - logs:GetLogEvents
+                  - logs:FilterLogEvents
+                Resource: "*"
+      Tags:
+        - Key: Name
+          Value: !Sub
+            - "${Service}-apigateway-executor"
+            - Service: !Ref Service
+        - Key: Project
+          Value: !Ref Project
+        - Key: Service
+          Value: !Ref Service
+        - Key: DeployedBy
+          Value: !Ref DeployedBy
+
+# ------------------------------------------------------------------------------
+# LAMBDA FUNCTIONS
+# ------------------------------------------------------------------------------
+  LambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Ref Service
+      Description: !Ref ServiceDescription
+      Code:
+        S3Bucket: lambda-function-bucket
+        S3Key: !Sub
+          - "${Service}.zip"
+          - Service: !Ref Service
+      Handler: main
+      Runtime: go1.x
+      MemorySize: 128
+      Role: !GetAtt
+        - LambdaExecutorRole
+        - Arn
+      Timeout: 30
+      Tags:
+        - Key: Name
+          Value: !Ref Service
+        - Key: Project
+          Value: !Ref Project
+        - Key: Service
+          Value: !Ref Service
+        - Key: DeployedBy
+          Value: !Ref DeployedBy
+
+# ------------------------------------------------------------------------------
+# API GATEWAYS
+# ------------------------------------------------------------------------------
+  ApiGateway:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: !Sub
+      - "${Service}-apigateway"
+      - Service: !Ref Service
+      Description: !Sub
+        - "API Gateway for ${Service}"
+        - Service: !Ref Service
+      ProtocolType: HTTP
+      Target: !GetAtt
+        - LamdbaFunction
+        - Arn
+      Tags:
+        - Key: Name
+          Value: !Sub
+            - "${Service}-apigateway"
+            - Service: !Ref Service
+        - Key: Project
+          Value: !Ref Project
+        - Key: Service
+          Value: !Ref Service
+        - Key: DeployedBy
+          Value: !Ref DeployedBy
+
+# ------------------------------------------------------------------------------
+# LAMBDA FUNCTION VERSIONS
+# ------------------------------------------------------------------------------
+  LambdaFunctionVersion:
+    Type: AWS::Lambda::Version
+    Properties:
+      FunctionName: !Ref LambdaFunction
+      Description: prod
+      ProvisionedConcurrencyConfig:
+        ProvisionedConcurrentExecutions: 5
+
+# ------------------------------------------------------------------------------
+# LAMBDA FUNCTION PERMISSIONS
+# ------------------------------------------------------------------------------
+  LambdaPermissions:
+    Type: AWS::Lambda::Permission
+    DependsOn:
+      - LambdaFunction
+    Properties:
+      FunctionName: !Ref LambdaFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !GetAtt
+        - ApiGateway
+        - Arn
+
+# ------------------------------------------------------------------------------
+# CLOUDWATCH LOG GROUPS
+# ------------------------------------------------------------------------------
+  CloudwatchLogGroup:
+    Type: AWS::Logs::LogGroup
+    DependsOn: LambdaFunction
+    Properties:
+      LogGroupName: !Sub
+        - "/aws/lambda/${FunctionName}"
+        - FunctionName: !Ref LambdaFunction
+      RetentionInDays: 7
+
+# ------------------------------------------------------------------------------
+# API GATEWAY DEPLOYMENTS
+# ------------------------------------------------------------------------------
+  APIGatewayDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn: ApiGateway
+    Properties:
+      ApiId: !Ref ApiGateway
+      Description: Sub
+        - "API Gateway deployment for ${Service}"
+        - Service: !Ref Service
+      StageName: prod
+
+# ------------------------------------------------------------------------------
+# API GATEWAY STAGES
+# ------------------------------------------------------------------------------
+  ApiGatewayStage:
+    Type: AWS::ApiGatewayV2::Stage
+    DependsOn: ApiGateway
+    Properties:
+      ApiId: !Ref ApiGateway
+      StageName: prod
+      Description: !Sub
+        - "API Gateway stage for ${Service}"
+        - Service: !Ref Service
+      AccessLogSettings:
+        DestinationArn: !GetAtt
+          - CloudwatchLogGroup
+          - Arn
+      AutoDeploy: false
+      DefaultRouteSettings:
+        DataTraceEnabled: true
+        DetailedMetricsEnabled: true
+        LoggingLevel: INFO
+        ThrottlingBurstLimit: 10
+        ThrottlingRateLimit: 5
+      DeploymentId: !Ref APIGatewayDeployment
+      Tags:
+        - Key: Name
+          Value: !Sub
+            - "${Service}-apigateway-stage"
+            - Service: !Ref Service
+        - Key: Project
+          Value: !Ref Project
+        - Key: Service
+          Value: !Ref Service
+        - Key: DeployedBy
+          Value: !Ref DeployedBy
+
+# ------------------------------------------------------------------------------

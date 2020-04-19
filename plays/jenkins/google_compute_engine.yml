@@ -5,7 +5,7 @@
 
   vars:
     project_name: "{{ cicd_project_name }}"
-    service_name: "{{ cicd_service_prefix }}jenkins"
+    service_name: "{{ project_name }}-jenkins"
     service_url: "{{ cicd_service_url }}"
 
     gcp_region: us-east1-d

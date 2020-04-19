@@ -4,7 +4,7 @@
 
   vars:
     project_name: "{{ kobe_project_name }}"
-    service_name: "{{ kobe_service_prefix }}heroku-app"
+    service_name: "{{ project_name }}-heroku-app"
     service_url: "{{ kobe_service_url }}"
 
     repo_name: kobebot
@@ -19,18 +19,18 @@
     node_version: v12
 
   roles:
-    - role: assert_node_version
+    - role: nodejs/assert_node_version
       expected_node_version: "{{ node_version }}"
 
-    - role: empty_work_dir
+    - role: utils/empty_work_dir
 
-    - role: deploy_heroku_app
+    - role: heroku/deploy_heroku_app
       tags:
           - heroku
 
-    - role: empty_work_dir
+    - role: utils/empty_work_dir
 
-    - role: notify_knightwatcher
+    - role: utils/notify_knightwatcher
       message_username: "{{ user }}"
       message_type: deploy
       message_link: "{{ service_url }}"

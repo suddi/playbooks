@@ -1,0 +1,4 @@
+aws_stack_tags: |
+    Key=Name,Value={{ aws_stack_name }}
+    Key=Project,Value={{ project_name }}
+    Key=Service,Value={{ service_name }}

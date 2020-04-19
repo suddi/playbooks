@@ -22,18 +22,6 @@ github_account: "{{ vault_github_account }}"
 bitbucket_account: "{{ vault_bitbucket_account }}"
 
 # ------------------------------------------------------------------------------
-# RUNTIME USER SPECIFICS
-# ------------------------------------------------------------------------------
-runtime_user: "{{ lookup('env', 'USER') }}"
-runtime_user_home_dir: "{{ lookup('env', 'HOME') }}"
-
-# ------------------------------------------------------------------------------
-# DEPLOYMENT USER SPECIFICS
-# ------------------------------------------------------------------------------
-deployment_user: deploy
-deployment_user_home_dir: /home/deploy
-
-# ------------------------------------------------------------------------------
 # DEFAULT USER SPECIFICS
 # ------------------------------------------------------------------------------
 default_user: "{{ vault_default_user }}"
@@ -45,6 +33,18 @@ default_user_aws_secret_access_key: "{{ vault_default_user_aws_secret_access_key
 
 default_user_aws_profile: "{{ vault_default_user_aws_profile }}"
 default_user_aws_region: "{{ vault_default_user_aws_region }}"
+
+# ------------------------------------------------------------------------------
+# RUNTIME USER SPECIFICS
+# ------------------------------------------------------------------------------
+runtime_user: "{{ lookup('env', 'USER') }}"
+runtime_user_home_dir: "{{ lookup('env', 'HOME') }}"
+
+# ------------------------------------------------------------------------------
+# DEPLOYMENT USER SPECIFICS
+# ------------------------------------------------------------------------------
+deployment_user: deploy
+deployment_user_home_dir: /home/deploy
 
 # ------------------------------------------------------------------------------
 # CICD USER SPECIFICS
@@ -65,13 +65,10 @@ cicd_user_npm_auth_token: "{{ vault_cicd_user_npm_auth_token }}"
 # ------------------------------------------------------------------------------
 # General
 general_project_name: suddi
-general_service_prefix: "{{ general_project_name }}-"
 general_service_url: "{{ vault_general_service_url }}"
-general_aws_profile: suddi
 
 # Knightwatcher
 knightwatcher_project_name: knightwatcher
-knightwatcher_service_prefix: "{{ knightwatcher_project_name }}-"
 knightwatcher_service_url: "{{ vault_knightwatcher_service_url }}"
 
 knightwatcher_config_aws_region: ap-northeast-1
@@ -81,7 +78,6 @@ knightwatcher_config_default_notifier: "{{ vault_knightwatcher_config_default_no
 
 # Kobe
 kobe_project_name: kobe
-kobe_service_prefix: "{{ kobe_project_name }}-"
 kobe_service_url: "{{ vault_kobe_service_url }}"
 
 kobe_config_microsoft_app_id: "{{ vault_kobe_config_microsoft_app_id }}"
@@ -89,7 +85,6 @@ kobe_config_microsoft_app_password: "{{ vault_kobe_config_microsoft_app_password
 
 # MemoriesBot
 memoriesbot_project_name: memoriesbot
-memoriesbot_service_prefix: "{{ memoriesbot_project_name }}-"
 memoriesbot_service_url: "{{ vault_memoriesbot_service_url }}"
 
 memoriesbot_config_telegram_api_key: "{{ vault_memoriesbot_config_telegram_api_key }}"
@@ -98,22 +93,18 @@ memoriesbot_aws_lambda_role_name: "{{ vault_memoriesbot_aws_lambda_role_name }}"
 
 # CICD
 cicd_project_name: cicd
-cicd_service_prefix: "{{ cicd_project_name }}-"
 cicd_service_url: "{{ vault_cicd_service_url }}"
 
 # BuildGreenr
 buildgreenr_project_name: buildgreenr
-buildgreenr_service_prefix: "{{ buildgreenr_project_name }}-"
 buildgreenr_service_url: "{{ vault_buildgreenr_service_url }}"
 
 # OnePusher
 onepusher_project_name: onepusher
-onepusher_service_prefix: "{{ onepusher_project_name }}-"
 onepusher_service_url: "{{ vault_onepusher_service_url }}"
 
 # ThinkTech Industries
 thinktech_industries_project_name: thinktech_industries
-thinktech_industries_service_prefix: "{{ thinktech_industries_project_name }}-"
 thinktech_industries_service_url: "{{ vault_thinktech_industries_service_url }}"
 
 # ------------------------------------------------------------------------------

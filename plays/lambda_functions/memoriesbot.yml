@@ -4,7 +4,7 @@
 
   vars:
     project_name: "{{ memoriesbot_project_name }}"
-    service_name: "{{ memoriesbot_service_prefix }}lambda"
+    service_name: "{{ project_name }}-lambda"
 
     repo_name: memoriesbot
     repo_url: "{{ github_account }}/{{ repo_name }}.git"

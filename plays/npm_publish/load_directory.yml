@@ -5,7 +5,7 @@
   vars:
     project_name: "{{ general_project_name }}"
     package_name: load-directory
-    service_name: "{{ general_service_prefix }}npm-{{ package_name }}"
+    service_name: "{{ project_name }}-npm-{{ package_name }}"
     service_url: https://www.npmjs.com/package/{{ package_name }}
 
     repo_name: "{{ package_name }}"
@@ -16,19 +16,19 @@
     node_version: v12
 
   roles:
-    - role: assert_node_version
+    - role: nodejs/assert_node_version
       expected_node_version: "{{ node_version }}"
 
-    - role: empty_work_dir
+    - role: utils/empty_work_dir
 
-    - role: publish_npm_package
+    - role: nodejs/publish_npm_package
       tags:
-          - publish
-          - npm
+        - publish
+        - npm
 
-    - role: empty_work_dir
+    - role: utils/empty_work_dir
 
-    - role: notify_knightwatcher
+    - role: utils/notify_knightwatcher
       message_username: "{{ deploy_user }}"
       message_type: npm-publish
       message_link: "{{ service_url }}"

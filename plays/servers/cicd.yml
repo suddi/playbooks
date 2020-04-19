@@ -4,7 +4,7 @@
 
   vars:
     project_name: "{{ cicd_project_name }}"
-    service_name: "{{ cicd_service_prefix }}cicd"
+    service_name: "{{ project_name }}-cicd"
     service_url: "{{ cicd_service_url }}"
 
     repo_name: playbooks
@@ -37,20 +37,20 @@
     aws_secret_access_key: "{{ cicd_user_aws_secret_access_key }}"
 
   roles:
-    - role: print_inventory_hostname
+    - role: utils/print_inventory_hostname
 
-    - role: create_new_user
+    - role: user/create_new_user
       when: "inventory_hostname != 'localhost'"
 
-    - role: generate_ssh_keys
+    - role: user/generate_ssh_keys
       become: yes
       become_user: "{{ user }}"
       tags:
         - ssh
 
-    - role: install_git
+    - role: git/install_git
 
-    - role: install_general_dependencies
+    - role: general/install_general_dependencies
       dependency_git_install: yes
       dependency_make_install: yes
       dependency_zsh_install: no
@@ -58,22 +58,22 @@
         - dependencies
       when: "inventory_hostname != 'localhost'"
 
-    - role: install_python_dependencies
+    - role: python/install_python_dependencies
       tags:
         - dependencies
         - python
 
-    - role: install_node_dependencies
+    - role: nodejs/install_node_dependencies
       tags:
         - dependencies
         - node
 
-    - role: install_golang_dependencies
+    - role: golang/install_golang_dependencies
       tags:
         - dependencies
         - golang
       when: "inventory_hostname != 'localhost'"
 
-    - role: setup_playbooks
+    - role: python/setup_playbooks
       tags:
         - playbooks

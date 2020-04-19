@@ -22,10 +22,10 @@
     aws_secret_access_key: "{{ default_user_aws_secret_access_key }}"
 
   roles:
-    - role: install_macos_dependencies
+    - role: general/install_macos_dependencies
 
-    - role: install_git
+    - role: git/install_git
 
-    - role: install_general_dependencies
+    - role: general/install_general_dependencies
       dependency_make_install: yes
       dependency_zsh_install: yes

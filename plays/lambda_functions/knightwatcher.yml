@@ -4,7 +4,7 @@
 
   vars:
     project_name: "{{ knightwatcher_project_name }}"
-    service_name: "{{ knightwatcher_service_prefix }}lambda"
+    service_name: "{{ project_name }}-lambda"
     service_url: "{{ knightwatcher_service_url }}"
 
     repo_name: knightwatcherbot
@@ -20,21 +20,21 @@
     aws_lambda_environment_variables: REGION={{ knightwatcher_config_aws_region }},TABLENAME={{ knightwatcher_config_tablename }},TELEGRAM_API_KEY={{ knightwatcher_config_telegram_api_key }},DEFAULT_NOTIFIER={{ knightwatcher_config_default_notifier }}
 
   roles:
-    - role: assert_node_version
+    - role: nodejs/assert_node_version
       expected_node_version: "{{ node_version }}"
 
-    - role: empty_work_dir
+    - role: utils/empty_work_dir
 
-    - role: deploy_claudia_app
+    - role: nodejs/deploy_claudia_app
       create_usage_plan: yes
       create_api_key: no
       tags:
         - lambda
         - claudia
 
-    - role: empty_work_dir
+    - role: utils/empty_work_dir
 
-    - role: notify_knightwatcher
+    - role: utils/notify_knightwatcher
       message_username: "{{ user }}"
       message_type: deploy
       message_link: "{{ service_url }}"

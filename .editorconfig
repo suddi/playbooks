@@ -12,7 +12,7 @@ indent_style = space
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-[{package.json,*.yml}]
+[{package.json,*.yml,*.yml.j2}]
 # http://www.yaml.org/spec/1.2/spec.html#id2777534
 # The indent_size for `package.json` must be 2
 # https://github.com/npm/npm/issues/4718

@@ -1,0 +1,51 @@
+- name: setup cicd server
+  hosts: local
+  gather_facts: no
+
+  vars:
+    project_name: "{{ cicd_project_name }}"
+    service_name: "{{ project_name }}"
+    service_url: "{{ cicd_service_url }}"
+
+    repo_name: playbooks
+    repo_url: "{{ github_account }}/playbooks.git"
+
+    work_dir: "{{ cicd_user_home_dir }}/playbooks"
+
+    user: "{{ cicd_user }}"
+    user_home_dir: "{{ cicd_user_home_dir }}"
+    user_machine_name: "{{ cicd_user_machine_name }}"
+    user_email: "{{ user }}/{{ user_machine_name }}"
+    user_shell: /bin/bash
+    user_shell_profile_file: "{{ user_home_dir }}/.bash_profile"
+    user_shell_rc_file: "{{ user_home_dir }}/.bashrc"
+
+    python_versions:
+      - "2.7.17"
+      - "3.8.2"
+    python_default_version: "{{ python_versions[0] }}"
+
+    node_versions:
+      - "8"
+      - "10"
+      - "12"
+    node_default_version: "{{ node_versions[1] }}"
+    npm_auth_token: "{{ cicd_user_npm_auth_token }}"
+
+    aws_profile: "{{ default_user_aws_profile }}"
+    aws_region: "{{ default_user_aws_region }}"
+    aws_access_key_id: "{{ cicd_user_aws_access_key_id }}"
+    aws_secret_access_key: "{{ cicd_user_aws_secret_access_key }}"
+
+  roles:
+    - role: aws/execute_cloudformation_stack
+      aws_stack_name: "{{ project_name }}-vpc-stack"
+      aws_stack_file_path: "{{ files_dir }}/cloudformation/create_vpc.yml"
+      aws_stack_parameters: |
+          ParameterKey=Project,ParameterValue={{ project_name }}
+          ParameterKey=Service,ParameterValue={{ project_name }}-vpc
+          ParameterKey=Region,ParameterValue={{ aws_region }}
+          ParameterKey=InternetGatewayName,ParameterValue={{ project_name }}-public-internet-gateway
+          ParameterKey=PublicVpcName,ParameterValue={{ project_name }}-public-vpc
+          ParameterKey=PrivateVpcName,ParameterValue={{ project_name }}-private-vpc
+

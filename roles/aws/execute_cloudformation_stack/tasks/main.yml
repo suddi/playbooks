@@ -1,0 +1,63 @@
+- name: check if cloudformation stack exists
+  command: aws cloudformation describe-stacks
+    --profile {{ aws_profile }}
+    --region {{ aws_region }}
+    --stack-name {{ aws_stack_name }}
+  register: describe_stack_result
+  failed_when: no
+
+- name: delete cloudformation stack
+  command: aws cloudformation delete-stack
+    --profile {{ aws_profile }}
+    --region {{ aws_region }}
+    --stack-name {{ aws_stack_name }}
+  when: "describe_stack_result.stdout and
+  'ROLLBACK_COMPLETE' in describe_stack_result.stdout"
+
+- name: wait for cloudformation stack deletion to complete
+  command: aws cloudformation wait stack-delete-complete
+    --profile {{ aws_profile }}
+    --region {{ aws_region }}
+    --stack-name {{ aws_stack_name }}
+  when: "describe_stack_result.stdout and
+    'ROLLBACK_COMPLETE' in describe_stack_result.stdout"
+
+- name: create cloudformation stack
+  command: aws cloudformation create-stack
+    --profile {{ aws_profile }}
+    --region {{ aws_region }}
+    --stack-name {{ aws_stack_name }}
+    --template-body file://{{ aws_stack_file_path }}
+    --parameters {{ aws_stack_parameters }}
+    --tags {{ aws_stack_tags }}
+  when: "describe_stack_result.stderr or
+    (describe_stack_result.stdout and
+    'ROLLBACK_COMPLETE' in describe_stack_result.stdout)"
+
+- name: wait for cloudformation stack creation to complete
+  command: aws cloudformation wait stack-create-complete
+    --profile {{ aws_profile }}
+    --region {{ aws_region }}
+    --stack-name {{ aws_stack_name }}
+  when: "describe_stack_result.stderr or
+    (describe_stack_result.stdout and
+    'ROLLBACK_COMPLETE' in describe_stack_result.stdout)"
+
+- name: update cloudformation stack
+  command: aws cloudformation update-stack
+    --profile {{ aws_profile }}
+    --region {{ aws_region }}
+    --stack-name {{ aws_stack_name }}
+    --template-body file://{{ aws_stack_file_path }}
+    --parameters {{ aws_stack_parameters }}
+    --tags {{ aws_stack_tags }}
+  when: "describe_stack_result.stdout and
+    'StackId' in describe_stack_result.stdout"
+
+- name: wait for cloudformation stack update to complete
+  command: aws cloudformation wait stack-update-complete
+    --profile {{ aws_profile }}
+    --region {{ aws_region }}
+    --stack-name {{ aws_stack_name }}
+  when: "describe_stack_result.stdout and
+    'StackId' in describe_stack_result.stdout"

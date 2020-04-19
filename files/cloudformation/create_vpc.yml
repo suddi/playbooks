@@ -1,0 +1,485 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+Description: CloudFormation template to create VPC setup
+
+Parameters:
+  Project:
+    Description: Project that the resources in this CloudFormation template is for
+    Type: String
+  Service:
+    Description: Service that the resources in this CloudFormation template is for
+    Type: String
+  DeployedBy:
+    Description: Deployment user/service
+    Type: String
+    Default: ansible
+  Region:
+    Description: AWS region
+    Type: String
+  InternetGatewayName:
+    Description: Internet Gateway name
+    Type: String
+  PublicVpcName:
+    Description: VPC name
+    Type: String
+  PrivateVpcName:
+    Description: VPC name
+    Type: String
+
+Resources:
+# ------------------------------------------------------------------------------
+# INTERNET GATEWAYS
+# ------------------------------------------------------------------------------
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Ref InternetGatewayName
+        - Key: Project
+          Value: !Ref Project
+        - Key: Service
+          Value: !Ref Service
+        - Key: DeployedBy
+          Value: !Ref DeployedBy
+
+# ------------------------------------------------------------------------------
+# VIRTUAL PRIVATE CLOUDS (VPCs)
+# ------------------------------------------------------------------------------
+  PublicVpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      # starting: 10.0.0.0
+      # ending: 10.0.15.255
+      CidrBlock: 10.0.0.0/20
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: !Ref PublicVpcName
+        - Key: Project
+          Value: !Ref Project
+        - Key: Service
+          Value: !Ref Service
+        - Key: DeployedBy
+          Value: !Ref DeployedBy
+
+  PrivateVpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      # starting: 10.0.16.0
+      # ending: 10.0.31.255
+      CidrBlock: 10.0.16.0/20
+      EnableDnsHostnames: false
+      EnableDnsSupport: false
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: !Ref PrivateVpcName
+        - Key: Project
+          Value: !Ref Project
+        - Key: Service
+          Value: !Ref Service
+        - Key: DeployedBy
+          Value: !Ref DeployedBy
+
+# ------------------------------------------------------------------------------
+# ROUTE TABLES
+# ------------------------------------------------------------------------------
+  PublicVpcRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref PublicVpc
+      Tags:
+        - Key: Name
+          Value: !Sub
+            - "${VpcName}-routetable"
+            - VpcName: !Ref PublicVpcName
+        - Key: Project
+          Value: !Ref Project
+        - Key: Service
+          Value: !Ref Service
+        - Key: DeployedBy
+          Value: !Ref DeployedBy
+
+  PrivateVpcRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref PrivateVpc
+      Tags:
+        - Key: Name
+          Value: !Sub
+            - "${VpcName}-routetable"
+            - VpcName: !Ref PrivateVpcName
+        - Key: Project
+          Value: !Ref Project
+        - Key: Service
+          Value: !Ref Service
+        - Key: DeployedBy
+          Value: !Ref DeployedBy
+
+# ------------------------------------------------------------------------------
+# SUBNETS
+# ------------------------------------------------------------------------------
+  PublicVpcSubnetA1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Sub
+        - "${Region}a"
+        - Region: !Ref Region
+      # starting: 10.0.0.0
+      # ending: 10.0.0.15
+      CidrBlock: 10.0.0.0/28
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub
+            - "${VpcName}-subnet-a1"
+            - VpcName: !Ref PublicVpcName
+        - Key: Project
+          Value: !Ref Project
+        - Key: Service
+          Value: !Ref Service
+        - Key: DeployedBy
+          Value: !Ref DeployedBy
+      VpcId: !Ref PublicVpc
+
+  PublicVpcSubnetC1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Sub
+        - "${Region}c"
+        - Region: !Ref Region
+      # starting: 10.0.0.16
+      # ending: 10.0.0.31
+      CidrBlock: 10.0.0.16/28
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub
+            - "${VpcName}-subnet-c1"
+            - VpcName: !Ref PublicVpcName
+        - Key: Project
+          Value: !Ref Project
+        - Key: Service
+          Value: !Ref Service
+        - Key: DeployedBy
+          Value: !Ref DeployedBy
+      VpcId: !Ref PublicVpc
+
+  PublicVpcSubnetD1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Sub
+        - "${Region}d"
+        - Region: !Ref Region
+      # starting: 10.0.0.32
+      # ending: 10.0.0.47
+      CidrBlock: 10.0.0.32/28
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub
+            - "${VpcName}-subnet-d1"
+            - VpcName: !Ref PublicVpcName
+        - Key: Project
+          Value: !Ref Project
+        - Key: Service
+          Value: !Ref Service
+        - Key: DeployedBy
+          Value: !Ref DeployedBy
+      VpcId: !Ref PublicVpc
+
+  PublicVpcSubnetA2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Sub
+        - "${Region}a"
+        - Region: !Ref Region
+      # starting: 10.0.0.48
+      # ending: 10.0.0.63
+      CidrBlock: 10.0.0.48/28
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub
+            - "${VpcName}-subnet-a2"
+            - VpcName: !Ref PublicVpcName
+        - Key: Project
+          Value: !Ref Project
+        - Key: Service
+          Value: !Ref Service
+        - Key: DeployedBy
+          Value: !Ref DeployedBy
+      VpcId: !Ref PublicVpc
+
+  PublicVpcSubnetC2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Sub
+        - "${Region}c"
+        - Region: !Ref Region
+      # starting: 10.0.0.64
+      # ending: 10.0.0.79
+      CidrBlock: 10.0.0.64/28
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub
+            - "${VpcName}-subnet-c2"
+            - VpcName: !Ref PublicVpcName
+        - Key: Project
+          Value: !Ref Project
+        - Key: Service
+          Value: !Ref Service
+        - Key: DeployedBy
+          Value: !Ref DeployedBy
+      VpcId: !Ref PublicVpc
+
+  PublicVpcSubnetD2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Sub
+        - "${Region}d"
+        - Region: !Ref Region
+      # starting: 10.0.0.80
+      # ending: 10.0.0.95
+      CidrBlock: 10.0.0.80/28
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub
+            - "${VpcName}-subnet-d2"
+            - VpcName: !Ref PublicVpcName
+        - Key: Project
+          Value: !Ref Project
+        - Key: Service
+          Value: !Ref Service
+        - Key: DeployedBy
+          Value: !Ref DeployedBy
+      VpcId: !Ref PublicVpc
+
+  PrivateVpcSubnetA1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Sub
+        - "${Region}a"
+        - Region: !Ref Region
+      # starting: 10.0.16.0
+      # ending: 10.0.16.15
+      CidrBlock: 10.0.16.0/28
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub
+            - "${VpcName}-subnet-a1"
+            - VpcName: !Ref PrivateVpcName
+        - Key: Project
+          Value: !Ref Project
+        - Key: Service
+          Value: !Ref Service
+        - Key: DeployedBy
+          Value: !Ref DeployedBy
+      VpcId: !Ref PrivateVpc
+
+  PrivateVpcSubnetC1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Sub
+        - "${Region}c"
+        - Region: !Ref Region
+      # starting: 10.0.16.16
+      # ending: 10.0.16.31
+      CidrBlock: 10.0.16.16/28
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub
+            - "${VpcName}-subnet-c1"
+            - VpcName: !Ref PrivateVpcName
+        - Key: Project
+          Value: !Ref Project
+        - Key: Service
+          Value: !Ref Service
+        - Key: DeployedBy
+          Value: !Ref DeployedBy
+      VpcId: !Ref PrivateVpc
+
+  PrivateVpcSubnetD1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Sub
+        - "${Region}d"
+        - Region: !Ref Region
+      # starting: 10.0.16.32
+      # ending: 10.0.16.47
+      CidrBlock: 10.0.16.32/28
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub
+            - "${VpcName}-subnet-d1"
+            - VpcName: !Ref PrivateVpcName
+        - Key: Project
+          Value: !Ref Project
+        - Key: Service
+          Value: !Ref Service
+        - Key: DeployedBy
+          Value: !Ref DeployedBy
+      VpcId: !Ref PrivateVpc
+
+  PrivateVpcSubnetA2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Sub
+        - "${Region}a"
+        - Region: !Ref Region
+      # starting: 10.0.16.48
+      # ending: 10.0.16.63
+      CidrBlock: 10.0.16.48/28
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub
+            - "${VpcName}-subnet-a2"
+            - VpcName: !Ref PrivateVpcName
+        - Key: Project
+          Value: !Ref Project
+        - Key: Service
+          Value: !Ref Service
+        - Key: DeployedBy
+          Value: !Ref DeployedBy
+      VpcId: !Ref PrivateVpc
+
+  PrivateVpcSubnetC2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Sub
+        - "${Region}c"
+        - Region: !Ref Region
+      # starting: 10.0.16.64
+      # ending: 10.0.16.79
+      CidrBlock: 10.0.16.64/28
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub
+            - "${VpcName}-subnet-c2"
+            - VpcName: !Ref PrivateVpcName
+        - Key: Project
+          Value: !Ref Project
+        - Key: Service
+          Value: !Ref Service
+        - Key: DeployedBy
+          Value: !Ref DeployedBy
+      VpcId: !Ref PrivateVpc
+
+  PrivateVpcSubnetD2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Sub
+        - "${Region}d"
+        - Region: !Ref Region
+      # starting: 10.0.16.80
+      # ending: 10.0.16.95
+      CidrBlock: 10.0.16.80/28
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub
+            - "${VpcName}-subnet-d2"
+            - VpcName: !Ref PrivateVpcName
+        - Key: Project
+          Value: !Ref Project
+        - Key: Service
+          Value: !Ref Service
+        - Key: DeployedBy
+          Value: !Ref DeployedBy
+      VpcId: !Ref PrivateVpc
+
+# ------------------------------------------------------------------------------
+# VPC ATTACHMENTS
+# ------------------------------------------------------------------------------
+  PublicVpcAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref PublicVpc
+
+# ------------------------------------------------------------------------------
+# ROUTE TABLE ASSOCIATIONS
+# ------------------------------------------------------------------------------
+  PublicVpcSubnetA1RouteTableAssociationSub:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicVpcSubnetA1
+      RouteTableId: !Ref PublicVpcRouteTable
+
+  PublicVpcSubnetC1RouteTableAssociationSub:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicVpcSubnetC1
+      RouteTableId: !Ref PublicVpcRouteTable
+
+  PublicVpcSubnetD1RouteTableAssociationSub:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicVpcSubnetD1
+      RouteTableId: !Ref PublicVpcRouteTable
+
+  PublicVpcSubnetA2RouteTableAssociationSub:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicVpcSubnetA2
+      RouteTableId: !Ref PublicVpcRouteTable
+
+  PublicVpcSubnetC2RouteTableAssociationSub:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicVpcSubnetC2
+      RouteTableId: !Ref PublicVpcRouteTable
+
+  PublicVpcSubnetD2RouteTableAssociationSub:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicVpcSubnetD2
+      RouteTableId: !Ref PublicVpcRouteTable
+
+  PrivateVpcSubnetA1RouteTableAssociationSub:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateVpcSubnetA1
+      RouteTableId: !Ref PrivateVpcRouteTable
+
+  PrivateVpcSubnetC1RouteTableAssociationSub:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateVpcSubnetC1
+      RouteTableId: !Ref PrivateVpcRouteTable
+
+  PrivateVpcSubnetD1RouteTableAssociationSub:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateVpcSubnetD1
+      RouteTableId: !Ref PrivateVpcRouteTable
+
+  PrivateVpcSubnetA2RouteTableAssociationSub:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateVpcSubnetA2
+      RouteTableId: !Ref PrivateVpcRouteTable
+
+  PrivateVpcSubnetC2RouteTableAssociationSub:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateVpcSubnetC2
+      RouteTableId: !Ref PrivateVpcRouteTable
+
+  PrivateVpcSubnetD2RouteTableAssociationSub:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateVpcSubnetD2
+      RouteTableId: !Ref PrivateVpcRouteTable
+
+# ------------------------------------------------------------------------------
