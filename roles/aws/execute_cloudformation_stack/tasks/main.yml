@@ -4,7 +4,7 @@
     --region {{ aws_region }}
     --stack-name {{ aws_stack_name }}
   register: describe_stack_result
-  failed_when: no
+  ignore_errors: yes
 
 - name: delete cloudformation stack
   command: aws cloudformation delete-stack
@@ -51,8 +51,13 @@
     --template-body file://{{ aws_stack_file_path }}
     --parameters {{ aws_stack_parameters }}
     --tags {{ aws_stack_tags }}
+  register: update_stack_result
   when: "describe_stack_result.stdout and
     'StackId' in describe_stack_result.stdout"
+  failed_when:
+    - "update_stack_result.rc != 0"
+    - "update_stack_result.stderr and
+      'No updates are to be performed.' not in update_stack_result.stderr"
 
 - name: wait for cloudformation stack update to complete
   command: aws cloudformation wait stack-update-complete
