@@ -1,0 +1,11 @@
+- name: list hosted zones in route 53
+  command: aws route53 list-hosted-zones
+    --profile {{ aws_profile }}
+    --region {{ aws_region }}
+  register: list_hosted_zones_result
+
+- name: retrieve hosted zone id for hosted zone "{{ hosted_zone }}"
+  set_fact:
+    hosted_zone_id: "{{ list_hosted_zones_result.stdout | from_json | json_query(query) | join() | regex_replace('^\/hostedzone\/') }}"
+  vars:
+    query: "HostedZones[?Name=='{{ hosted_zone }}.'].Id"

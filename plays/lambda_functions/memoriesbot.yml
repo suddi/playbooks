@@ -12,28 +12,28 @@
 
     user: "{{ runtime_user }}"
 
-    aws_profile: "{{ general_aws_profile }}"
-    aws_region: ap-northeast-1
+    aws_profile: "{{ default_user_aws_profile }}"
+    aws_region: "{{ default_user_aws_region }}"
     aws_lambda_function_description: "Revisit memories and get reminded everyday via Telegram"
     aws_lambda_runtime: go1.x
     aws_lambda_role_name: "{{ memoriesbot_aws_lambda_role_name }}"
     aws_lambda_environment_variables: TELEGRAM_API_KEY={{ memoriesbot_config_telegram_api_key }}
 
   roles:
-    - role: empty_work_dir
+    - role: utils/empty_work_dir
 
-    - role: get_source_code
+    - role: git/get_source_code
 
-    - role: build_go_package
+    - role: golang/build_go_package
       make_zip: yes
 
-    - role: deploy_lambda_function
+    - role: aws/deploy_lambda_function
       tags:
         - lambda
 
-    - role: empty_work_dir
+    - role: utils/empty_work_dir
 
-    - role: notify_knightwatcher
+    - role: utils/notify_knightwatcher
       message_username: "{{ user }}"
       message_type: deploy
       message_link: "{{ service_url }}"

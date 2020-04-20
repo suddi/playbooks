@@ -1,0 +1,46 @@
+- name: create route for sites in suddi.io
+  hosts: local
+  gather_facts: no
+
+  vars:
+    project_name: "{{ general_project_name }}-io"
+
+    aws_profile: "{{ default_user_aws_profile }}"
+    aws_region: "{{ default_user_aws_region }}"
+
+  roles:
+    - role: aws/execute_cloudformation_stack
+      aws_stack_name: linkedin-{{ project_name }}-bucket-stack
+      aws_stack_file_path: "{{ files_dir }}/cloudformation/create_s3_bucket_redirection.yml"
+      aws_stack_parameters: |
+          ParameterKey=Project,ParameterValue={{ project_name }}
+          ParameterKey=Service,ParameterValue={{ linkedin_domain }}
+          ParameterKey=RouteUrl,ParameterValue={{ linkedin_url }}
+      service_name: linkedin-{{ project_name }}
+
+    - role: aws/execute_cloudformation_stack
+      aws_stack_name: github-{{ project_name }}-bucket-stack
+      aws_stack_file_path: "{{ files_dir }}/cloudformation/create_s3_bucket_redirection.yml"
+      aws_stack_parameters: |
+          ParameterKey=Project,ParameterValue={{ project_name }}
+          ParameterKey=Service,ParameterValue={{ github_domain }}
+          ParameterKey=RouteUrl,ParameterValue={{ github_url }}
+      service_name: linkedin-{{ project_name }}
+
+    - role: aws/execute_cloudformation_stack
+      aws_stack_name: linkedin-{{ project_name }}-route53-recordset-stack
+      aws_stack_file_path: "{{ files_dir }}/cloudformation/create_s3_website_route53_recordset.yml"
+      aws_stack_parameters: |
+          ParameterKey=Project,ParameterValue={{ project_name }}
+          ParameterKey=Service,ParameterValue={{ linkedin_domain }}
+          ParameterKey=HostedZone,ParameterValue={{ general_domain }}.
+      service_name: linkedin-{{ project_name }}
+
+    - role: aws/execute_cloudformation_stack
+      aws_stack_name: github-{{ project_name }}-route53-recordset-stack
+      aws_stack_file_path: "{{ files_dir }}/cloudformation/create_s3_website_route53_recordset.yml"
+      aws_stack_parameters: |
+          ParameterKey=Project,ParameterValue={{ project_name }}
+          ParameterKey=Service,ParameterValue={{ github_domain }}
+          ParameterKey=HostedZone,ParameterValue={{ general_domain }}.
+      service_name: linkedin-{{ project_name }}

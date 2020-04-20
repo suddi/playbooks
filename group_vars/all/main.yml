@@ -6,6 +6,9 @@ sensitive_files:
   - group_vars/all/vault.encrypted.yml
   - inventory.ini
 
+github_url: "{{ vault_github_url }}"
+linkedin_url: "{{ vault_linkedin_url }}"
+
 # ------------------------------------------------------------------------------
 # DIRECTORIES
 # ------------------------------------------------------------------------------
@@ -59,6 +62,14 @@ cicd_user_aws_secret_access_key: "{{ vault_cicd_user_aws_secret_access_key }}"
 
 # NPM
 cicd_user_npm_auth_token: "{{ vault_cicd_user_npm_auth_token }}"
+
+# ------------------------------------------------------------------------------
+# DOMAINS
+# ------------------------------------------------------------------------------
+general_domain: "{{ vault_general_domain }}"
+github_domain: "{{ vault_github_domain }}"
+lambda_domain: "{{ vault_lambda_domain }}"
+linkedin_domain: "{{ vault_linkedin_domain }}"
 
 # ------------------------------------------------------------------------------
 # PROJECTS

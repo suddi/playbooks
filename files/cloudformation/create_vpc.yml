@@ -13,9 +13,6 @@ Parameters:
     Description: Deployment user/service
     Type: String
     Default: ansible
-  Region:
-    Description: AWS region
-    Type: String
   InternetGatewayName:
     Description: Internet Gateway name
     Type: String
@@ -125,9 +122,7 @@ Resources:
   PublicVpcSubnetA1:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: !Sub
-        - "${Region}a"
-        - Region: !Ref Region
+      AvailabilityZone: "${AWS::Region}a"
       # starting: 10.0.0.0
       # ending: 10.0.0.15
       CidrBlock: 10.0.0.0/28
@@ -148,9 +143,7 @@ Resources:
   PublicVpcSubnetC1:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: !Sub
-        - "${Region}c"
-        - Region: !Ref Region
+      AvailabilityZone: "${AWS::Region}c"
       # starting: 10.0.0.16
       # ending: 10.0.0.31
       CidrBlock: 10.0.0.16/28
@@ -171,9 +164,7 @@ Resources:
   PublicVpcSubnetD1:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: !Sub
-        - "${Region}d"
-        - Region: !Ref Region
+      AvailabilityZone: "${AWS::Region}d"
       # starting: 10.0.0.32
       # ending: 10.0.0.47
       CidrBlock: 10.0.0.32/28
@@ -194,9 +185,7 @@ Resources:
   PublicVpcSubnetA2:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: !Sub
-        - "${Region}a"
-        - Region: !Ref Region
+      AvailabilityZone: "${AWS::Region}a"
       # starting: 10.0.0.48
       # ending: 10.0.0.63
       CidrBlock: 10.0.0.48/28
@@ -217,9 +206,7 @@ Resources:
   PublicVpcSubnetC2:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: !Sub
-        - "${Region}c"
-        - Region: !Ref Region
+      AvailabilityZone: "${AWS::Region}c"
       # starting: 10.0.0.64
       # ending: 10.0.0.79
       CidrBlock: 10.0.0.64/28
@@ -240,9 +227,7 @@ Resources:
   PublicVpcSubnetD2:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: !Sub
-        - "${Region}d"
-        - Region: !Ref Region
+      AvailabilityZone: "${AWS::Region}d"
       # starting: 10.0.0.80
       # ending: 10.0.0.95
       CidrBlock: 10.0.0.80/28
@@ -263,9 +248,7 @@ Resources:
   PrivateVpcSubnetA1:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: !Sub
-        - "${Region}a"
-        - Region: !Ref Region
+      AvailabilityZone: "${AWS::Region}a"
       # starting: 10.0.16.0
       # ending: 10.0.16.15
       CidrBlock: 10.0.16.0/28
@@ -286,9 +269,7 @@ Resources:
   PrivateVpcSubnetC1:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: !Sub
-        - "${Region}c"
-        - Region: !Ref Region
+      AvailabilityZone: "${AWS::Region}c"
       # starting: 10.0.16.16
       # ending: 10.0.16.31
       CidrBlock: 10.0.16.16/28
@@ -309,9 +290,7 @@ Resources:
   PrivateVpcSubnetD1:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: !Sub
-        - "${Region}d"
-        - Region: !Ref Region
+      AvailabilityZone: "${AWS::Region}d"
       # starting: 10.0.16.32
       # ending: 10.0.16.47
       CidrBlock: 10.0.16.32/28
@@ -332,9 +311,7 @@ Resources:
   PrivateVpcSubnetA2:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: !Sub
-        - "${Region}a"
-        - Region: !Ref Region
+      AvailabilityZone: "${AWS::Region}a"
       # starting: 10.0.16.48
       # ending: 10.0.16.63
       CidrBlock: 10.0.16.48/28
@@ -355,9 +332,7 @@ Resources:
   PrivateVpcSubnetC2:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: !Sub
-        - "${Region}c"
-        - Region: !Ref Region
+      AvailabilityZone: "${AWS::Region}c"
       # starting: 10.0.16.64
       # ending: 10.0.16.79
       CidrBlock: 10.0.16.64/28
@@ -378,9 +353,7 @@ Resources:
   PrivateVpcSubnetD2:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: !Sub
-        - "${Region}d"
-        - Region: !Ref Region
+      AvailabilityZone: "${AWS::Region}d"
       # starting: 10.0.16.80
       # ending: 10.0.16.95
       CidrBlock: 10.0.16.80/28

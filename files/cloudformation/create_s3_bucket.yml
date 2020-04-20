@@ -1,0 +1,41 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+Description: CloudFormation template to create a S3 bucket
+
+Parameters:
+  Project:
+    Description: Project that the resources in this CloudFormation template is for
+    Type: String
+  Service:
+    Description: Service that the resources in this CloudFormation template is for
+    Type: String
+  DeployedBy:
+    Description: Deployment user/service
+    Type: String
+    Default: ansible
+
+Resources:
+# ------------------------------------------------------------------------------
+# S3 BUCKET
+# ------------------------------------------------------------------------------
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: Private
+      BucketName: !Ref Service
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: Name
+          Value: !Ref Service
+        - Key: Project
+          Value: !Ref Project
+        - Key: Service
+          Value: !Ref Service
+        - Key: DeployedBy
+          Value: !Ref DeployedBy
+
+# ------------------------------------------------------------------------------

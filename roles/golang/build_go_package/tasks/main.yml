@@ -1,17 +1,20 @@
-- name: setup a go build
-  block:
-    - name: install go dependencies for build
-      command: make install
-
-    - name: create directory for build
-      command: make builddir
-
-    - name: build for deployment
-      command: make build
-
-    - name: zip build for deployment
-      command: make zip
-      when: "{{ make_zip }}"
-
+- name: install go dependencies for build
+  command: make install
   args:
     chdir: "{{ work_dir }}"
+
+- name: create directory for build
+  command: make builddir
+  args:
+    chdir: "{{ work_dir }}"
+
+- name: build for deployment
+  command: make build
+  args:
+    chdir: "{{ work_dir }}"
+
+- name: zip build for deployment
+  command: make zip
+  args:
+    chdir: "{{ work_dir }}"
+  when: "{{ make_zip }}"
