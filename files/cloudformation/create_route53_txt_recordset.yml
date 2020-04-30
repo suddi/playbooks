@@ -1,0 +1,32 @@
+---
+  AWSTemplateFormatVersion: "2010-09-09"
+  Description: CloudFormation template to create a Route 53 recordset for a S3 website
+
+  Parameters:
+    Project:
+      Description: Project that the resources in this CloudFormation template is for
+      Type: String
+    Service:
+      Description: Service that the resources in this CloudFormation template is for
+      Type: String
+    DeployedBy:
+      Description: Deployment user/service
+      Type: String
+      Default: ansible
+    HostedZone:
+      Description: Name of the hosted zone in Route 53
+      Type: String
+
+  Resources:
+  # ------------------------------------------------------------------------------
+  # ROUTE 53 RECORDSET
+  # ------------------------------------------------------------------------------
+    Route53RecordSet:
+      Type: AWS::Route53::RecordSet
+      Properties:
+        HostedZoneName: !Ref HostedZone
+        Name: !Ref Service
+        ResourceRecords:
+          - '"v=DMARC1; p=quarantine; rua=mailto:admin@suddi.io"'
+        TTL: "300"
+        Type: TXT

@@ -66,10 +66,10 @@ cicd_user_npm_auth_token: "{{ vault_cicd_user_npm_auth_token }}"
 # ------------------------------------------------------------------------------
 # DOMAINS
 # ------------------------------------------------------------------------------
-general_domain: "{{ vault_general_domain }}"
 github_domain: "{{ vault_github_domain }}"
 lambda_domain: "{{ vault_lambda_domain }}"
 linkedin_domain: "{{ vault_linkedin_domain }}"
+vault_domain: "{{ vault_vault_domain }}"
 
 # ------------------------------------------------------------------------------
 # PROJECTS
@@ -77,6 +77,7 @@ linkedin_domain: "{{ vault_linkedin_domain }}"
 # General
 general_project_name: suddi
 general_service_url: "{{ vault_general_service_url }}"
+general_domain: "{{ vault_general_domain }}"
 
 # Knightwatcher
 knightwatcher_project_name: knightwatcher
@@ -115,8 +116,8 @@ onepusher_project_name: onepusher
 onepusher_service_url: "{{ vault_onepusher_service_url }}"
 
 # ThinkTech Industries
-thinktech_industries_project_name: thinktech_industries
-thinktech_industries_service_url: "{{ vault_thinktech_industries_service_url }}"
+thinktechindustries_project_name: thinktechindustries
+thinktechindustries_domain: "{{ vault_thinktechindustries_domain }}"
 
 # ------------------------------------------------------------------------------
 # SOFTWARE RUNTIME VERSIONS

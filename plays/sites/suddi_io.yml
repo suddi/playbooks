@@ -1,4 +1,4 @@
-- name: create route for sites in suddi.io
+- name: provision resources for sites under suddi.io
   hosts: local
   gather_facts: no
 
@@ -28,6 +28,14 @@
       service_name: linkedin-{{ project_name }}
 
     - role: aws/execute_cloudformation_stack
+      aws_stack_name: vault-{{ project_name }}-bucket-stack
+      aws_stack_file_path: "{{ files_dir }}/cloudformation/create_s3_bucket.yml"
+      aws_stack_parameters: |
+          ParameterKey=Project,ParameterValue={{ project_name }}
+          ParameterKey=Service,ParameterValue={{ vault_domain }}
+      service_name: vault-{{ project_name }}
+
+    - role: aws/execute_cloudformation_stack
       aws_stack_name: linkedin-{{ project_name }}-route53-recordset-stack
       aws_stack_file_path: "{{ files_dir }}/cloudformation/create_s3_website_route53_recordset.yml"
       aws_stack_parameters: |
@@ -44,3 +52,12 @@
           ParameterKey=Service,ParameterValue={{ github_domain }}
           ParameterKey=HostedZone,ParameterValue={{ general_domain }}.
       service_name: linkedin-{{ project_name }}
+
+    - role: aws/execute_cloudformation_stack
+      aws_stack_name: dmarc-route53-recordset-stack
+      aws_stack_file_path: "{{ files_dir }}/cloudformation/create_route53_txt_recordset.yml"
+      aws_stack_parameters: |
+          ParameterKey=Project,ParameterValue={{ project_name }}
+          ParameterKey=Service,ParameterValue=_dmarc.{{ general_domain }}
+          ParameterKey=HostedZone,ParameterValue={{ general_domain }}.
+      service_name: "{{ project_name }}"
