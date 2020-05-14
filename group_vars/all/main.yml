@@ -79,6 +79,8 @@ general_project_name: suddi
 general_service_url: "{{ vault_general_service_url }}"
 general_domain: "{{ vault_general_domain }}"
 
+general_aws_profile: suddi
+
 # Knightwatcher
 knightwatcher_project_name: knightwatcher
 knightwatcher_service_url: "{{ vault_knightwatcher_service_url }}"
