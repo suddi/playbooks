@@ -27,9 +27,13 @@
   },
   "scripts": {
     "coverage": "nyc mocha",
+    "decrypt": "ansible-vault decrypt group_vars/all/vault.encrypted.yml",
+    "download": "ansible-playbook plays/sensitive_files/download.yml && npm run decrypt",
+    "encrypt": "ansible-vault encrypt group_vars/all/vault.encrypted.yml",
     "lint": "eslint .",
     "security-check": "npm audit --audit-level high || true",
-    "test": "npm run lint && npm run security-check && npm run coverage"
+    "test": "npm run lint && npm run security-check && npm run coverage",
+    "upload": "npm run encrypt && ansible-playbook plays/sensitive_files/upload.yml"
   },
   "dependencies": {
     "axios": "^0.19.2",

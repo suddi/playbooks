@@ -1,5 +1,5 @@
 - name: get apigateway
-  command: aws apigateway get-rest-api
+  command: aws apigateway get-rest-apis
     --profile {{ aws_profile }}
     --region {{ aws_region }}
 

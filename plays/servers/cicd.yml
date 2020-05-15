@@ -32,7 +32,6 @@
     node_default_version: "{{ node_versions[1] }}"
     npm_auth_token: "{{ cicd_user_npm_auth_token }}"
 
-    aws_profile: "{{ general_aws_profile }}"
     aws_access_key_id: "{{ cicd_user_aws_access_key_id }}"
     aws_secret_access_key: "{{ cicd_user_aws_secret_access_key }}"
 

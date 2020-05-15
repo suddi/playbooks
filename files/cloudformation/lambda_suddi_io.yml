@@ -1,6 +1,6 @@
 ---
 AWSTemplateFormatVersion: "2010-09-09"
-Description: CloudFormation template to create a S3 bucket
+Description: CloudFormation template to create resources for lambda.suddi.io
 
 Parameters:
   Project:

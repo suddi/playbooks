@@ -1,6 +1,6 @@
 ---
   AWSTemplateFormatVersion: "2010-09-09"
-  Description: CloudFormation template to create a Route 53 recordset for a S3 website
+  Description: CloudFormation template to create resources for suddi.io
 
   Parameters:
     Project:
@@ -25,8 +25,12 @@
       Type: AWS::Route53::RecordSet
       Properties:
         HostedZoneName: !Ref HostedZone
-        Name: !Ref Service
+        Name: !Sub
+          - "_dmarc.${Domain}"
+          - Domain: !Ref Service
         ResourceRecords:
           - '"v=DMARC1; p=quarantine; rua=mailto:admin@suddi.io"'
         TTL: "300"
         Type: TXT
+
+# ------------------------------------------------------------------------------

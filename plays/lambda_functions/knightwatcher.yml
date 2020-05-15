@@ -14,8 +14,6 @@
 
     node_version: v12
 
-    aws_profile: "{{ general_aws_profile }}"
-    aws_region: ap-northeast-1
     aws_lambda_runtime: nodejs12.x
     aws_lambda_environment_variables: REGION={{ knightwatcher_config_aws_region }},TABLENAME={{ knightwatcher_config_tablename }},TELEGRAM_API_KEY={{ knightwatcher_config_telegram_api_key }},DEFAULT_NOTIFIER={{ knightwatcher_config_default_notifier }}
 

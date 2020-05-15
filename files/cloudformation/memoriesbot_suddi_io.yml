@@ -9,13 +9,13 @@ Parameters:
   Service:
     Description: Service that the resources in this CloudFormation template is for
     Type: String
-  ServiceDescription:
-    Description: Description for the service that the resources in this Cloudformation is for
-    Type: String
   DeployedBy:
     Description: Deployment user/service
     Type: String
     Default: ansible
+  LambdaFunctionsBucket:
+    Description: Lambda functions bucket to retrieve build from
+    Type: String
 
 Resources:
 # ------------------------------------------------------------------------------
@@ -86,7 +86,7 @@ Resources:
             Statement:
               - Action: lambda:InvokeFunction
                 Resource: !GetAtt
-                  - LamdbaFunction
+                  - LambdaFunction
                   - Arn
                 Effect: Allow
       Tags:
@@ -152,9 +152,9 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: !Ref Service
-      Description: !Ref ServiceDescription
+      Description: Revisit memories and get reminded everyday via Telegram
       Code:
-        S3Bucket: lambda-function-bucket
+        S3Bucket: !Ref LambdaFunctionsBucket
         S3Key: !Sub
           - "${Service}.zip"
           - Service: !Ref Service
@@ -189,7 +189,7 @@ Resources:
         - Service: !Ref Service
       ProtocolType: HTTP
       Target: !GetAtt
-        - LamdbaFunction
+        - LambdaFunction
         - Arn
       Tags:
         - Key: Name
@@ -249,7 +249,7 @@ Resources:
     DependsOn: ApiGateway
     Properties:
       ApiId: !Ref ApiGateway
-      Description: Sub
+      Description: !Sub
         - "API Gateway deployment for ${Service}"
         - Service: !Ref Service
       StageName: prod

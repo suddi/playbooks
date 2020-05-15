@@ -17,4 +17,4 @@
   command: make zip
   args:
     chdir: "{{ work_dir }}"
-  when: "{{ make_zip }}"
+  when: make_zip

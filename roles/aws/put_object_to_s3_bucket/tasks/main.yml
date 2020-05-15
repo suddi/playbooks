@@ -1,0 +1,16 @@
+- name: check if {{ aws_s3_bucket_name }} s3 bucket exists
+  command: aws s3api head-bucket
+    --profile {{ aws_profile }}
+    --region {{ aws_region }}
+    --bucket {{ aws_s3_bucket_name }}
+
+- name: put objects to {{ aws_s3_bucket_name }} s3 bucket
+  command: aws s3api put-object
+    --profile {{ aws_profile }}
+    --region {{ aws_region }}
+    --bucket {{ aws_s3_bucket_name }}
+    --acl {{ aws_s3_acl }}
+    --body {{ upload_root_dir }}/{{ item }}
+    --key {{ item }}
+    --tagging project={{ project_name }}&service={{ service_name }}&deployment_method={{ deployment_method }}
+  with_items: "{{ files }}"

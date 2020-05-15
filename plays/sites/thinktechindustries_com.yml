@@ -5,14 +5,11 @@
   vars:
     project_name: "{{ thinktechindustries_project_name }}-com"
 
-    aws_profile: "{{ default_user_aws_profile }}"
-    aws_region: "{{ default_user_aws_region }}"
-
   roles:
     - role: aws/execute_cloudformation_stack
-      aws_stack_name: "{{ project_name }}-bucket-stack"
-      aws_stack_file_path: "{{ files_dir }}/cloudformation/create_s3_bucket.yml"
+      aws_stack_name: "{{ project_name }}-stack"
+      aws_stack_file_path: "{{ files_dir }}/cloudformation/thinktechindustries_com.yml"
       aws_stack_parameters: |
           ParameterKey=Project,ParameterValue={{ project_name }}
           ParameterKey=Service,ParameterValue={{ thinktechindustries_domain }}
-      service_name: linkedin-{{ project_name }}
+      service_name: "{{ project_name }}"

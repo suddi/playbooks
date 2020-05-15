@@ -1,6 +1,6 @@
 ---
 AWSTemplateFormatVersion: "2010-09-09"
-Description: CloudFormation template to create a Route 53 recordset for a S3 website
+Description: CloudFormation template to create resources for linkedin.suddi.io
 
 Parameters:
   Project:
@@ -13,6 +13,9 @@ Parameters:
     Description: Deployment user/service
     Type: String
     Default: ansible
+  RouteUrl:
+    Description: URL to redirect requests to
+    Type: String
   HostedZone:
     Description: Name of the hosted zone in Route 53
     Type: String
@@ -102,10 +105,38 @@ Mappings:
 
 Resources:
 # ------------------------------------------------------------------------------
+# S3 BUCKET
+# ------------------------------------------------------------------------------
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: Private
+      BucketName: !Ref Service
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      WebsiteConfiguration:
+        RedirectAllRequestsTo:
+          HostName: !Ref RouteUrl
+          Protocol: https
+      Tags:
+        - Key: Name
+          Value: !Ref Service
+        - Key: Project
+          Value: !Ref Project
+        - Key: Service
+          Value: !Ref Service
+        - Key: DeployedBy
+          Value: !Ref DeployedBy
+
+# ------------------------------------------------------------------------------
 # ROUTE 53 RECORDSET
 # ------------------------------------------------------------------------------
   Route53RecordSet:
     Type: AWS::Route53::RecordSet
+    DependsOn: S3Bucket
     Properties:
       HostedZoneName: !Ref HostedZone
       Name: !Ref Service
@@ -119,3 +150,5 @@ Resources:
           - !Ref AWS::Region
           - HostedZoneId
       Type: A
+
+# ------------------------------------------------------------------------------
