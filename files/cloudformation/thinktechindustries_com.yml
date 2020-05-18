@@ -39,3 +39,24 @@ Resources:
           Value: !Ref DeployedBy
 
 # ------------------------------------------------------------------------------
+# CLOUDFRONT
+# ------------------------------------------------------------------------------
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    DependsOn: S3Bucket
+    Properties:
+
+      Tags:
+        - Key: Name
+          Value: !Sub
+            - "${Service}-cloudfront-distribution"
+            - Service: !Ref Service
+        - Key: Project
+          Value: !Ref Project
+        - Key: Service
+          Value: !Ref Service
+        - Key: DeployedBy
+          Value: !Ref DeployedBy
+
+
+# ------------------------------------------------------------------------------

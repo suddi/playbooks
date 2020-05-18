@@ -31,7 +31,7 @@
 
     - role: aws/put_object_to_s3_bucket
       files:
-        - memoriesbot
+        - memoriesbot.zip
 
     - role: utils/empty_work_dir
 
@@ -42,7 +42,7 @@
           ParameterKey=Project,ParameterValue={{ project_name }}
           ParameterKey=Service,ParameterValue={{ service_name }}
           ParameterKey=LambdaFunctionsBucket,ParameterValue={{ lambda_domain }}
-      service_name: lambda-{{ project_name }}
+      aws_stack_capabilities: CAPABILITY_NAMED_IAM
 
     - role: utils/notify_knightwatcher
       message_username: "{{ user }}"

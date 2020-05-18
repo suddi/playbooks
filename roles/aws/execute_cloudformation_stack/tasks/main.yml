@@ -30,6 +30,9 @@
     --stack-name {{ aws_stack_name }}
     --template-body file://{{ aws_stack_file_path }}
     --parameters {{ aws_stack_parameters }}
+    {% if aws_stack_capabilities | bool %}
+      --capabilities {{ aws_stack_capabilities }}
+    {% endif %}
     --tags {{ aws_stack_tags }}
   when: "describe_stack_result.stderr or
     (describe_stack_result.stdout and
@@ -51,6 +54,9 @@
     --stack-name {{ aws_stack_name }}
     --template-body file://{{ aws_stack_file_path }}
     --parameters {{ aws_stack_parameters }}
+    {% if aws_stack_capabilities | bool %}
+      --capabilities {{ aws_stack_capabilities }}
+    {% endif %}
     --tags {{ aws_stack_tags }}
   register: update_stack_result
   when: "describe_stack_result.stdout and

@@ -4,6 +4,15 @@
 
   vars:
     project_name: "{{ thinktechindustries_project_name }}-com"
+    service_name: "{{ project_name }}"
+    service_url: "{{ thinktechindustries_service_url }}"
+
+    user: "{{ runtime_user }}"
+
+    upload_root_dir: "{{ temp_dir }}"
+
+    repo_name: think-tech.github.io
+    repo_url: "{{ thinktech_github_account }}/{{ repo_name }}.git"
 
   roles:
     - role: aws/execute_cloudformation_stack
@@ -12,4 +21,22 @@
       aws_stack_parameters: |
           ParameterKey=Project,ParameterValue={{ project_name }}
           ParameterKey=Service,ParameterValue={{ thinktechindustries_domain }}
-      service_name: "{{ project_name }}"
+
+    - role: utils/empty_work_dir
+
+    - role: git/get_source_code
+
+    - role: aws/put_object_to_s3_bucket
+      aws_s3_bucket_name: "{{ thinktechindustries_domain }}"
+      folder: "{{ repo_name }}"
+      exclude: .git
+      website:
+        index_document: index.html
+
+    - role: utils/empty_work_dir
+
+    - role: utils/notify_knightwatcher
+      message_username: "{{ user }}"
+      message_type: deploy
+      message_link: "{{ service_url }}"
+      message_repo_name: "{{ repo_name }}"

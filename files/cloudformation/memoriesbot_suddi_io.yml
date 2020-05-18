@@ -63,6 +63,7 @@ Resources:
 
   ApiGatewayExecutorRole:
     Type: AWS::IAM::Role
+    DependsOn: LambdaFunction
     Properties:
       RoleName: !Sub
         - "${Service}-apigateway-executor"
@@ -180,6 +181,7 @@ Resources:
 # ------------------------------------------------------------------------------
   ApiGateway:
     Type: AWS::ApiGatewayV2::Api
+    DependsOn: LambdaFunction
     Properties:
       Name: !Sub
       - "${Service}-apigateway"
@@ -188,26 +190,23 @@ Resources:
         - "API Gateway for ${Service}"
         - Service: !Ref Service
       ProtocolType: HTTP
-      Target: !GetAtt
-        - LambdaFunction
-        - Arn
+      Target: !Sub
+        - arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${FunctionName}
+        - FunctionName: !Ref Service
       Tags:
-        - Key: Name
-          Value: !Sub
-            - "${Service}-apigateway"
-            - Service: !Ref Service
-        - Key: Project
-          Value: !Ref Project
-        - Key: Service
-          Value: !Ref Service
-        - Key: DeployedBy
-          Value: !Ref DeployedBy
+        Name: !Sub
+          - "${Service}-apigateway"
+          - Service: !Ref Service
+        Project: !Ref Project
+        Service: !Ref Service
+        DeployedBy: !Ref DeployedBy
 
 # ------------------------------------------------------------------------------
 # LAMBDA FUNCTION VERSIONS
 # ------------------------------------------------------------------------------
   LambdaFunctionVersion:
     Type: AWS::Lambda::Version
+    DependsOn: LambdaFunction
     Properties:
       FunctionName: !Ref LambdaFunction
       Description: prod
@@ -219,15 +218,14 @@ Resources:
 # ------------------------------------------------------------------------------
   LambdaPermissions:
     Type: AWS::Lambda::Permission
-    DependsOn:
-      - LambdaFunction
+    DependsOn: LambdaFunction
     Properties:
       FunctionName: !Ref LambdaFunction
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
-      SourceArn: !GetAtt
-        - ApiGateway
-        - Arn
+      SourceArn: !Sub
+        - arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}
+        - ApiGateway: !Ref ApiGateway
 
 # ------------------------------------------------------------------------------
 # CLOUDWATCH LOG GROUPS
@@ -240,19 +238,6 @@ Resources:
         - "/aws/lambda/${FunctionName}"
         - FunctionName: !Ref LambdaFunction
       RetentionInDays: 7
-
-# ------------------------------------------------------------------------------
-# API GATEWAY DEPLOYMENTS
-# ------------------------------------------------------------------------------
-  APIGatewayDeployment:
-    Type: AWS::ApiGateway::Deployment
-    DependsOn: ApiGateway
-    Properties:
-      ApiId: !Ref ApiGateway
-      Description: !Sub
-        - "API Gateway deployment for ${Service}"
-        - Service: !Ref Service
-      StageName: prod
 
 # ------------------------------------------------------------------------------
 # API GATEWAY STAGES
@@ -270,24 +255,30 @@ Resources:
         DestinationArn: !GetAtt
           - CloudwatchLogGroup
           - Arn
+        Format: >-
+          {"requestId":"$context.requestId", "ip": "$context.identity.sourceIp",
+          "requestTime":"$context.requestTime","routeKey":"$context.routeKey",
+          "status":"$context.status"}
       AutoDeploy: false
-      DefaultRouteSettings:
-        DataTraceEnabled: true
-        DetailedMetricsEnabled: true
-        LoggingLevel: INFO
-        ThrottlingBurstLimit: 10
-        ThrottlingRateLimit: 5
-      DeploymentId: !Ref APIGatewayDeployment
       Tags:
-        - Key: Name
-          Value: !Sub
-            - "${Service}-apigateway-stage"
-            - Service: !Ref Service
-        - Key: Project
-          Value: !Ref Project
-        - Key: Service
-          Value: !Ref Service
-        - Key: DeployedBy
-          Value: !Ref DeployedBy
+        Name: !Sub
+          - "${Service}-apigateway-stage"
+          - Service: !Ref Service
+        Project: !Ref Project
+        Service: !Ref Service
+        DeployedBy: !Ref DeployedBy
+
+# ------------------------------------------------------------------------------
+# API GATEWAY DEPLOYMENTS
+# ------------------------------------------------------------------------------
+  APIGatewayDeployment:
+    Type: AWS::ApiGatewayV2::Deployment
+    DependsOn: ApiGatewayStage
+    Properties:
+      ApiId: !Ref ApiGateway
+      Description: !Sub
+        - "API Gateway deployment for ${Service}"
+        - Service: !Ref Service
+      StageName: prod
 
 # ------------------------------------------------------------------------------
