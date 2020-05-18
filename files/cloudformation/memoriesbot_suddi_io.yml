@@ -177,7 +177,7 @@ Resources:
           Value: !Ref DeployedBy
 
 # ------------------------------------------------------------------------------
-# API GATEWAYS
+# API GATEWAY APIS
 # ------------------------------------------------------------------------------
   ApiGateway:
     Type: AWS::ApiGatewayV2::Api

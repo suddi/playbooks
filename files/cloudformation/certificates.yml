@@ -1,0 +1,35 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+Description: CloudFormation template to create certificates in US-East-1
+
+Parameters:
+  DeployedBy:
+    Description: Deployment user/service
+    Type: String
+    Default: ansible
+
+Resources:
+# ------------------------------------------------------------------------------
+# CERTIFICATES
+# ------------------------------------------------------------------------------
+  ThinkTechIndustriesCertificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: thinktechindustries.com
+      DomainValidationOptions:
+        - DomainName: thinktechindustries.com
+          ValidationDomain: thinktechindustries.com
+        - DomainName: www.thinktechindustries.com
+          ValidationDomain: thinktechindustries.com
+      SubjectAlternativeNames:
+        - www.thinktechindustries.com
+      ValidationMethod: EMAIL
+      Tags:
+        - Key: Name
+          Value: thinktechindustries-com-certificate
+        - Key: Project
+          Value: thinktechindustries-com
+        - Key: Service
+          Value: thinktechindustries-com
+        - Key: DeployedBy
+          Value: !Ref DeployedBy

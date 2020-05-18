@@ -372,7 +372,7 @@ Resources:
       VpcId: !Ref PrivateVpc
 
 # ------------------------------------------------------------------------------
-# VPC ATTACHMENTS
+# VPC GATEWAY ATTACHMENTS
 # ------------------------------------------------------------------------------
   PublicVpcAttachment:
     Type: AWS::EC2::VPCGatewayAttachment

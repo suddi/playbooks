@@ -19,8 +19,9 @@
       aws_stack_name: "{{ project_name }}-stack"
       aws_stack_file_path: "{{ files_dir }}/cloudformation/thinktechindustries_com.yml"
       aws_stack_parameters: |
-          ParameterKey=Project,ParameterValue={{ project_name }}
-          ParameterKey=Service,ParameterValue={{ thinktechindustries_domain }}
+          ParameterKey=ProjectName,ParameterValue={{ project_name }}
+          ParameterKey=ServiceName,ParameterValue={{ service_name }}
+          ParameterKey=Domain,ParameterValue={{ thinktechindustries_domain }}
 
     - role: utils/empty_work_dir
 

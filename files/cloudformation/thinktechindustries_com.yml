@@ -3,60 +3,154 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: CloudFormation template to create resources for thinktechindustries.com
 
 Parameters:
-  Project:
-    Description: Project that the resources in this CloudFormation template is for
+  DisplayName:
+    Description: Display name for the project
     Type: String
-  Service:
-    Description: Service that the resources in this CloudFormation template is for
+    Default: ThinkTech Industries
+  ProjectName:
+    Description: Project name for the resources under this CloudFormation template
+    Type: String
+  ServiceName:
+    Description: Service name prefix for the resources under this CloudFormation template
     Type: String
   DeployedBy:
     Description: Deployment user/service
     Type: String
     Default: ansible
+  Domain:
+    Description: Domain for this service
+    Type: String
 
 Resources:
 # ------------------------------------------------------------------------------
-# S3 BUCKET
+# S3 BUCKETS
 # ------------------------------------------------------------------------------
   S3Bucket:
     Type: AWS::S3::Bucket
     Properties:
       AccessControl: Private
-      BucketName: !Ref Service
+      BucketName: !Ref Domain
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
+      WebsiteConfiguration:
+        IndexDocument: index.html
       Tags:
         - Key: Name
-          Value: !Ref Service
+          Value: !Ref ServiceName
         - Key: Project
-          Value: !Ref Project
+          Value: !Ref ProjectName
         - Key: Service
-          Value: !Ref Service
+          Value: !Ref ServiceName
         - Key: DeployedBy
           Value: !Ref DeployedBy
 
 # ------------------------------------------------------------------------------
-# CLOUDFRONT
+# ROUTE 53 HOSTED ZONES
+# ------------------------------------------------------------------------------
+  HostedZone:
+    Type: AWS::Route53::HostedZone
+    Properties:
+      HostedZoneConfig:
+        Comment: !Sub Route 53 Hosted Zone for ${DisplayName}
+      Name: !Ref Domain
+      HostedZoneTags:
+        - Key: Name
+          Value: !Sub ${ServiceName}-hosted-zone
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Service
+          Value: !Ref ServiceName
+        - Key: DeployedBy
+          Value: !Ref DeployedBy
+
+# ------------------------------------------------------------------------------
+# CLOUDFRONT DISTRIBUTIONS
 # ------------------------------------------------------------------------------
   CloudFrontDistribution:
     Type: AWS::CloudFront::Distribution
     DependsOn: S3Bucket
     Properties:
-
+      DistributionConfig:
+        Aliases:
+          - !Ref Domain
+          - !Sub www.${Domain}
+        Comment: !Sub CloudFront Distribution for ${DisplayName}
+        DefaultCacheBehavior:
+          AllowedMethods:
+            - GET
+            - HEAD
+          CachedMethods:
+            - GET
+            - HEAD
+          Compress: true
+          ForwardedValues:
+            QueryString: false
+          TargetOriginId: !Ref Domain
+          ViewerProtocolPolicy: redirect-to-https
+        DefaultRootObject: index.html
+        Enabled: true
+        HttpVersion: http2
+        IPV6Enabled: false
+        Origins:
+          - Id: !Ref Domain
+            CustomOriginConfig:
+              OriginProtocolPolicy: https-only
+            DomainName: !Sub ${Domain}.s3.amazonaws.com
+        PriceClass: PriceClass_100
+        ViewerCertificate:
+          AcmCertificateArn: arn:aws:acm:us-east-1:525924540563:certificate/623f992f-58b7-4e95-b212-05edc48187e7
+          MinimumProtocolVersion: TLSv1.2_2018
+          SslSupportMethod: sni-only
       Tags:
         - Key: Name
-          Value: !Sub
-            - "${Service}-cloudfront-distribution"
-            - Service: !Ref Service
+          Value: !Sub ${ServiceName}-cloudfront-distribution
         - Key: Project
-          Value: !Ref Project
+          Value: !Ref ProjectName
         - Key: Service
-          Value: !Ref Service
+          Value: !Ref ServiceName
         - Key: DeployedBy
           Value: !Ref DeployedBy
 
+# ------------------------------------------------------------------------------
+# ROUTE 53 RECORDSETS
+# ------------------------------------------------------------------------------
+  Route53RecordSet1:
+    Type: AWS::Route53::RecordSet
+    DependsOn:
+      - HostedZone
+      - CloudFrontDistribution
+    Properties:
+      AliasTarget:
+        DNSName: !GetAtt
+          - CloudFrontDistribution
+          - DomainName
+        # This is always the hosted zone ID when you create an alias record
+        # that routes traffic to a CloudFront distribution.
+        HostedZoneId: Z2FDTNDATAQYW2
+      Comment: !Sub Route53 RecordSet for ${Domain}
+      HostedZoneId: !Ref HostedZone
+      Name: !Ref Domain
+      Type: A
+
+  Route53RecordSet2:
+    Type: AWS::Route53::RecordSet
+    DependsOn:
+      - HostedZone
+      - CloudFrontDistribution
+    Properties:
+      AliasTarget:
+        DNSName: !GetAtt
+          - CloudFrontDistribution
+          - DomainName
+        # This is always the hosted zone ID when you create an alias record
+        # that routes traffic to a CloudFront distribution.
+        HostedZoneId: Z2FDTNDATAQYW2
+      Comment: !Sub Route53 RecordSet for ${Domain}
+      HostedZoneId: !Ref HostedZone
+      Name: !Sub www.${Domain}
+      Type: A
 
 # ------------------------------------------------------------------------------
