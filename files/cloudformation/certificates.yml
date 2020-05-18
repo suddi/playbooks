@@ -3,10 +3,22 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: CloudFormation template to create certificates in US-East-1
 
 Parameters:
+  DisplayName:
+    Description: Display name for the project
+    Type: String
+  ProjectName:
+    Description: Project name for the resources under this CloudFormation template
+    Type: String
+  ServiceName:
+    Description: Service name prefix for the resources under this CloudFormation template
+    Type: String
   DeployedBy:
     Description: Deployment user/service
     Type: String
     Default: ansible
+  Domain:
+    Description: Domain for this service
+    Type: String
 
 Resources:
 # ------------------------------------------------------------------------------
@@ -15,21 +27,23 @@ Resources:
   ThinkTechIndustriesCertificate:
     Type: AWS::CertificateManager::Certificate
     Properties:
-      DomainName: thinktechindustries.com
+      DomainName: !Ref Domain
       DomainValidationOptions:
-        - DomainName: thinktechindustries.com
-          ValidationDomain: thinktechindustries.com
-        - DomainName: www.thinktechindustries.com
-          ValidationDomain: thinktechindustries.com
+        - DomainName: !Ref Domain
+          ValidationDomain: !Ref Domain
+        - DomainName: !Sub www.${Domain}
+          ValidationDomain: !Ref Domain
       SubjectAlternativeNames:
-        - www.thinktechindustries.com
+        - !Sub www.${Domain}
       ValidationMethod: EMAIL
       Tags:
         - Key: Name
-          Value: thinktechindustries-com-certificate
+          Value: !Sub ${ServiceName}-certificate
         - Key: Project
-          Value: thinktechindustries-com
+          Value: !Ref ProjectName
         - Key: Service
-          Value: thinktechindustries-com
+          Value: !Ref ServiceName
         - Key: DeployedBy
           Value: !Ref DeployedBy
+
+# ------------------------------------------------------------------------------
