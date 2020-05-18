@@ -3,10 +3,6 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: CloudFormation template to create resources for thinktechindustries.com
 
 Parameters:
-  DisplayName:
-    Description: Display name for the project
-    Type: String
-    Default: ThinkTech Industries
   ProjectName:
     Description: Project name for the resources under this CloudFormation template
     Type: String
@@ -20,8 +16,20 @@ Parameters:
   Domain:
     Description: Domain for this service
     Type: String
+  CertificateArn:
+    Description: Certificate ARN for the TLS certificate in US-East-1 region
+    Type: String
 
 Resources:
+# ------------------------------------------------------------------------------
+# CLOUDFRONT ORIGIN ACCESS IDENTITY
+# ------------------------------------------------------------------------------
+  OriginAccessIdentity:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: !Sub Origin Access Identity for ${ProjectName}
+
 # ------------------------------------------------------------------------------
 # S3 BUCKETS
 # ------------------------------------------------------------------------------
@@ -48,13 +56,35 @@ Resources:
           Value: !Ref DeployedBy
 
 # ------------------------------------------------------------------------------
+# S3 BUCKET POLICIES
+# ------------------------------------------------------------------------------
+  S3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    DependsOn:
+      - OriginAccessIdentity
+      - S3Bucket
+    Properties:
+      Bucket: !Ref S3Bucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - s3:GetObject
+            Resource: !Sub
+              - "${S3BucketArn}/*"
+              - S3BucketArn: !GetAtt S3Bucket.Arn
+            Principal:
+              CanonicalUser: !GetAtt OriginAccessIdentity.S3CanonicalUserId
+
+# ------------------------------------------------------------------------------
 # ROUTE 53 HOSTED ZONES
 # ------------------------------------------------------------------------------
   HostedZone:
     Type: AWS::Route53::HostedZone
     Properties:
       HostedZoneConfig:
-        Comment: !Sub Route 53 Hosted Zone for ${DisplayName}
+        Comment: !Sub Route 53 Hosted Zone for ${ProjectName}
       Name: !Ref Domain
       HostedZoneTags:
         - Key: Name
@@ -77,7 +107,7 @@ Resources:
         Aliases:
           - !Ref Domain
           - !Sub www.${Domain}
-        Comment: !Sub CloudFront Distribution for ${DisplayName}
+        Comment: !Sub CloudFront Distribution for ${ProjectName}
         DefaultCacheBehavior:
           AllowedMethods:
             - GET
@@ -96,12 +126,12 @@ Resources:
         IPV6Enabled: false
         Origins:
           - Id: !Ref Domain
-            CustomOriginConfig:
-              OriginProtocolPolicy: https-only
-            DomainName: !Sub ${Domain}.s3.amazonaws.com
+            DomainName: !Sub ${Domain}.s3.${AWS::Region}.amazonaws.com
+            S3OriginConfig:
+              OriginAccessIdentity: !Sub origin-access-identity/cloudfront/${OriginAccessIdentity}
         PriceClass: PriceClass_100
         ViewerCertificate:
-          AcmCertificateArn: arn:aws:acm:us-east-1:525924540563:certificate/623f992f-58b7-4e95-b212-05edc48187e7
+          AcmCertificateArn: !Ref CertificateArn
           MinimumProtocolVersion: TLSv1.2_2018
           SslSupportMethod: sni-only
       Tags:
@@ -124,9 +154,7 @@ Resources:
       - CloudFrontDistribution
     Properties:
       AliasTarget:
-        DNSName: !GetAtt
-          - CloudFrontDistribution
-          - DomainName
+        DNSName: !GetAtt CloudFrontDistribution.DomainName
         # This is always the hosted zone ID when you create an alias record
         # that routes traffic to a CloudFront distribution.
         HostedZoneId: Z2FDTNDATAQYW2
@@ -142,9 +170,7 @@ Resources:
       - CloudFrontDistribution
     Properties:
       AliasTarget:
-        DNSName: !GetAtt
-          - CloudFrontDistribution
-          - DomainName
+        DNSName: !GetAtt CloudFrontDistribution.DomainName
         # This is always the hosted zone ID when you create an alias record
         # that routes traffic to a CloudFront distribution.
         HostedZoneId: Z2FDTNDATAQYW2

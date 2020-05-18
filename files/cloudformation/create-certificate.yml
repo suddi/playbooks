@@ -3,9 +3,6 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: CloudFormation template to create certificates in US-East-1
 
 Parameters:
-  DisplayName:
-    Description: Display name for the project
-    Type: String
   ProjectName:
     Description: Project name for the resources under this CloudFormation template
     Type: String

@@ -114,7 +114,9 @@ onepusher_service_url: "{{ vault_onepusher_service_url }}"
 # ThinkTech Industries
 thinktechindustries_project_name: thinktechindustries
 thinktechindustries_domain: "{{ vault_thinktechindustries_domain }}"
-thinktechindustries_service_url: "{{ vault_thinktech_industries_service_url }}"
+thinktechindustries_service_url: "{{ vault_thinktechindustries_service_url }}"
+
+thinktechindustries_certificate_arn: "{{ vault_thinktechindustries_certificate_arn }}"
 
 # ------------------------------------------------------------------------------
 # SOFTWARE RUNTIME VERSIONS
