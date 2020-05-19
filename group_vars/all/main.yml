@@ -12,6 +12,9 @@ linkedin_url: "{{ vault_linkedin_url }}"
 aws_profile: default
 aws_region: ap-northeast-1
 
+pypi_username: "{{ vault_pypi_username }}"
+pypi_password: "{{ vault_pypi_password }}"
+
 # ------------------------------------------------------------------------------
 # DIRECTORIES
 # ------------------------------------------------------------------------------

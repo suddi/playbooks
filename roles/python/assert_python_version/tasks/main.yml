@@ -1,0 +1,9 @@
+- name: get running python version
+  command: python
+    --version
+  register: python_version_result
+
+- name: check python version is {{ expected_python_version }}
+  assert:
+    that:
+      - "'{{ expected_python_version }}' in python_version_result.stdout"

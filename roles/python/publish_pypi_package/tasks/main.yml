@@ -1,0 +1,51 @@
+- name: get source code
+  git:
+    repo: "{{ repo_url }}"
+    dest: "{{ work_dir }}"
+    force: yes
+    version: "{{ repo_version }}"
+
+- name: install python dependencies for build
+  command: pip install --requirement requirements.txt --requirement test_requirements.txt
+  args:
+    chdir: "{{ work_dir }}"
+
+- name: discover custom setup.py commands
+  command: python setup.py --help-commands
+  register: setup_py_commands
+  args:
+    chdir: "{{ work_dir }}"
+
+- name: run python setup.py lint
+  command: python setup.py lint
+  when: "'lint' in setup_py_commands.stdout"
+  args:
+    chdir: "{{ work_dir }}"
+
+- name: run python setup.py test
+  command: python setup.py test
+  when: "'test' in setup_py_commands.stdout"
+  args:
+    chdir: "{{ work_dir }}"
+
+- name: create python source distribution files
+  command: python setup.py sdist bdist_wheel
+  args:
+    chdir: "{{ work_dir }}"
+
+- name: upload with twine to test pypi
+  command: twine upload
+    --repository-url https://test.pypi.org/legacy/
+    --username {{ pypi_username }}
+    --password {{ pypi_password }}
+    dist/*
+  args:
+    chdir: "{{ work_dir }}"
+
+- name: publish with twine to pypi
+  command: twine upload
+    --username {{ pypi_username }}
+    --password {{ pypi_password }}
+    dist/*
+  args:
+    chdir: "{{ work_dir }}"

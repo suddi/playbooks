@@ -1,0 +1,32 @@
+- name: publish tweetstreamer to pypi
+  hosts: local
+  gather_facts: no
+
+  vars:
+    project_name: "{{ general_project_name }}"
+    package_name: tweetstreamer
+    service_name: "{{ project_name }}-pypi-{{ package_name }}"
+    service_url: https://pypi.org/project/{{ package_name }}
+
+    repo_name: "{{ package_name }}"
+    repo_url: "{{ github_account }}/{{ repo_name }}.git"
+
+    deploy_user: "{{ runtime_user }}"
+
+  roles:
+    - role: python/assert_python_version
+
+    - role: utils/empty_work_dir
+
+    - role: python/publish_pypi_package
+      tags:
+        - publish
+        - pypi
+
+    - role: utils/empty_work_dir
+
+    - role: utils/notify_knightwatcher
+      message_username: "{{ deploy_user }}"
+      message_type: pypi-publish
+      message_link: "{{ service_url }}"
+      message_repo_name: "{{ repo_name }}"
