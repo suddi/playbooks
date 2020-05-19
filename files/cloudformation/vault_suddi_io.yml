@@ -3,16 +3,19 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: CloudFormation template to create resources for vault.suddi.io
 
 Parameters:
-  Project:
-    Description: Project that the resources in this CloudFormation template is for
+  ProjectName:
+    Description: Project name for the resources under this CloudFormation template
     Type: String
-  Service:
-    Description: Service that the resources in this CloudFormation template is for
+  ServiceName:
+    Description: Service name prefix for the resources under this CloudFormation template
     Type: String
   DeployedBy:
     Description: Deployment user/service
     Type: String
     Default: ansible
+  Domain:
+    Description: Domain for this service
+    Type: String
 
 Resources:
 # ------------------------------------------------------------------------------
@@ -22,7 +25,7 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       AccessControl: Private
-      BucketName: !Ref Service
+      BucketName: !Ref Domain
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
@@ -32,11 +35,11 @@ Resources:
         Status: Enabled
       Tags:
         - Key: Name
-          Value: !Ref Service
+          Value: !Sub ${ServiceName}-bucket
         - Key: Project
-          Value: !Ref Project
+          Value: !Ref ProjectName
         - Key: Service
-          Value: !Ref Service
+          Value: !Ref ServiceName
         - Key: DeployedBy
           Value: !Ref DeployedBy
 

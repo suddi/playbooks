@@ -47,7 +47,7 @@ Resources:
         IndexDocument: index.html
       Tags:
         - Key: Name
-          Value: !Ref ServiceName
+          Value: !Sub ${ServiceName}-bucket
         - Key: Project
           Value: !Ref ProjectName
         - Key: Service

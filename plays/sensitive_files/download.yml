@@ -11,12 +11,6 @@
     download_root_dir: "{{ project_root_dir }}"
     files: "{{ sensitive_files }}"
 
-  tasks:
-    - name: get objects from {{ aws_s3_bucket_name }} s3 bucket
-      command: aws s3api get-object
-        --profile {{ aws_profile }}
-        --region {{ aws_region }}
-        --bucket {{ aws_s3_bucket_name }}
-        --key {{ item }}
-        "{{ download_root_dir }}/{{ item }}"
-      with_items: "{{ files }}"
+  roles:
+    - role: aws/get_object_from_s3_bucket
+

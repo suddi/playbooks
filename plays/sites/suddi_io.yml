@@ -10,17 +10,20 @@
       aws_stack_name: "{{ project_name }}-stack"
       aws_stack_file_path: "{{ files_dir }}/cloudformation/suddi_io.yml"
       aws_stack_parameters: |
-          ParameterKey=Project,ParameterValue={{ project_name }}
-          ParameterKey=Service,ParameterValue={{ general_domain }}
+          ParameterKey=ProjectName,ParameterValue={{ project_name }}
+          ParameterKey=ServiceName,ParameterValue={{ project_name }}
+          ParameterKey=Domain,ParameterValue={{ general_domain }}
           ParameterKey=HostedZone,ParameterValue={{ general_domain }}.
+          ParameterKey=MailAdministrator,ParameterValue=admin@{{ general_domain }}
       service_name: "{{ project_name }}"
 
     - role: aws/execute_cloudformation_stack
       aws_stack_name: github-{{ project_name }}-stack
       aws_stack_file_path: "{{ files_dir }}/cloudformation/github_suddi_io.yml"
       aws_stack_parameters: |
-          ParameterKey=Project,ParameterValue={{ project_name }}
-          ParameterKey=Service,ParameterValue={{ github_domain }}
+          ParameterKey=ProjectName,ParameterValue={{ project_name }}
+          ParameterKey=ServiceName,ParameterValue=github-{{ project_name }}
+          ParameterKey=Domain,ParameterValue={{ github_domain }}
           ParameterKey=RouteUrl,ParameterValue={{ github_url }}
           ParameterKey=HostedZone,ParameterValue={{ general_domain }}.
       service_name: github-{{ project_name }}
@@ -29,16 +32,18 @@
       aws_stack_name: lambda-{{ project_name }}-stack
       aws_stack_file_path: "{{ files_dir }}/cloudformation/lambda_suddi_io.yml"
       aws_stack_parameters: |
-          ParameterKey=Project,ParameterValue={{ project_name }}
-          ParameterKey=Service,ParameterValue={{ lambda_domain }}
+          ParameterKey=ProjectName,ParameterValue={{ project_name }}
+          ParameterKey=ServiceName,ParameterValue=lambda-{{ project_name }}
+          ParameterKey=Domain,ParameterValue={{ lambda_domain }}
       service_name: lambda-{{ project_name }}
 
     - role: aws/execute_cloudformation_stack
       aws_stack_name: linkedin-{{ project_name }}-stack
       aws_stack_file_path: "{{ files_dir }}/cloudformation/linkedin_suddi_io.yml"
       aws_stack_parameters: |
-          ParameterKey=Project,ParameterValue={{ project_name }}
-          ParameterKey=Service,ParameterValue={{ linkedin_domain }}
+          ParameterKey=ProjectName,ParameterValue={{ project_name }}
+          ParameterKey=ServiceName,ParameterValue=linkedin-{{ project_name }}
+          ParameterKey=Domain,ParameterValue={{ linkedin_domain }}
           ParameterKey=RouteUrl,ParameterValue={{ linkedin_url }}
           ParameterKey=HostedZone,ParameterValue={{ general_domain }}.
       service_name: linkedin-{{ project_name }}
@@ -47,6 +52,7 @@
       aws_stack_name: vault-{{ project_name }}-stack
       aws_stack_file_path: "{{ files_dir }}/cloudformation/vault_suddi_io.yml"
       aws_stack_parameters: |
-          ParameterKey=Project,ParameterValue={{ project_name }}
-          ParameterKey=Service,ParameterValue={{ vault_domain }}
+          ParameterKey=ProjectName,ParameterValue={{ project_name }}
+          ParameterKey=ServiceName,ParameterValue=vault-{{ project_name }}
+          ParameterKey=Domain,ParameterValue={{ vault_domain }}
       service_name: vault-{{ project_name }}

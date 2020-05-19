@@ -10,7 +10,6 @@
     aws_s3_acl: private
 
     upload_root_dir: "{{ project_root_dir }}"
-
     files: "{{ sensitive_files }}"
 
   roles:

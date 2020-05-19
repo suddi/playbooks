@@ -1,0 +1,14 @@
+- name: check if {{ aws_s3_bucket_name }} s3 bucket exists
+  command: aws s3api head-bucket
+    --profile {{ aws_profile }}
+    --region {{ aws_region }}
+    --bucket {{ aws_s3_bucket_name }}
+
+- name: get objects from {{ aws_s3_bucket_name }} s3 bucket
+  command: aws s3api get-object
+    --profile {{ aws_profile }}
+    --region {{ aws_region }}
+    --bucket {{ aws_s3_bucket_name }}
+    --key {{ item }}
+    "{{ download_root_dir }}/{{ item }}"
+  with_items: "{{ files }}"

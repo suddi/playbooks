@@ -3,18 +3,24 @@
   Description: CloudFormation template to create resources for suddi.io
 
   Parameters:
-    Project:
-      Description: Project that the resources in this CloudFormation template is for
+    ProjectName:
+      Description: Project name for the resources under this CloudFormation template
       Type: String
-    Service:
-      Description: Service that the resources in this CloudFormation template is for
+    ServiceName:
+      Description: Service name prefix for the resources under this CloudFormation template
       Type: String
     DeployedBy:
       Description: Deployment user/service
       Type: String
       Default: ansible
+    Domain:
+      Description: Domain for this service
+      Type: String
     HostedZone:
       Description: Name of the hosted zone in Route 53
+      Type: String
+    MailAdministrator:
+      Description: Email address of the mail administrator for DMARC record
       Type: String
 
   Resources:
@@ -25,11 +31,9 @@
       Type: AWS::Route53::RecordSet
       Properties:
         HostedZoneName: !Ref HostedZone
-        Name: !Sub
-          - "_dmarc.${Domain}"
-          - Domain: !Ref Service
+        Name: !Sub "_dmarc.${Domain}"
         ResourceRecords:
-          - '"v=DMARC1; p=quarantine; rua=mailto:admin@suddi.io"'
+          - !Sub '"v=DMARC1; p=quarantine; rua=mailto:${MailAdministrator}"'
         TTL: "300"
         Type: TXT
 

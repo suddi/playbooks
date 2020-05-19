@@ -20,7 +20,8 @@
   when: files is defined and files | length > 0
 
 - name: copy folder to {{ aws_s3_bucket_name }} s3 bucket
-  command: aws s3 cp {{ upload_root_dir }}/{{ folder }} s3://{{ aws_s3_bucket_name }}/ --recursive
+  command: aws s3 cp {{ upload_root_dir }}/{{ folder }} s3://{{ aws_s3_bucket_name }}/
+    --recursive
     --profile {{ aws_profile }}
     --region {{ aws_region }}
     --acl {{ aws_s3_acl }}
@@ -28,17 +29,7 @@
       --sse AES256
     {% endif %}
     {% if exclude is defined %}
-      --exclude {{ exclude }}
+      --exclude "{{ exclude }}"
     {% endif %}
   when: folder is defined
-
-- name: set up website on {{ aws_s3_bucket_name }} s3 bucket
-  command: aws s3 website s3://{{ aws_s3_bucket_name }}
-    --profile {{ aws_profile }}
-    --region {{ aws_region }}
-    --index-document {{ website.index_document }}
-    {% if error_document is defined %}
-      --error-document {{ website.error_document }}
-    {% endif %}
-  when: website is defined
 

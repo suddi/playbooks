@@ -40,7 +40,7 @@
     - role: aws/put_object_to_s3_bucket
       aws_s3_bucket_name: "{{ thinktechindustries_domain }}"
       folder: "{{ repo_name }}"
-      exclude: .git
+      exclude: .git/*
       website:
         index_document: index.html
 
