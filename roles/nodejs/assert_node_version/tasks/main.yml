@@ -6,4 +6,4 @@
 - name: check node version is {{ expected_node_version }}
   assert:
     that:
-      - "{{ expected_node_version }} in node_version_result.stdout"
+      - "'{{ expected_node_version }}' in node_version_result.stdout"
