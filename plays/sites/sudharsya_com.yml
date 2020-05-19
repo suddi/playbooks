@@ -1,0 +1,53 @@
+- name: provision resources for sites under sudharsya.com
+  hosts: local
+  gather_facts: no
+
+  vars:
+    project_name: "{{ sudharsya_project_name }}-com"
+    service_name: "{{ project_name }}"
+    service_url: "{{ sudharsya_service_url }}"
+
+    user: "{{ runtime_user }}"
+
+    upload_root_dir: "{{ temp_dir }}"
+
+    repo_name: sudharsya.com
+    repo_url: "{{ github_account }}/{{ repo_name }}.git"
+
+  roles:
+    - role: aws/execute_cloudformation_stack
+      aws_region: us-east-1
+      aws_stack_name: "{{ project_name }}-certificate-stack"
+      aws_stack_file_path: "{{ files_dir }}/cloudformation/create-certificate.yml"
+      aws_stack_parameters: |
+          ParameterKey=ProjectName,ParameterValue={{ project_name }}
+          ParameterKey=ServiceName,ParameterValue={{ service_name }}
+          ParameterKey=Domain,ParameterValue={{ sudharsya_domain }}
+
+    - role: aws/execute_cloudformation_stack
+      aws_stack_name: "{{ project_name }}-stack"
+      aws_stack_file_path: "{{ files_dir }}/cloudformation/sudharsya_com.yml"
+      aws_stack_parameters: |
+          ParameterKey=ProjectName,ParameterValue={{ project_name }}
+          ParameterKey=ServiceName,ParameterValue={{ service_name }}
+          ParameterKey=Domain,ParameterValue={{ sudharsya_domain }}
+          ParameterKey=CertificateArn,ParameterValue={{ sudharsya_certificate_arn }}
+
+    - role: utils/empty_work_dir
+
+    - role: git/get_source_code
+
+    - role: aws/put_object_to_s3_bucket
+      aws_s3_bucket_name: "{{ sudharsya_domain }}"
+      folder: "{{ repo_name }}"
+      exclude: .git/*
+      website:
+        index_document: index.html
+
+    - role: utils/empty_work_dir
+
+    - role: utils/notify_knightwatcher
+      message_username: "{{ user }}"
+      message_type: deploy
+      message_link: "{{ service_url }}"
+      message_repo_name: "{{ repo_name }}"

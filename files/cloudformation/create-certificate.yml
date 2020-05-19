@@ -35,7 +35,7 @@ Resources:
       ValidationMethod: EMAIL
       Tags:
         - Key: Name
-          Value: !Sub ${ServiceName}-certificate
+          Value: !Sub ${ServiceName}-cert
         - Key: Project
           Value: !Ref ProjectName
         - Key: Service

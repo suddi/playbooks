@@ -63,19 +63,15 @@ cicd_user_aws_secret_access_key: "{{ vault_cicd_user_aws_secret_access_key }}"
 cicd_user_npm_auth_token: "{{ vault_cicd_user_npm_auth_token }}"
 
 # ------------------------------------------------------------------------------
-# DOMAINS
+# PROJECTS
 # ------------------------------------------------------------------------------
+# General
+general_project_name: suddi
 general_domain: "{{ vault_general_domain }}"
 github_domain: "{{ vault_github_domain }}"
 lambda_domain: "{{ vault_lambda_domain }}"
 linkedin_domain: "{{ vault_linkedin_domain }}"
 vault_domain: "{{ vault_vault_domain }}"
-
-# ------------------------------------------------------------------------------
-# PROJECTS
-# ------------------------------------------------------------------------------
-# General
-general_project_name: suddi
 general_service_url: "{{ vault_general_service_url }}"
 
 # Knightwatcher
@@ -113,6 +109,13 @@ buildgreenr_service_url: "{{ vault_buildgreenr_service_url }}"
 # OnePusher
 onepusher_project_name: onepusher
 onepusher_service_url: "{{ vault_onepusher_service_url }}"
+
+# Sudharsya
+sudharsya_project_name: sudharsya
+sudharsya_domain: "{{ vault_sudharsya_domain }}"
+sudharsya_service_url: "{{ vault_sudharsya_service_url }}"
+
+sudharsya_certificate_arn: "{{ vault_sudharsya_certificate_arn }}"
 
 # ThinkTech Industries
 thinktechindustries_project_name: thinktechindustries

@@ -28,7 +28,7 @@ Resources:
     Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
     Properties:
       CloudFrontOriginAccessIdentityConfig:
-        Comment: !Sub Origin Access Identity for ${ProjectName}
+        Comment: !Sub access-identity-${ProjectName}.s3.amazonaws.com
 
 # ------------------------------------------------------------------------------
 # S3 BUCKETS

@@ -1,0 +1,182 @@
+---
+  AWSTemplateFormatVersion: "2010-09-09"
+  Description: CloudFormation template to create resources for sudharsya.com
+
+  Parameters:
+    ProjectName:
+      Description: Project name for the resources under this CloudFormation template
+      Type: String
+    ServiceName:
+      Description: Service name prefix for the resources under this CloudFormation template
+      Type: String
+    DeployedBy:
+      Description: Deployment user/service
+      Type: String
+      Default: ansible
+    Domain:
+      Description: Domain for this service
+      Type: String
+    CertificateArn:
+      Description: Certificate ARN for the TLS certificate in US-East-1 region
+      Type: String
+
+  Resources:
+  # ------------------------------------------------------------------------------
+  # CLOUDFRONT ORIGIN ACCESS IDENTITY
+  # ------------------------------------------------------------------------------
+    OriginAccessIdentity:
+      Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+      Properties:
+        CloudFrontOriginAccessIdentityConfig:
+          Comment: !Sub access-identity-${ProjectName}.s3.amazonaws.com
+
+  # ------------------------------------------------------------------------------
+  # S3 BUCKETS
+  # ------------------------------------------------------------------------------
+    S3Bucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        AccessControl: Private
+        BucketName: !Ref Domain
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: true
+          BlockPublicPolicy: true
+          IgnorePublicAcls: true
+          RestrictPublicBuckets: true
+        WebsiteConfiguration:
+          IndexDocument: index.html
+        Tags:
+          - Key: Name
+            Value: !Sub ${ServiceName}-bucket
+          - Key: Project
+            Value: !Ref ProjectName
+          - Key: Service
+            Value: !Ref ServiceName
+          - Key: DeployedBy
+            Value: !Ref DeployedBy
+
+  # ------------------------------------------------------------------------------
+  # S3 BUCKET POLICIES
+  # ------------------------------------------------------------------------------
+    S3BucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      DependsOn:
+        - OriginAccessIdentity
+        - S3Bucket
+      Properties:
+        Bucket: !Ref S3Bucket
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - s3:GetObject
+              Resource: !Sub
+                - "${S3BucketArn}/*"
+                - S3BucketArn: !GetAtt S3Bucket.Arn
+              Principal:
+                CanonicalUser: !GetAtt OriginAccessIdentity.S3CanonicalUserId
+
+  # ------------------------------------------------------------------------------
+  # ROUTE 53 HOSTED ZONES
+  # ------------------------------------------------------------------------------
+    HostedZone:
+      Type: AWS::Route53::HostedZone
+      Properties:
+        HostedZoneConfig:
+          Comment: !Sub Route 53 Hosted Zone for ${ProjectName}
+        Name: !Ref Domain
+        HostedZoneTags:
+          - Key: Name
+            Value: !Sub ${ServiceName}-hosted-zone
+          - Key: Project
+            Value: !Ref ProjectName
+          - Key: Service
+            Value: !Ref ServiceName
+          - Key: DeployedBy
+            Value: !Ref DeployedBy
+
+  # ------------------------------------------------------------------------------
+  # CLOUDFRONT DISTRIBUTIONS
+  # ------------------------------------------------------------------------------
+    CloudFrontDistribution:
+      Type: AWS::CloudFront::Distribution
+      DependsOn: S3Bucket
+      Properties:
+        DistributionConfig:
+          Aliases:
+            - !Ref Domain
+            - !Sub www.${Domain}
+          Comment: !Sub CloudFront Distribution for ${ProjectName}
+          DefaultCacheBehavior:
+            AllowedMethods:
+              - GET
+              - HEAD
+            CachedMethods:
+              - GET
+              - HEAD
+            Compress: true
+            ForwardedValues:
+              QueryString: false
+            TargetOriginId: !Ref Domain
+            ViewerProtocolPolicy: redirect-to-https
+          DefaultRootObject: index.html
+          Enabled: true
+          HttpVersion: http2
+          IPV6Enabled: false
+          Origins:
+            - Id: !Ref Domain
+              DomainName: !Sub ${Domain}.s3.${AWS::Region}.amazonaws.com
+              S3OriginConfig:
+                OriginAccessIdentity: !Sub origin-access-identity/cloudfront/${OriginAccessIdentity}
+          PriceClass: PriceClass_100
+          ViewerCertificate:
+            AcmCertificateArn: !Ref CertificateArn
+            MinimumProtocolVersion: TLSv1.2_2018
+            SslSupportMethod: sni-only
+        Tags:
+          - Key: Name
+            Value: !Sub ${ServiceName}-cloudfront-distribution
+          - Key: Project
+            Value: !Ref ProjectName
+          - Key: Service
+            Value: !Ref ServiceName
+          - Key: DeployedBy
+            Value: !Ref DeployedBy
+
+  # ------------------------------------------------------------------------------
+  # ROUTE 53 RECORDSETS
+  # ------------------------------------------------------------------------------
+    Route53RecordSet1:
+      Type: AWS::Route53::RecordSet
+      DependsOn:
+        - HostedZone
+        - CloudFrontDistribution
+      Properties:
+        AliasTarget:
+          DNSName: !GetAtt CloudFrontDistribution.DomainName
+          # This is always the hosted zone ID when you create an alias record
+          # that routes traffic to a CloudFront distribution.
+          HostedZoneId: Z2FDTNDATAQYW2
+        Comment: !Sub Route53 RecordSet for ${Domain}
+        HostedZoneId: !Ref HostedZone
+        Name: !Ref Domain
+        Type: A
+
+    Route53RecordSet2:
+      Type: AWS::Route53::RecordSet
+      DependsOn:
+        - HostedZone
+        - CloudFrontDistribution
+      Properties:
+        AliasTarget:
+          DNSName: !GetAtt CloudFrontDistribution.DomainName
+          # This is always the hosted zone ID when you create an alias record
+          # that routes traffic to a CloudFront distribution.
+          HostedZoneId: Z2FDTNDATAQYW2
+        Comment: !Sub Route53 RecordSet for ${Domain}
+        HostedZoneId: !Ref HostedZone
+        Name: !Sub www.${Domain}
+        Type: A
+
+  # ------------------------------------------------------------------------------
