@@ -373,7 +373,7 @@ Resources:
     Properties:
       DomainName: "{{ memoriesbot_domain }}"
       ApiId: !Ref ApiGateway
-      Stage: $default
+      Stage: !Ref StageName
 
 # ------------------------------------------------------------------------------
 # ROUTE 53 RECORDSETS
