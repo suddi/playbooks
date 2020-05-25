@@ -16,6 +16,11 @@ pypi_username: "{{ vault_pypi_username }}"
 pypi_password: "{{ vault_pypi_password }}"
 
 # ------------------------------------------------------------------------------
+# NOTIFICATIONS
+# ------------------------------------------------------------------------------
+telegram_users: "{{ vault_telegram_users }}"
+
+# ------------------------------------------------------------------------------
 # DIRECTORIES
 # ------------------------------------------------------------------------------
 project_root_dir: "{{ inventory_dir }}"
@@ -92,11 +97,10 @@ kobe_config_microsoft_app_password: "{{ vault_kobe_config_microsoft_app_password
 
 # MemoriesBot
 memoriesbot_project_name: memoriesbot
+memoriesbot_domain: "{{ vault_memoriesbot_domain }}"
 memoriesbot_service_url: "{{ vault_memoriesbot_service_url }}"
 
 memoriesbot_config_telegram_api_key: "{{ vault_memoriesbot_config_telegram_api_key }}"
-
-memoriesbot_aws_lambda_role_name: "{{ vault_memoriesbot_aws_lambda_role_name }}"
 
 # CICD
 cicd_project_name: cicd

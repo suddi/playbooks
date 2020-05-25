@@ -3,35 +3,61 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: CloudFormation template to deploy a Lambda function and create a respective API Gateway
 
 Parameters:
-  Project:
-    Description: Project that the resources in this CloudFormation template is for
+  ProjectName:
+    Description: Project name for the resources under this CloudFormation template
     Type: String
-  Service:
-    Description: Service that the resources in this CloudFormation template is for
+  ServiceName:
+    Description: Service name prefix for the resources under this CloudFormation template
     Type: String
   DeployedBy:
     Description: Deployment user/service
     Type: String
     Default: ansible
+  Domain:
+    Description: Domain for this service
+    Type: String
+  HostedZone:
+    Description: Name of the hosted zone in Route 53
+    Type: String
   LambdaFunctionsBucket:
-    Description: Lambda functions bucket to retrieve build from
+    Description: Lambda functions bucket to retrieve build
+    Type: String
+  StageName:
+    Description: Stage name under which the deployment will be made
     Type: String
 
 Resources:
+# ------------------------------------------------------------------------------
+# CERTIFICATES
+# ------------------------------------------------------------------------------
+  Certificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !Ref Domain
+      DomainValidationOptions:
+        - DomainName: !Ref Domain
+          ValidationDomain: !Ref Domain
+      ValidationMethod: EMAIL
+      Tags:
+        - Key: Name
+          Value: !Sub ${ServiceName}-cert
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Service
+          Value: !Ref ServiceName
+        - Key: DeployedBy
+          Value: !Ref DeployedBy
+
 # ------------------------------------------------------------------------------
 # IDENTITY ACCESS MANAGEMENT ROLES
 # ------------------------------------------------------------------------------
   LambdaExecutorRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub
-        - "${Service}-lambda-executor"
-        - Service: !Ref Service
-      Description: !Sub
-        - "IAM role to execute ${Service} Lambda function"
-        - Service: !Ref Service
+      RoleName: !Sub ${ServiceName}-lambda-executor
+      Description: !Sub IAM role to execute ${ServiceName} Lambda function
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Principal:
@@ -42,7 +68,7 @@ Resources:
       Policies:
         - PolicyName: LambdaExecutorRolePolicy
           PolicyDocument:
-            Version: '2012-10-17'
+            Version: "2012-10-17"
             Statement:
               - Action:
                   - s3:Get*
@@ -51,13 +77,11 @@ Resources:
                 Effect: Allow
       Tags:
         - Key: Name
-          Value: !Sub
-            - "${Service}-lambda-executor"
-            - Service: !Ref Service
+          Value: !Sub ${ServiceName}-lambda-executor
         - Key: Project
-          Value: !Ref Project
+          Value: !Ref ProjectName
         - Key: Service
-          Value: !Ref Service
+          Value: !Ref ServiceName
         - Key: DeployedBy
           Value: !Ref DeployedBy
 
@@ -65,14 +89,10 @@ Resources:
     Type: AWS::IAM::Role
     DependsOn: LambdaFunction
     Properties:
-      RoleName: !Sub
-        - "${Service}-apigateway-executor"
-        - Service: !Ref Service
-      Description: !Sub
-        - "IAM role to execute ${Service} API Gateway"
-        - Service: !Ref Service
+      RoleName: !Sub ${ServiceName}-apigateway-executor
+      Description: !Sub IAM role to execute ${ServiceName} API Gateway
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Principal:
@@ -83,36 +103,28 @@ Resources:
       Policies:
         - PolicyName: LambdaAPIExecutorRolePolicy
           PolicyDocument:
-            Version: '2012-10-17'
+            Version: "2012-10-17"
             Statement:
               - Action: lambda:InvokeFunction
-                Resource: !GetAtt
-                  - LambdaFunction
-                  - Arn
+                Resource: !GetAtt LambdaFunction.Arn
                 Effect: Allow
       Tags:
         - Key: Name
-          Value: !Sub
-            - "${Service}-apigateway-executor"
-            - Service: !Ref Service
+          Value: !Sub ${ServiceName}-apigateway-executor
         - Key: Project
-          Value: !Ref Project
+          Value: !Ref ProjectName
         - Key: Service
-          Value: !Ref Service
+          Value: !Ref ServiceName
         - Key: DeployedBy
           Value: !Ref DeployedBy
 
   CloudWatchLogsRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub
-        - "${Service}-cloudwatch-logger"
-        - Service: !Ref Service
-      Description: !Sub
-        - "IAM role to log for ${Service} API Gateway"
-        - Service: !Ref Service
+      RoleName: !Sub ${ServiceName}-cloudwatch-logger
+      Description: !Sub IAM role to log for ${ServiceName} API Gateway
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Principal:
@@ -122,7 +134,7 @@ Resources:
       Policies:
         - PolicyName: LambdaCloudwatchLoggerPolicy
           PolicyDocument:
-            Version: '2012-10-17'
+            Version: "2012-10-17"
             Statement:
               - Effect: Allow
                 Action:
@@ -136,13 +148,11 @@ Resources:
                 Resource: "*"
       Tags:
         - Key: Name
-          Value: !Sub
-            - "${Service}-apigateway-executor"
-            - Service: !Ref Service
+          Value: !Sub ${ServiceName}-apigateway-executor
         - Key: Project
-          Value: !Ref Project
+          Value: !Ref ProjectName
         - Key: Service
-          Value: !Ref Service
+          Value: !Ref ServiceName
         - Key: DeployedBy
           Value: !Ref DeployedBy
 
@@ -152,27 +162,28 @@ Resources:
   LambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: !Ref Service
+      FunctionName: !Ref ServiceName
       Description: Revisit memories and get reminded everyday via Telegram
       Code:
         S3Bucket: !Ref LambdaFunctionsBucket
-        S3Key: !Sub
-          - "${Service}.zip"
-          - Service: !Ref Service
+        S3Key: !Sub ${ServiceName}.zip
+      Environment:
+        Variables:
+          TELEGRAM_API_KEY: "{{ fact_memoriesbot_telegram_api_key }}"
+          CHAT_ID_SUDDI: "{{ fact_memoriesbot_telegram_suddi_chat_id }}"
+          CHAT_ID_NATASYA: "{{ fact_memoriesbot_telegram_natasya_chat_id }}"
       Handler: main
       Runtime: go1.x
       MemorySize: 128
-      Role: !GetAtt
-        - LambdaExecutorRole
-        - Arn
+      Role: !GetAtt LambdaExecutorRole.Arn
       Timeout: 30
       Tags:
         - Key: Name
-          Value: !Ref Service
+          Value: !Ref ServiceName
         - Key: Project
-          Value: !Ref Project
+          Value: !Ref ProjectName
         - Key: Service
-          Value: !Ref Service
+          Value: !Ref ServiceName
         - Key: DeployedBy
           Value: !Ref DeployedBy
 
@@ -183,23 +194,82 @@ Resources:
     Type: AWS::ApiGatewayV2::Api
     DependsOn: LambdaFunction
     Properties:
-      Name: !Sub
-      - "${Service}-apigateway"
-      - Service: !Ref Service
-      Description: !Sub
-        - "API Gateway for ${Service}"
-        - Service: !Ref Service
+      Name: !Sub ${ServiceName}-apigateway
+      Description: !Sub API Gateway for ${ServiceName}
       ProtocolType: HTTP
-      Target: !Sub
-        - arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${FunctionName}
-        - FunctionName: !Ref Service
+      Target: !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${ServiceName}
       Tags:
-        Name: !Sub
-          - "${Service}-apigateway"
-          - Service: !Ref Service
-        Project: !Ref Project
-        Service: !Ref Service
+        Name: !Sub ${ServiceName}-apigateway
+        Project: !Ref ProjectName
+        Service: !Ref ServiceName
         DeployedBy: !Ref DeployedBy
+
+# ------------------------------------------------------------------------------
+# API GATEWAY INTEGRATIONS
+# ------------------------------------------------------------------------------
+  ApiGatewayIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref ApiGateway
+      ConnectionType: INTERNET
+      Description: !Sub Api Gateway integration with ${ServiceName} Lambda Function
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunction.Arn}/invocations
+      PayloadFormatVersion: "1.0"
+      TimeoutInMillis: 30000
+
+# ------------------------------------------------------------------------------
+# API GATEWAY MANAGED OVERRIDES
+# ------------------------------------------------------------------------------
+  ApiGatewayManagedOverrides:
+    Type: AWS::ApiGatewayV2::ApiGatewayManagedOverrides
+    Properties:
+      ApiId: !Ref ApiGateway
+      Integration:
+        Description: !Sub Default Api Gateway integration with ${ServiceName} Lambda Function
+        PayloadFormatVersion: "1.0"
+        TimeoutInMillis: 30000
+      Route:
+        AuthorizationType: NONE
+        OperationName: UnknownEndpoint
+        Target: !Sub integrations/${ApiGatewayIntegration}
+      Stage:
+        AccessLogSettings:
+          DestinationArn: !GetAtt CloudwatchLogGroup.Arn
+          Format: >-
+            {"requestId":"$context.requestId", "ip": "$context.identity.sourceIp",
+            "requestTime":"$context.requestTime","routeKey":"$context.routeKey",
+            "method":"$context.httpMethod","path":"$context.path",
+            "stage":"$context.stage","status":"$context.status"}
+        AutoDeploy: true
+        DefaultRouteSettings:
+          DetailedMetricsEnabled: true
+          ThrottlingBurstLimit: 10
+          ThrottlingRateLimit: 5
+        Description: !Sub Default API Gateway stage for ${ServiceName}
+        StageVariables:
+          STAGE_NAME: Default
+
+# ------------------------------------------------------------------------------
+# API GATEWAY ROUTES
+# ------------------------------------------------------------------------------
+  WhoamiRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ApiGateway
+      AuthorizationType: NONE
+      OperationName: Whoami
+      RouteKey: GET /
+      Target: !Sub integrations/${ApiGatewayIntegration}
+
+  HealthCheckRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ApiGateway
+      AuthorizationType: NONE
+      OperationName: HealthCheck
+      RouteKey: GET /v1/status
+      Target: !Sub integrations/${ApiGatewayIntegration}
 
 # ------------------------------------------------------------------------------
 # LAMBDA FUNCTION VERSIONS
@@ -209,7 +279,7 @@ Resources:
     DependsOn: LambdaFunction
     Properties:
       FunctionName: !Ref LambdaFunction
-      Description: prod
+      Description: !Ref StageName
       ProvisionedConcurrencyConfig:
         ProvisionedConcurrentExecutions: 5
 
@@ -223,9 +293,7 @@ Resources:
       FunctionName: !Ref LambdaFunction
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
-      SourceArn: !Sub
-        - arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}
-        - ApiGateway: !Ref ApiGateway
+      SourceArn: !Sub arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/${StageName}
 
 # ------------------------------------------------------------------------------
 # CLOUDWATCH LOG GROUPS
@@ -234,10 +302,8 @@ Resources:
     Type: AWS::Logs::LogGroup
     DependsOn: LambdaFunction
     Properties:
-      LogGroupName: !Sub
-        - "/aws/lambda/${FunctionName}"
-        - FunctionName: !Ref LambdaFunction
-      RetentionInDays: 7
+      LogGroupName: !Sub /aws/lambda/${LambdaFunction}
+      RetentionInDays: 3
 
 # ------------------------------------------------------------------------------
 # API GATEWAY STAGES
@@ -247,25 +313,26 @@ Resources:
     DependsOn: ApiGateway
     Properties:
       ApiId: !Ref ApiGateway
-      StageName: prod
-      Description: !Sub
-        - "API Gateway stage for ${Service}"
-        - Service: !Ref Service
+      StageName: !Ref StageName
+      Description: !Sub API Gateway stage ${StageName} for ${ServiceName}
       AccessLogSettings:
-        DestinationArn: !GetAtt
-          - CloudwatchLogGroup
-          - Arn
+        DestinationArn: !GetAtt CloudwatchLogGroup.Arn
         Format: >-
           {"requestId":"$context.requestId", "ip": "$context.identity.sourceIp",
           "requestTime":"$context.requestTime","routeKey":"$context.routeKey",
-          "status":"$context.status"}
+          "method":"$context.httpMethod","path":"$context.path",
+          "stage":"$context.stage","status":"$context.status"}
       AutoDeploy: false
+      DefaultRouteSettings:
+        DetailedMetricsEnabled: true
+        ThrottlingBurstLimit: 10
+        ThrottlingRateLimit: 5
+      StageVariables:
+        STAGE_NAME: !Ref StageName
       Tags:
-        Name: !Sub
-          - "${Service}-apigateway-stage"
-          - Service: !Ref Service
-        Project: !Ref Project
-        Service: !Ref Service
+        Name: !Sub ${ServiceName}-apigateway-stage
+        Project: !Ref ProjectName
+        Service: !Ref ServiceName
         DeployedBy: !Ref DeployedBy
 
 # ------------------------------------------------------------------------------
@@ -276,9 +343,51 @@ Resources:
     DependsOn: ApiGatewayStage
     Properties:
       ApiId: !Ref ApiGateway
-      Description: !Sub
-        - "API Gateway deployment for ${Service}"
-        - Service: !Ref Service
-      StageName: prod
+      Description: !Sub API Gateway deployment for ${ServiceName}
+      StageName: !Ref StageName
+
+# ------------------------------------------------------------------------------
+# API GATEWAY CUSTOM DOMAIN NAMES
+# ------------------------------------------------------------------------------
+  CustomDomainName:
+    Type: AWS::ApiGatewayV2::DomainName
+    DependsOn: Certificate
+    Properties:
+      DomainName: "{{ memoriesbot_domain }}"
+      DomainNameConfigurations:
+        - CertificateArn: !Ref Certificate
+          CertificateName: !Sub ${ServiceName}-cert
+          EndpointType: Regional
+      Tags:
+        Name: !Sub ${ServiceName}-domain
+        Project: !Ref ProjectName
+        Service: !Ref ServiceName
+        DeployedBy: !Ref DeployedBy
+
+# ------------------------------------------------------------------------------
+# API GATEWAY API MAPPINGS
+# ------------------------------------------------------------------------------
+  ApiMapping:
+    Type: 'AWS::ApiGatewayV2::ApiMapping'
+    DependsOn: CustomDomainName
+    Properties:
+      DomainName: "{{ memoriesbot_domain }}"
+      ApiId: !Ref ApiGateway
+      Stage: $default
+
+# ------------------------------------------------------------------------------
+# ROUTE 53 RECORDSETS
+# ------------------------------------------------------------------------------
+  Route53RecordSet:
+    Type: AWS::Route53::RecordSet
+    DependsOn: CustomDomainName
+    Properties:
+      AliasTarget:
+        DNSName: !GetAtt CustomDomainName.RegionalDomainName
+        HostedZoneId: !GetAtt CustomDomainName.RegionalHostedZoneId
+      Comment: !Sub Route53 RecordSet for ${Domain}
+      HostedZoneName: !Ref HostedZone
+      Name: !Ref Domain
+      Type: A
 
 # ------------------------------------------------------------------------------

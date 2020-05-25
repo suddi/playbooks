@@ -1,4 +1,4 @@
-- name: get lambda function
+- name: get lambda function {{ aws_lambda_function_name }}
   command: aws lambda get-function
     --profile {{ aws_profile }}
     --region {{ aws_region }}
@@ -8,11 +8,11 @@
   failed_when: "get_function_result.stderr and
     'ResourceNotFoundException' not in get_function_result.stderr"
 
-- name: create lambda function
+- name: create lambda function {{ aws_lambda_function_name }}
   command: aws lambda create-function
     --profile {{ aws_profile }}
     --region {{ aws_region }}
-    --function-name "{{ aws_lambda_function_name }}"
+    --function-name {{ aws_lambda_function_name }}
     --description {{ aws_lambda_function_description }}
     --runtime {{ aws_lambda_runtime }}
     --role {{ aws_lambda_role_name }}
@@ -21,27 +21,37 @@
     --timeout {{ aws_lambda_timeout }}
     --memory-size {{ aws_lambda_memory }}
     --environment {{ aws_lambda_environment_variables }}
-    --zip-file fileb://{{ bin_file }}
+    {% if bin_file is defined %}
+      --zip-file fileb://{{ bin_file }}
+    {% elif s3_key is defined %}
+      --s3-bucket {{ lambda_domain }}
+      --s3-key {{ s3_key }}
+    {% endif %}
   args:
     chdir: "{{ work_dir }}"
   when: "get_function_result.stderr and
     'ResourceNotFoundException' in get_function_result.stderr"
 
-- name: update lambda function code
+- name: update lambda function {{ aws_lambda_function_name }} code
   command: aws lambda update-function-code
     --profile {{ aws_profile }}
     --region {{ aws_region }}
-    --function-name "{{ aws_lambda_function_name }}"
-    --zip-file fileb://{{ bin_file }}
+    --function-name {{ aws_lambda_function_name }}
+    {% if bin_file is defined %}
+      --zip-file fileb://{{ bin_file }}
+    {% elif s3_key is defined %}
+      --s3-bucket {{ lambda_domain }}
+      --s3-key {{ s3_key }}
+    {% endif %}
   args:
     chdir: "{{ work_dir }}"
   when: "get_function_result.stdout"
 
-- name: update lambda function configuration
+- name: update lambda function {{ aws_lambda_function_name }} configuration
   command: aws lambda update-function-configuration
     --profile {{ aws_profile }}
     --region {{ aws_region }}
-    --function-name "{{ aws_lambda_function_name }}"
+    --function-name {{ aws_lambda_function_name }}
     --description {{ aws_lambda_function_description }}
     --runtime {{ aws_lambda_runtime }}
     --role {{ aws_lambda_role_name }}
@@ -54,11 +64,11 @@
     chdir: "{{ work_dir }}"
   when: "get_function_result.stdout"
 
-- name: get lambda function
+- name: get lambda function {{ aws_lambda_function_name }}
   command: aws lambda get-function
     --profile {{ aws_profile }}
     --region {{ aws_region }}
-    --function-name "{{ aws_lambda_function_name }}"
+    --function-name {{ aws_lambda_function_name }}
   register: get_new_function_result
   changed_when: no
 
@@ -66,9 +76,9 @@
   set_fact:
     aws_lambda_arn: "{{ (get_new_function_result.stdout | from_json).Configuration.FunctionArn }}"
 
-- name: tag lambda function
+- name: tag lambda function {{ aws_lambda_function_name }}
   command: aws lambda tag-resource
     --profile {{ aws_profile }}
-    --region "{{ aws_region }}"
-    --resource "{{ aws_lambda_arn }}"
-    --tags service="{{ service_name }}",project="{{ project_name }}",deployment_method="{{ deployment_method }}"
+    --region {{ aws_region }}
+    --resource {{ aws_lambda_arn }}
+    --tags Name="{{ service_name }}",Service="{{ service_name }}",Project="{{ project_name }}",DeployedBy="{{ deployment_method }}"

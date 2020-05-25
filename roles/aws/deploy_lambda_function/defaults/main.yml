@@ -1,17 +1,9 @@
-repo_version: master
-
 aws_lambda_function_name: "{{ repo_name }}"
 aws_lambda_function_description: ""
-aws_lambda_role_name: "{{ repo_name }}-executor"
+aws_lambda_role_name: "{{ repo_name }}-lambda-executor"
 aws_lambda_handler: main
 aws_lambda_environment_variables: ""
 aws_lambda_runtime: go1.x
-aws_lambda_version: production
-aws_lambda_usage_plan_name: "{{ aws_lambda_function_name }}-{{ aws_lambda_version }}-usage-plan"
-aws_lambda_api_key_name: "{{ aws_lambda_function_name }}-{{ aws_lambda_version }}-api-key"
+aws_lambda_version: prod
 aws_lambda_timeout: 30
 aws_lambda_memory: 128
-aws_lambda_ratelimit: 5
-aws_lambda_burstlimit: 10
-aws_lambda_sg_ids: ""
-aws_lambda_subnet_ids: ""

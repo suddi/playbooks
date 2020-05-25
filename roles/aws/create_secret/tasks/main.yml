@@ -1,0 +1,53 @@
+- name: get secret {{ aws_secret_id }}
+  command: aws secretsmanager describe-secret
+    --profile {{ aws_profile }}
+    --region {{ aws_region }}
+    --secret-id {{ aws_secret_id }}
+  register: describe_secret_result
+  changed_when: no
+  failed_when: "describe_secret_result.stderr and
+    'ResourceNotFoundException' not in describe_secret_result.stderr"
+
+- name: create secret {{ aws_secret_id }}
+  command: aws secretsmanager create-secret
+    --profile {{ aws_profile }}
+    --region {{ aws_region }}
+    --name {{ aws_secret_id }}
+    --description "{{ aws_secret_description }}"
+    {% if aws_secret_binary is defined %}
+      --secret-binary {{ aws_secret_binary }}
+    {% elif aws_secret_string is defined %}
+      --secret-string {{ aws_secret_string }}
+    {% endif %}
+    --tags
+      Key=Name,Value="{{ aws_secret_id | regex_replace('/', '-') }}"
+      Key=Service,Value="{{ service_name }}"
+      Key=Project,Value="{{ project_name }}"
+      Key=DeployedBy,Value="{{ deployment_method }}"
+  when: "describe_secret_result.stderr and
+    'ResourceNotFoundException' in describe_secret_result.stderr"
+
+- name: update secret {{ aws_secret_id }}
+  command: aws secretsmanager update-secret
+    --profile {{ aws_profile }}
+    --region {{ aws_region }}
+    --secret-id {{ aws_secret_id }}
+    --description "{{ aws_secret_description }}"
+    {% if aws_secret_binary is defined %}
+      --secret-binary {{ aws_secret_binary }}
+    {% elif aws_secret_string is defined %}
+      --secret-string {{ aws_secret_string }}
+    {% endif %}
+  when: "describe_secret_result.stdout"
+
+- name: get secret {{ aws_secret_id }}
+  command: aws secretsmanager describe-secret
+    --profile {{ aws_profile }}
+    --region {{ aws_region }}
+    --secret-id {{ aws_secret_id }}
+  register: describe_secret_result
+  changed_when: no
+
+- name: store secret arn as fact
+  set_fact:
+    "fact_{{ aws_secret_id | regex_replace('(/|-)', '_') }}": "{{ (describe_secret_result.stdout | from_json).ARN }}"

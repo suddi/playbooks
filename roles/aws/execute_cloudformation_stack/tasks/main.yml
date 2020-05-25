@@ -1,3 +1,8 @@
+- name: add additional values using string interpolation
+  template:
+    src: "{{ aws_stack_file_path }}"
+    dest: "{{ temp_dir }}/cloudformation.yml"
+
 - name: check if cloudformation stack "{{ aws_stack_name }}" exists
   command: aws cloudformation describe-stacks
     --profile {{ aws_profile }}
@@ -13,7 +18,8 @@
     --region {{ aws_region }}
     --stack-name {{ aws_stack_name }}
   when: "describe_stack_result.stdout and
-  'ROLLBACK_COMPLETE' in describe_stack_result.stdout"
+  'ROLLBACK_COMPLETE' in describe_stack_result.stdout and
+  'UPDATE_ROLLBACK_COMPLETE' not in describe_stack_result.stdout"
 
 - name: wait for cloudformation stack "{{ aws_stack_name }}" deletion to complete
   command: aws cloudformation wait stack-delete-complete
@@ -21,22 +27,24 @@
     --region {{ aws_region }}
     --stack-name {{ aws_stack_name }}
   when: "describe_stack_result.stdout and
-    'ROLLBACK_COMPLETE' in describe_stack_result.stdout"
+    'ROLLBACK_COMPLETE' in describe_stack_result.stdout and
+    'UPDATE_ROLLBACK_COMPLETE' not in describe_stack_result.stdout"
 
 - name: create cloudformation stack "{{ aws_stack_name }}"
   command: aws cloudformation create-stack
     --profile {{ aws_profile }}
     --region {{ aws_region }}
     --stack-name {{ aws_stack_name }}
-    --template-body file://{{ aws_stack_file_path }}
+    --template-body file://{{ temp_dir }}/cloudformation.yml
     --parameters {{ aws_stack_parameters }}
-    {% if aws_stack_capabilities | bool %}
+    {% if aws_stack_capabilities is defined %}
       --capabilities {{ aws_stack_capabilities }}
     {% endif %}
     --tags {{ aws_stack_tags }}
   when: "describe_stack_result.stderr or
     (describe_stack_result.stdout and
-    'ROLLBACK_COMPLETE' in describe_stack_result.stdout)"
+    'ROLLBACK_COMPLETE' in describe_stack_result.stdout and
+    'UPDATE_ROLLBACK_COMPLETE' not in describe_stack_result.stdout)"
 
 - name: wait for cloudformation stack "{{ aws_stack_name }}" creation to complete
   command: aws cloudformation wait stack-create-complete
@@ -45,16 +53,17 @@
     --stack-name {{ aws_stack_name }}
   when: "describe_stack_result.stderr or
     (describe_stack_result.stdout and
-    'ROLLBACK_COMPLETE' in describe_stack_result.stdout)"
+    'ROLLBACK_COMPLETE' in describe_stack_result.stdout and
+    'UPDATE_ROLLBACK_COMPLETE' not in describe_stack_result.stdout)"
 
 - name: update cloudformation stack "{{ aws_stack_name }}"
   command: aws cloudformation update-stack
     --profile {{ aws_profile }}
     --region {{ aws_region }}
     --stack-name {{ aws_stack_name }}
-    --template-body file://{{ aws_stack_file_path }}
+    --template-body file://{{ temp_dir }}/cloudformation.yml
     --parameters {{ aws_stack_parameters }}
-    {% if aws_stack_capabilities | bool %}
+    {% if aws_stack_capabilities is defined %}
       --capabilities {{ aws_stack_capabilities }}
     {% endif %}
     --tags {{ aws_stack_tags }}
@@ -76,6 +85,9 @@
   when:
     - "describe_stack_result.stdout and
       'StackId' in describe_stack_result.stdout"
-    - "update_stack_result.rc != 0"
-    - "update_stack_result.stderr and
-      'No updates are to be performed.' not in update_stack_result.stderr"
+    - "update_stack_result.rc == 0"
+
+- name: remove cloudformation template file
+  file:
+    path: "{{ temp_dir }}/cloudformation.yml"
+    state: absent

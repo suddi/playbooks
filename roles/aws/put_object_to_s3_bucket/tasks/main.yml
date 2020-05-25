@@ -12,7 +12,7 @@
     --acl {{ aws_s3_acl }}
     --body {{ upload_root_dir }}/{{ item }}
     --key {{ item }}
-    {% if server_side_encryption %}
+    {% if server_side_encryption is defined %}
       --server-side-encryption AES256
     {% endif %}
     --tagging project={{ project_name }}&service={{ service_name }}&deployment_method={{ deployment_method }}

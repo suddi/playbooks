@@ -1,6 +1,6 @@
 ---
 AWSTemplateFormatVersion: "2010-09-09"
-Description: CloudFormation template to create certificates in US-East-1
+Description: CloudFormation template to create certificates
 
 Parameters:
   ProjectName:
@@ -21,17 +21,20 @@ Resources:
 # ------------------------------------------------------------------------------
 # CERTIFICATES
 # ------------------------------------------------------------------------------
-  ThinkTechIndustriesCertificate:
+  Certificate:
     Type: AWS::CertificateManager::Certificate
     Properties:
       DomainName: !Ref Domain
       DomainValidationOptions:
         - DomainName: !Ref Domain
           ValidationDomain: !Ref Domain
+        {% if create_alternative is defined and create_alternative %}
         - DomainName: !Sub www.${Domain}
           ValidationDomain: !Ref Domain
       SubjectAlternativeNames:
         - !Sub www.${Domain}
+      {% endif %}
+
       ValidationMethod: EMAIL
       Tags:
         - Key: Name

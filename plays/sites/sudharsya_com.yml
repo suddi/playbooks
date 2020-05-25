@@ -23,6 +23,7 @@
           ParameterKey=ProjectName,ParameterValue={{ project_name }}
           ParameterKey=ServiceName,ParameterValue={{ service_name }}
           ParameterKey=Domain,ParameterValue={{ sudharsya_domain }}
+      create_alternative: yes
 
     - role: aws/execute_cloudformation_stack
       aws_stack_name: "{{ project_name }}-stack"

@@ -18,10 +18,24 @@
     aws_s3_bucket_name: "{{ lambda_domain }}"
     aws_lambda_function_description: Revisit memories and get reminded everyday via Telegram
     aws_lambda_runtime: go1.x
-    aws_lambda_role_name: "{{ memoriesbot_aws_lambda_role_name }}"
     aws_lambda_environment_variables: TELEGRAM_API_KEY={{ memoriesbot_config_telegram_api_key }}
 
   roles:
+    - role: aws/create_secret
+      aws_secret_id: "{{ service_name }}/telegram/api-key"
+      aws_secret_description: API Key for messaging Telegram bot "@sudharsya"
+      aws_secret_string: "{{ memoriesbot_config_telegram_api_key }}"
+
+    - role: aws/create_secret
+      aws_secret_id: "{{ service_name }}/telegram/suddi-chat-id"
+      aws_secret_description: Telegram ChatId for user "suddi"
+      aws_secret_string: "{{ telegram_users.suddi.chat_id }}"
+
+    - role: aws/create_secret
+      aws_secret_id: "{{ service_name }}/telegram/natasya-chat-id"
+      aws_secret_description: Telegram ChatId for user "natasya"
+      aws_secret_string: "{{ telegram_users.natasya.chat_id }}"
+
     - role: utils/empty_work_dir
 
     - role: git/get_source_code
@@ -31,18 +45,24 @@
 
     - role: aws/put_object_to_s3_bucket
       files:
-        - memoriesbot.zip
-
-    - role: utils/empty_work_dir
+        - "{{ service_name }}.zip"
 
     - role: aws/execute_cloudformation_stack
       aws_stack_name: "{{ service_name }}-{{ project_name }}-stack"
       aws_stack_file_path: "{{ files_dir }}/cloudformation/memoriesbot_suddi_io.yml"
       aws_stack_parameters: |
-          ParameterKey=Project,ParameterValue={{ project_name }}
-          ParameterKey=Service,ParameterValue={{ service_name }}
+          ParameterKey=ProjectName,ParameterValue={{ project_name }}
+          ParameterKey=ServiceName,ParameterValue={{ service_name }}
+          ParameterKey=Domain,ParameterValue={{ memoriesbot_domain }}
+          ParameterKey=HostedZone,ParameterValue={{ general_domain }}.
           ParameterKey=LambdaFunctionsBucket,ParameterValue={{ lambda_domain }}
+          ParameterKey=StageName,ParameterValue=prod
       aws_stack_capabilities: CAPABILITY_NAMED_IAM
+
+    - role: aws/deploy_lambda_function
+      s3_key: "{{ service_name }}.zip"
+
+    - role: utils/empty_work_dir
 
     - role: utils/notify_knightwatcher
       message_username: "{{ user }}"
