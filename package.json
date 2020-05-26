@@ -40,7 +40,9 @@
     "decrypt": "ansible-vault decrypt group_vars/all/vault.encrypted.yml || true",
     "download": "ansible-playbook plays/sensitive_files/download.yml && npm run decrypt",
     "encrypt": "ansible-vault encrypt group_vars/all/vault.encrypted.yml || true",
-    "lint": "eslint .",
+    "lint": "npm run lint:python && npm run lint:javascript",
+    "lint:python": "python setup.py lint",
+    "lint:javascript": "esliont .",
     "security-check": "npm audit --audit-level high || true",
     "test": "npm run lint && npm run security-check && npm run coverage",
     "upload": "npm run encrypt && ansible-playbook plays/sensitive_files/upload.yml"
