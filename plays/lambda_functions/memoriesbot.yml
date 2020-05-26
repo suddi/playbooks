@@ -7,9 +7,9 @@
     service_name: "{{ memoriesbot_project_name }}"
     service_url: "{{ memoriesbot_service_url }}"
 
-    repo_name: memoriesbot
+    repo_name: "{{ service_name }}"
     repo_url: "{{ github_account }}/{{ repo_name }}.git"
-    bin_file: "{{ work_dir }}/build/memoriesbot.zip"
+    bin_file: "{{ work_dir }}/build/{{ service_name }}.zip"
 
     user: "{{ runtime_user }}"
 

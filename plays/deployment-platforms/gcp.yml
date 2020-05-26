@@ -1,0 +1,7 @@
+- name: deploy memoriesbot to aws lambda
+  hosts: local
+  gather_facts: no
+
+  tasks:
+    - name: enable google photos apis
+      command: gcloud services enable photoslibrary.googleapis.com

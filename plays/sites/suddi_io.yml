@@ -4,6 +4,11 @@
 
   vars:
     project_name: "{{ general_project_name }}-io"
+    service_url: "{{ general_service_url }}"
+
+    repo_name: suddi.github.io
+
+    user: "{{ runtime_user }}"
 
   roles:
     - role: aws/execute_cloudformation_stack
@@ -56,3 +61,9 @@
           ParameterKey=ServiceName,ParameterValue=vault-{{ project_name }}
           ParameterKey=Domain,ParameterValue={{ vault_domain }}
       service_name: vault-{{ project_name }}
+
+    - role: utils/notify_knightwatcher
+      message_username: "{{ user }}"
+      message_type: deploy
+      message_link: "{{ service_url }}"
+      message_repo_name: "{{ repo_name }}"

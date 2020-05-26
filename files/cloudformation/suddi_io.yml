@@ -27,13 +27,24 @@
   # ------------------------------------------------------------------------------
   # ROUTE 53 RECORDSETS
   # ------------------------------------------------------------------------------
-    Route53RecordSet:
+    DmarcRoute53RecordSet:
       Type: AWS::Route53::RecordSet
       Properties:
         HostedZoneName: !Ref HostedZone
         Name: !Sub "_dmarc.${Domain}"
         ResourceRecords:
           - !Sub '"v=DMARC1; p=quarantine; rua=mailto:${MailAdministrator}"'
+        TTL: "300"
+        Type: TXT
+
+    GoogleSiteVerificationRoute53RecordSet:
+      Type: AWS::Route53::RecordSet
+      Properties:
+        HostedZoneName: !Ref HostedZone
+        Name: !Ref Domain
+        ResourceRecords:
+          - '"v=spf1 include:mailgun.org ~all"'
+          - '"google-site-verification={{ google_site_verification_text }}"'
         TTL: "300"
         Type: TXT
 

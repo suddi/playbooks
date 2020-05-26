@@ -79,6 +79,8 @@ linkedin_domain: "{{ vault_linkedin_domain }}"
 vault_domain: "{{ vault_vault_domain }}"
 general_service_url: "{{ vault_general_service_url }}"
 
+google_site_verification_text: "{{ vault_google_site_verification_text }}"
+
 # Knightwatcher
 knightwatcher_project_name: knightwatcher
 knightwatcher_service_url: "{{ vault_knightwatcher_service_url }}"

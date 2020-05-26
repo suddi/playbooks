@@ -240,7 +240,8 @@ Resources:
             {"requestId":"$context.requestId", "ip": "$context.identity.sourceIp",
             "requestTime":"$context.requestTime","routeKey":"$context.routeKey",
             "method":"$context.httpMethod","path":"$context.path",
-            "stage":"$context.stage","status":"$context.status"}
+            "protocol":"$context.protocol","stage":"$context.stage",
+            "status":"$context.status","responseLength":"$context.responseLength"}
         AutoDeploy: true
         DefaultRouteSettings:
           DetailedMetricsEnabled: true
@@ -321,7 +322,8 @@ Resources:
           {"requestId":"$context.requestId", "ip": "$context.identity.sourceIp",
           "requestTime":"$context.requestTime","routeKey":"$context.routeKey",
           "method":"$context.httpMethod","path":"$context.path",
-          "stage":"$context.stage","status":"$context.status"}
+          "protocol":"$context.protocol","stage":"$context.stage",
+          "status":"$context.status","responseLength":"$context.responseLength"}
       AutoDeploy: false
       DefaultRouteSettings:
         DetailedMetricsEnabled: true
