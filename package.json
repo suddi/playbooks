@@ -1,6 +1,6 @@
 {
   "name": "playbooks",
-  "description": "Personal ansible playbooks",
+  "description": "Ansible infrastructure-as-code playbooks for publishing packages to NPM, PyPy, setting up servers and deployment to AWS, GCP and Heroku",
   "version": "1.0.0",
   "private": true,
   "homepage": "https://github.com/suddi/playbooks",
@@ -20,7 +20,17 @@
     "utils"
   ],
   "license": "MIT",
-  "keywords": [],
+  "keywords": [
+    "playbooks",
+    "ansible",
+    "iac",
+    "infrastructure-as-code",
+    "cloudformation",
+    "deployment-manager",
+    "aws",
+    "gcp",
+    "heroku"
+  ],
   "engines": {
     "node": ">= 12.0.0",
     "npm": ">= 6.0.0"

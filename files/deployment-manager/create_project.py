@@ -1,4 +1,4 @@
-import copy
+# pylint: disable-msg=too-many-locals,too-many-branches,too-many-statements,import-error
 import sys
 
 from apis import get_api_resource_name
@@ -11,9 +11,9 @@ def generate_config(context):
     billing_name = 'billing_' + project_id
 
     if not is_project_parent_valid(context.properties):
-        sys.exit(('Invalid [organization-id, parent-folder-id], '
-            'must specify at least one. If setting up Shared VPC, you '
-            'must specify at least organization-id.'))
+        sys.exit('Invalid [organization-id, parent-folder-id], ' + \
+            'must specify at least one. If setting up Shared VPC, you ' + \
+            'must specify at least organization-id.')
 
     parent_type = ''
     parent_id = ''
@@ -71,7 +71,7 @@ def generate_config(context):
     }]
 
     if (context.properties.get('iam-policy-patch') or
-        context.properties.get('set-dm-service-account-as-owner')):
+            context.properties.get('set-dm-service-account-as-owner')):
         iam_policy_patch = context.properties.get('iam-policy-patch', {})
 
         if iam_policy_patch.get('add'):
@@ -109,7 +109,8 @@ def generate_config(context):
         resources.extend([{
             # Get the IAM policy first so that we do not remove any existing bindings.
             'name': 'get-iam-policy-' + project_id,
-            'action': 'gcp-types/cloudresourcemanager-v1:cloudresourcemanager.projects.getIamPolicy',
+            'action': 'gcp-types/cloudresourcemanager-v1:cloudresourcemanager.' + \
+                'projects.getIamPolicy',
             'properties': {
                 'resource': project_id,
             },
@@ -121,7 +122,8 @@ def generate_config(context):
             # Set the IAM policy patching the existing policy with what ever is currently in the
             # config.
             'name': 'patch-iam-policy-' + project_id,
-            'action': 'gcp-types/cloudresourcemanager-v1:cloudresourcemanager.projects.setIamPolicy',
+            'action': 'gcp-types/cloudresourcemanager-v1:cloudresourcemanager.' + \
+                'projects.setIamPolicy',
             'properties': {
                 'resource': project_id,
                 'policy': '$(ref.get-iam-policy-' + project_id + ')',
@@ -190,7 +192,7 @@ def generate_config(context):
     if context.properties.get('shared_vpc_service_of'):
         resources.append({
             'name': project_id + '-xpn-service-' +
-                context.properties['shared_vpc_service_of'],
+                    context.properties['shared_vpc_service_of'],
             'type': 'compute.beta.xpnResource',
             'properties': {
                 'organization-id': context.properties['organization-id'],
@@ -268,5 +270,4 @@ def is_project_parent_valid(properties):
     """
     if ('shared_vpc_service_of' in properties or properties['shared_vpc_host']):
         return 'organization-id' in properties
-    else:
-        return ('organization-id' in properties or 'parent-folder-id' in properties)
+    return 'organization-id' in properties or 'parent-folder-id' in properties

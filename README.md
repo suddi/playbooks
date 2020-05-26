@@ -9,7 +9,7 @@
 
 [![codecov](https://codecov.io/gh/suddi/playbooks/branch/master/graphs/commits.svg)](https://codecov.io/gh/suddi/playbooks)
 
-Ansible playbooks for publishing packages to NPM, PyPy and deployment to AWS, Heroku
+Ansible infrastructure-as-code playbooks for publishing packages to NPM, PyPy, setting up servers and deployment to AWS, GCP and Heroku
 
 ## Installation
 
