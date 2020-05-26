@@ -45,6 +45,7 @@
     "lint:javascript": "eslint .",
     "security-check": "npm audit --audit-level high || true",
     "test": "npm run lint && npm run security-check && npm run coverage",
+    "test:javascript": "npm run lint:javascript && npm run security-check && npm run coverage",
     "upload": "npm run encrypt && ansible-playbook plays/sensitive_files/upload.yml"
   },
   "dependencies": {
