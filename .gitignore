@@ -62,3 +62,6 @@ inventory.ini
 
 plays/test.yml
 roles/test/
+
+__pycache__/
+*.pyc

@@ -59,7 +59,9 @@
     --version {{ aws_lambda_version }}
     --timeout {{ aws_lambda_timeout }}
     --memory-size {{ aws_lambda_memory }}
-    --environment {{ aws_lambda_environment_variables }}
+    {% if aws_lambda_environment_variables is defined %}
+      --environment Variables="{{ aws_lambda_environment_variables }}"
+    {% endif %}
   args:
     chdir: "{{ work_dir }}"
   when: "get_function_result.stdout"

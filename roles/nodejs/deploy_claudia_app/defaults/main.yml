@@ -3,11 +3,11 @@ repo_version: master
 aws_lambda_function_name: "{{ repo_name }}"
 aws_lambda_function_description: ""
 aws_lambda_config_json: "{{ files_dir }}/{{ repo_name }}/claudia.json"
-aws_lambda_role_name: "{{ repo_name }}-executor"
+aws_lambda_role_name: "{{ repo_name }}-lambda-executor"
 aws_lambda_environment_variables: ""
 aws_lambda_runtime: nodejs12.x
 aws_lambda_module: lib/app
-aws_lambda_version: production
+aws_lambda_version: prod
 aws_lambda_usage_plan_name: "{{ aws_lambda_function_name }}-{{ aws_lambda_version }}-usage-plan"
 aws_lambda_api_key_name: "{{ aws_lambda_function_name }}-{{ aws_lambda_version }}-api-key"
 aws_lambda_timeout: 30

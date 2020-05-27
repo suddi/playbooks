@@ -17,22 +17,11 @@
   args:
     chdir: "{{ work_dir }}"
 
-- name: get cost of modules
-  command: node_modules/.bin/cost-of-modules
-    --no-install
-  args:
-    chdir: "{{ work_dir }}"
-  register: cost_of_modules_result
-
-- name: print cost of modules
-  debug:
-    msg: "{{ cost_of_modules_result.stdout }}"
-
 - name: get lambda function
   command: aws lambda get-function
     --profile {{ aws_profile }}
-    --function-name {{ aws_lambda_function_name }}
     --region {{ aws_region }}
+    --function-name {{ aws_lambda_function_name }}
   register: get_function_result
   changed_when: no
   failed_when: "get_function_result.stderr and
@@ -40,11 +29,11 @@
 
 - name: create lambda function
   command: node_modules/.bin/claudia create
+    --region {{ aws_region }}
     --name {{ aws_lambda_function_name }}
     --description {{ aws_lambda_function_description }}
     --runtime {{ aws_lambda_runtime }}
     --role {{ aws_lambda_role_name }}
-    --region {{ aws_region }}
     --api-module {{ aws_lambda_module }}
     --config {{ aws_lambda_config_json }}
     --version {{ aws_lambda_version }}
@@ -62,6 +51,7 @@
 
 - name: update lambda function code
   command: node_modules/.bin/claudia update
+    --region {{ aws_region }}
     --config {{ aws_lambda_config_json }}
     --version {{ aws_lambda_version }}
     --set-env {{ aws_lambda_environment_variables }}
@@ -74,8 +64,8 @@
 - name: get lambda function
   command: aws lambda get-function
     --profile {{ aws_profile }}
-    --function-name "{{ aws_lambda_function_name }}"
     --region {{ aws_region }}
+    --function-name {{ aws_lambda_function_name }}
   register: get_new_function_result
   changed_when: no
 
@@ -85,18 +75,19 @@
 
 - name: tag lambda function
   command: aws lambda tag-resource
-    --resource "{{ aws_lambda_arn }}"
-    --region "{{ aws_region }}"
-    --tags service="{{ service_name }}",project="{{ project_name }}",deployment_method="{{ deployment_method }}"
     --profile {{ aws_profile }}
+    --region {{ aws_region }}
+    --resource {{ aws_lambda_arn }}
+    --tags Name="{{ service_name }}",Service="{{ service_name }}",Project="{{ project_name }}",DeployedBy="{{ deployment_method }}"
 
 - name: create api gateway usage plan
   command: aws apigateway create-usage-plan
+    --profile {{ aws_profile }}
+    --region {{ aws_region }}
     --name {{ aws_lambda_usage_plan_name }}
     --description "Usage plan for {{ aws_lambda_function_name }}:{{ aws_lambda_version }}"
     --api-stages apiId={{ (lookup('file', aws_lambda_config_json) | from_json).api.id }},stage={{ aws_lambda_version }}
     --throttle burstLimit={{ aws_lambda_burstlimit }},rateLimit={{ aws_lambda_ratelimit }}
-    --profile {{ aws_profile }}
   register: api_gateway_usage_plan_result
   when: "create_usage_plan and
     get_function_result.stderr and
@@ -104,11 +95,12 @@
 
 - name: create api gateway api key
   command: aws apigateway create-api-key
+    --profile {{ aws_profile }}
+    --region {{ aws_region }}
     --name {{ aws_lambda_api_key_name }}
     --description "API Key for {{ aws_lambda_function_name }}:{{ aws_lambda_version }}"
     --enabled
     --generate-distinct-id
-    --profile {{ aws_profile }}
   register: api_gateway_api_key_result
   when: "create_api_key and
     get_function_result.stderr and
@@ -116,10 +108,11 @@
 
 - name: create api gateway usage plan key
   command: aws apigateway create-usage-plan-key
+    --profile {{ aws_profile }}
+    --region {{ aws_region }}
     --usage-plan-id {{ (api_gateway_usage_plan_result.stdout | from_json)['id'] }}
     --key-id {{ (api_gateway_api_key_result.stdout | from_json)['id'] }}
     --key-type "API_KEY"
-    --profile {{ aws_profile }}
   when: "create_api_key and
     get_function_result.stderr and
     'ResourceNotFoundException' in get_function_result.stderr"

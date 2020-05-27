@@ -1,0 +1,33 @@
+- name: get source code
+  git:
+    repo: "{{ repo_url }}"
+    dest: "{{ work_dir }}"
+    force: yes
+    update: yes
+    version: "{{ repo_version }}"
+
+# - name: switch to .nvmrc node version
+#   shell: nvm use
+#   args:
+#     chdir: "{{ work_dir }}"
+#     removes: .nvmrc
+
+- name: install npm dependencies for build
+  command: npm install
+  args:
+    chdir: "{{ work_dir }}"
+
+- name: generate lib/config.js from config.js.j2 template
+  template:
+    src: "{{ work_dir }}/config.js.j2"
+    dest: "{{ work_dir }}/lib/config.js"
+    mode: "0644"
+
+- name: pack claudia app
+  command: node_modules/.bin/claudia pack
+    --output build/{{ service_name }}.zip
+    --no-optional-dependencies
+    --npm-options=--ignore-scripts
+    --force
+  args:
+    chdir: "{{ work_dir }}"

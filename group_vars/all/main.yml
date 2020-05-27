@@ -73,6 +73,7 @@ cicd_user_npm_auth_token: "{{ vault_cicd_user_npm_auth_token }}"
 # General
 general_project_name: suddi
 general_domain: "{{ vault_general_domain }}"
+bot_domain: "{{ vault_bot_domain }}"
 github_domain: "{{ vault_github_domain }}"
 lambda_domain: "{{ vault_lambda_domain }}"
 linkedin_domain: "{{ vault_linkedin_domain }}"
@@ -81,14 +82,15 @@ general_service_url: "{{ vault_general_service_url }}"
 
 google_site_verification_text: "{{ vault_google_site_verification_text }}"
 
-# Knightwatcher
-knightwatcher_project_name: knightwatcher
-knightwatcher_service_url: "{{ vault_knightwatcher_service_url }}"
+bot_project_name: bot
+bot_service_url: "{{ vault_bot_service_url }}"
 
-knightwatcher_config_aws_region: "{{ vault_knightwatcher_config_aws_region }}"
-knightwatcher_config_tablename: "{{ vault_knightwatcher_config_tablename }}"
-knightwatcher_config_telegram_api_key: "{{ vault_knightwatcher_config_telegram_api_key }}"
-knightwatcher_config_default_notifier: "{{ vault_knightwatcher_config_default_notifier }}"
+# KnightwatcherBot
+knightwatcherbot_project_name: knightwatcherbot
+
+knightwatcherbot_config_tablename: "{{ vault_knightwatcherbot_config_tablename }}"
+knightwatcherbot_config_table_username_index: "{{ vault_knightwatcherbot_config_table_username_index }}"
+knightwatcherbot_config_telegram_api_key: "{{ vault_knightwatcherbot_config_telegram_api_key }}"
 
 # Kobe
 kobe_project_name: kobe
@@ -99,8 +101,6 @@ kobe_config_microsoft_app_password: "{{ vault_kobe_config_microsoft_app_password
 
 # MemoriesBot
 memoriesbot_project_name: memoriesbot
-memoriesbot_domain: "{{ vault_memoriesbot_domain }}"
-memoriesbot_service_url: "{{ vault_memoriesbot_service_url }}"
 
 memoriesbot_config_telegram_api_key: "{{ vault_memoriesbot_config_telegram_api_key }}"
 

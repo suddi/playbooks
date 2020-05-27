@@ -1,0 +1,335 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+Description: CloudFormation template to serve bots through API Gateway
+
+Parameters:
+  ProjectName:
+    Description: Project name for the resources under this CloudFormation template
+    Type: String
+  ServiceName:
+    Description: Service name prefix for the resources under this CloudFormation template
+    Type: String
+  DeployedBy:
+    Description: Deployment user/service
+    Type: String
+    Default: ansible
+  Domain:
+    Description: Domain for this service
+    Type: String
+  HostedZone:
+    Description: Name of the hosted zone in Route 53
+    Type: String
+  StageName:
+    Description: Stage name under which the deployment will be made
+    Type: String
+
+Resources:
+# ------------------------------------------------------------------------------
+# CERTIFICATES
+# ------------------------------------------------------------------------------
+  Certificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !Ref Domain
+      DomainValidationOptions:
+        - DomainName: !Ref Domain
+          ValidationDomain: !Ref Domain
+      ValidationMethod: EMAIL
+      Tags:
+        - Key: Name
+          Value: !Sub ${ServiceName}-cert
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Service
+          Value: !Ref ServiceName
+        - Key: DeployedBy
+          Value: !Ref DeployedBy
+
+# ------------------------------------------------------------------------------
+# CLOUDWATCH LOG GROUPS
+# ------------------------------------------------------------------------------
+  CloudwatchLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${ServiceName}
+      RetentionInDays: 3
+
+# ------------------------------------------------------------------------------
+# API GATEWAY APIS
+# ------------------------------------------------------------------------------
+  ApiGateway:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: !Sub ${ServiceName}-apigateway
+      Description: !Sub API Gateway for ${ServiceName}
+      ProtocolType: HTTP
+      Tags:
+        Name: !Sub ${ServiceName}-apigateway
+        Project: !Ref ProjectName
+        Service: !Ref ServiceName
+        DeployedBy: !Ref DeployedBy
+
+# ------------------------------------------------------------------------------
+# API GATEWAY INTEGRATIONS
+# ------------------------------------------------------------------------------
+  KnightwatcherBotApiGatewayIntegration:
+    DependsOn: ApiGateway
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref ApiGateway
+      ConnectionType: INTERNET
+      Description: !Sub Api Gateway integration with knightwatcherbot Lambda Function
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub
+        - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunctionArn}/invocations
+        - LambdaFunctionArn: !ImportValue KnightwatcherBotLambdaFunctionArn
+      PayloadFormatVersion: "1.0"
+      TimeoutInMillis: 30000
+
+  MemoriesBotApiGatewayIntegration:
+    DependsOn: ApiGateway
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref ApiGateway
+      ConnectionType: INTERNET
+      Description: !Sub Api Gateway integration with memoriesbot Lambda Function
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub
+        - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunctionArn}/invocations
+        - LambdaFunctionArn: !ImportValue MemoriesBotLambdaFunctionArn
+      PayloadFormatVersion: "1.0"
+      TimeoutInMillis: 30000
+
+# ------------------------------------------------------------------------------
+# API GATEWAY ROUTES
+# ------------------------------------------------------------------------------
+  WhoamiRoute:
+    DependsOn: MemoriesBotApiGatewayIntegration
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ApiGateway
+      AuthorizationType: NONE
+      OperationName: Whoami
+      RouteKey: GET /
+      Target: !Sub integrations/${MemoriesBotApiGatewayIntegration}
+
+  HealthCheckRoute:
+    DependsOn: MemoriesBotApiGatewayIntegration
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ApiGateway
+      AuthorizationType: NONE
+      OperationName: HealthCheck
+      RouteKey: GET /v1/status
+      Target: !Sub integrations/${MemoriesBotApiGatewayIntegration}
+
+  FaviconRoute:
+    DependsOn: KnightwatcherBotApiGatewayIntegration
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ApiGateway
+      AuthorizationType: NONE
+      OperationName: Favicon
+      RouteKey: GET /favicon.ico
+      Target: !Sub integrations/${KnightwatcherBotApiGatewayIntegration}
+
+  CircleCIHookRoute:
+    DependsOn: KnightwatcherBotApiGatewayIntegration
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ApiGateway
+      AuthorizationType: NONE
+      OperationName: CircleCIHook
+      RouteKey: POST /v1/hooks/circleci
+      Target: !Sub integrations/${KnightwatcherBotApiGatewayIntegration}
+
+  TelegramHookRoute:
+    DependsOn: KnightwatcherBotApiGatewayIntegration
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ApiGateway
+      AuthorizationType: NONE
+      OperationName: TelegramHook
+      RouteKey: POST /v1/hooks/telegram
+      Target: !Sub integrations/${KnightwatcherBotApiGatewayIntegration}
+
+  MessageRoute:
+    DependsOn: KnightwatcherBotApiGatewayIntegration
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ApiGateway
+      AuthorizationType: NONE
+      OperationName: Message
+      RouteKey: POST /v1/messages
+      Target: !Sub integrations/${KnightwatcherBotApiGatewayIntegration}
+
+  UnknownEndpointRoute:
+    DependsOn: MemoriesBotApiGatewayIntegration
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ApiGateway
+      AuthorizationType: NONE
+      OperationName: UnknownEndpoint
+      RouteKey: $default
+      Target: !Sub integrations/${MemoriesBotApiGatewayIntegration}
+
+# ------------------------------------------------------------------------------
+# API GATEWAY STAGES
+# ------------------------------------------------------------------------------
+  ApiGatewayStage:
+    Type: AWS::ApiGatewayV2::Stage
+    DependsOn:
+      - WhoamiRoute
+      - HealthCheckRoute
+      - FaviconRoute
+      - CircleCIHookRoute
+      - TelegramHookRoute
+      - MessageRoute
+      - UnknownEndpointRoute
+    Properties:
+      ApiId: !Ref ApiGateway
+      StageName: !Ref StageName
+      Description: !Sub API Gateway stage ${StageName} for ${ServiceName}
+      AccessLogSettings:
+        DestinationArn: !GetAtt CloudwatchLogGroup.Arn
+        Format: >-
+          {"requestId":"$context.requestId", "ip": "$context.identity.sourceIp",
+          "requestTime":"$context.requestTime","routeKey":"$context.routeKey",
+          "method":"$context.httpMethod","path":"$context.path",
+          "protocol":"$context.protocol","stage":"$context.stage",
+          "status":"$context.status","responseLength":"$context.responseLength"}
+      AutoDeploy: false
+      DefaultRouteSettings:
+        DetailedMetricsEnabled: true
+        ThrottlingBurstLimit: 10
+        ThrottlingRateLimit: 5
+      StageVariables:
+        STAGE_NAME: !Ref StageName
+      Tags:
+        Name: !Sub ${ServiceName}-apigateway-stage
+        Project: !Ref ProjectName
+        Service: !Ref ServiceName
+        DeployedBy: !Ref DeployedBy
+
+# ------------------------------------------------------------------------------
+# API GATEWAY DEPLOYMENTS
+# ------------------------------------------------------------------------------
+  APIGatewayDeployment:
+    Type: AWS::ApiGatewayV2::Deployment
+    DependsOn: ApiGatewayStage
+    Properties:
+      ApiId: !Ref ApiGateway
+      Description: !Sub API Gateway deployment for ${ServiceName}
+      StageName: !Ref StageName
+
+# ------------------------------------------------------------------------------
+# LAMBDA FUNCTION PERMISSIONS
+# ------------------------------------------------------------------------------
+  WhoamiLambdaFunctionPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn: ApiGateway
+    Properties:
+      FunctionName: !ImportValue MemoriesBotLambdaFunctionArn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/
+
+  HealthCheckLambdaFunctionPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn: ApiGateway
+    Properties:
+      FunctionName: !ImportValue MemoriesBotLambdaFunctionArn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/v1/status
+
+  FaviconLambdaFunctionPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn: ApiGateway
+    Properties:
+      FunctionName: !ImportValue KnightwatcherBotLambdaFunctionArn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/favicon.ico
+
+  CircleCIHookLambdaFunctionPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn: ApiGateway
+    Properties:
+      FunctionName: !ImportValue KnightwatcherBotLambdaFunctionArn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/v1/hooks/circleci
+
+  TelegramHookLambdaFunctionPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn: ApiGateway
+    Properties:
+      FunctionName: !ImportValue KnightwatcherBotLambdaFunctionArn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/v1/hooks/telegram
+
+  MessageLambdaFunctionPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn: ApiGateway
+    Properties:
+      FunctionName: !ImportValue KnightwatcherBotLambdaFunctionArn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/v1/messages
+
+  UnknownEndpointLambdaPermissions:
+    Type: AWS::Lambda::Permission
+    DependsOn: ApiGateway
+    Properties:
+      FunctionName: !ImportValue MemoriesBotLambdaFunctionArn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/$default
+
+# ------------------------------------------------------------------------------
+# API GATEWAY CUSTOM DOMAIN NAMES
+# ------------------------------------------------------------------------------
+  CustomDomainName:
+    Type: AWS::ApiGatewayV2::DomainName
+    DependsOn: Certificate
+    Properties:
+      DomainName: !Ref Domain
+      DomainNameConfigurations:
+        - CertificateArn: !Ref Certificate
+          CertificateName: bot-cert
+          EndpointType: Regional
+      Tags:
+        Name: bot-domain
+        Project: !Ref ProjectName
+        Service: bot
+        DeployedBy: !Ref DeployedBy
+
+# ------------------------------------------------------------------------------
+# API GATEWAY API MAPPINGS
+# ------------------------------------------------------------------------------
+  ApiMapping:
+    Type: 'AWS::ApiGatewayV2::ApiMapping'
+    DependsOn: CustomDomainName
+    Properties:
+      DomainName: !Ref Domain
+      ApiId: !Ref ApiGateway
+      Stage: !Ref StageName
+
+# ------------------------------------------------------------------------------
+# ROUTE 53 RECORDSETS
+# ------------------------------------------------------------------------------
+  Route53RecordSet:
+    Type: AWS::Route53::RecordSet
+    DependsOn: CustomDomainName
+    Properties:
+      AliasTarget:
+        DNSName: !GetAtt CustomDomainName.RegionalDomainName
+        HostedZoneId: !GetAtt CustomDomainName.RegionalHostedZoneId
+      Comment: !Sub Route53 RecordSet for ${Domain}
+      HostedZoneName: !Ref HostedZone
+      Name: !Ref Domain
+      Type: A
+
+# ------------------------------------------------------------------------------

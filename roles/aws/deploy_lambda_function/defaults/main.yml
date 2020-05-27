@@ -2,7 +2,6 @@ aws_lambda_function_name: "{{ repo_name }}"
 aws_lambda_function_description: ""
 aws_lambda_role_name: "{{ repo_name }}-lambda-executor"
 aws_lambda_handler: main
-aws_lambda_environment_variables: ""
 aws_lambda_runtime: go1.x
 aws_lambda_version: prod
 aws_lambda_timeout: 30

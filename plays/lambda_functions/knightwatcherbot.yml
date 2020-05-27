@@ -1,30 +1,31 @@
-- name: deploy memoriesbot to aws lambda
+- name: deploy knightwatcherbot to aws lambda
   hosts: local
   gather_facts: no
 
   vars:
     project_name: "{{ general_project_name }}-io"
-    service_name: "{{ memoriesbot_project_name }}"
+    service_name: "{{ knightwatcherbot_project_name }}"
     service_url: "{{ bot_service_url }}"
 
     repo_name: "{{ service_name }}"
     repo_url: "{{ github_account }}/{{ repo_name }}.git"
-    bin_file: "{{ work_dir }}/build/{{ service_name }}.zip"
 
     user: "{{ runtime_user }}"
+
+    node_version: v12
 
     upload_root_dir: "{{ work_dir }}/build"
 
     aws_s3_bucket_name: "{{ lambda_domain }}"
-    aws_lambda_runtime: go1.x
+    aws_lambda_runtime: nodejs12.x
 
   roles:
+    - role: nodejs/assert_node_version
+      expected_node_version: "{{ node_version }}"
+
     - role: utils/empty_work_dir
 
-    - role: git/get_source_code
-
-    - role: golang/build_go_package
-      make_zip: yes
+    - role: nodejs/pack_claudia_app
 
     - role: aws/put_object_to_s3_bucket
       files:
@@ -38,11 +39,12 @@
           ParameterKey=ServiceName,ParameterValue={{ service_name }}
           ParameterKey=LambdaFunctionsBucket,ParameterValue={{ lambda_domain }}
           ParameterKey=VersionName,ParameterValue=prod
+          ParameterKey=DynamoDBTableName,ParameterValue={{ knightwatcherbot_config_tablename }}
+          ParameterKey=DynamoDBTableUsernameIndex,ParameterValue={{ knightwatcherbot_config_table_username_index }}
       aws_stack_capabilities: CAPABILITY_NAMED_IAM
 
     - role: aws/deploy_lambda_function
       s3_key: "{{ service_name }}.zip"
-
 
     - role: utils/empty_work_dir
 

@@ -1,0 +1,27 @@
+- name: provision resources for bot.suddi.io
+  hosts: local
+  gather_facts: no
+
+  vars:
+    project_name: "{{ general_project_name }}-io"
+    service_name: "{{ bot_project_name }}"
+    service_url: "{{ bot_service_url }}"
+
+    user: "{{ runtime_user }}"
+
+  roles:
+    - role: aws/execute_cloudformation_stack
+      aws_stack_name: "{{ service_name }}-{{ project_name }}-stack"
+      aws_stack_file_path: "{{ files_dir }}/cloudformation/bot_suddi_io.yml"
+      aws_stack_parameters: |
+          ParameterKey=ProjectName,ParameterValue={{ project_name }}
+          ParameterKey=ServiceName,ParameterValue={{ service_name }}
+          ParameterKey=Domain,ParameterValue={{ bot_domain }}
+          ParameterKey=HostedZone,ParameterValue={{ general_domain }}.
+          ParameterKey=StageName,ParameterValue=prod
+
+    - role: utils/notify_knightwatcher
+      message_username: "{{ user }}"
+      message_type: deploy
+      message_link: "{{ service_url }}"
+      message_repo_name: "{{ service_name }}"

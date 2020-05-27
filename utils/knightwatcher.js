@@ -31,7 +31,7 @@ function getMessage(options) {
 function sendMessage(options) {
     const message = getMessage(options);
     return axios
-        .post('https://bot.suddi.io/message', {
+        .post('https://bot.suddi.io/v1/messages', {
             username: 'suddi_r',
             text: message
         });

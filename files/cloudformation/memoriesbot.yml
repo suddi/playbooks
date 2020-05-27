@@ -1,0 +1,115 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+Description: CloudFormation template to deploy memoriesbot lambda function
+
+Parameters:
+  ProjectName:
+    Description: Project name for the resources under this CloudFormation template
+    Type: String
+  ServiceName:
+    Description: Service name prefix for the resources under this CloudFormation template
+    Type: String
+  DeployedBy:
+    Description: Deployment user/service
+    Type: String
+    Default: ansible
+  LambdaFunctionsBucket:
+    Description: Lambda functions bucket to retrieve build
+    Type: String
+  VersionName:
+    Description: Version name for the deployment
+    Type: String
+
+Resources:
+# ------------------------------------------------------------------------------
+# IDENTITY ACCESS MANAGEMENT ROLES
+# ------------------------------------------------------------------------------
+  LambdaExecutorRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${ServiceName}-lambda-executor
+      Description: !Sub IAM role to execute ${ServiceName} Lambda function
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs
+      Policies:
+        - PolicyName: LambdaS3BucketReadOnlyPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Action:
+                  - s3:GetObject
+                  - s3:ListObjects
+                Resource: !Sub arn:aws:s3:::${LambdaFunctionsBucket}
+                Effect: Allow
+      Tags:
+        - Key: Name
+          Value: !Sub ${ServiceName}-lambda-executor
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Service
+          Value: !Ref ServiceName
+        - Key: DeployedBy
+          Value: !Ref DeployedBy
+
+# ------------------------------------------------------------------------------
+# LAMBDA FUNCTIONS
+# ------------------------------------------------------------------------------
+  LambdaFunction:
+    Type: AWS::Lambda::Function
+    DependsOn: LambdaExecutorRole
+    Properties:
+      FunctionName: !Ref ServiceName
+      Description: Revisit memories and get reminded everyday via Telegram
+      Code:
+        S3Bucket: !Ref LambdaFunctionsBucket
+        S3Key: !Sub ${ServiceName}.zip
+      Handler: main
+      Runtime: go1.x
+      MemorySize: 128
+      Role: !GetAtt LambdaExecutorRole.Arn
+      Timeout: 30
+      Tags:
+        - Key: Name
+          Value: !Ref ServiceName
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Service
+          Value: !Ref ServiceName
+        - Key: DeployedBy
+          Value: !Ref DeployedBy
+
+# ------------------------------------------------------------------------------
+# LAMBDA FUNCTION VERSIONS
+# ------------------------------------------------------------------------------
+  LambdaFunctionVersion:
+    Type: AWS::Lambda::Version
+    DependsOn: LambdaFunction
+    Properties:
+      FunctionName: !Ref ServiceName
+      Description: !Ref VersionName
+
+# ------------------------------------------------------------------------------
+# CLOUDWATCH LOG GROUPS
+# ------------------------------------------------------------------------------
+  CloudwatchLogGroup:
+    Type: AWS::Logs::LogGroup
+    DependsOn: LambdaFunction
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${ServiceName}
+      RetentionInDays: 3
+
+# ------------------------------------------------------------------------------
+
+Outputs:
+  LambdaFunctionArn:
+    Description: ARN of MemoriesBot Lambda Function
+    Value: !GetAtt LambdaFunction.Arn
+    Export:
+      Name: MemoriesBotLambdaFunctionArn
