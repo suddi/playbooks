@@ -1,0 +1,75 @@
+- name: get bot info
+  uri:
+    url: https://api.telegram.org/bot{{ telegram_api_key }}/getMe
+    method: GET
+  register: get_bot_info_result
+
+- name: print get_bot_info_result
+  debug:
+    var: get_bot_info_result.json
+
+- name: get bot webhook url
+  uri:
+    url: https://api.telegram.org/bot{{ telegram_api_key }}/getWebhookInfo
+    method: GET
+  register: get_bot_webhook_result
+
+- name: print get_bot_webhook_result
+  debug:
+    var: get_bot_webhook_result.json
+
+- name: get bot commands
+  uri:
+    url: https://api.telegram.org/bot{{ telegram_api_key }}/getMyCommands
+    method: GET
+  register: get_bot_commands_result
+
+- name: print get_bot_commands_result
+  debug:
+    var: get_bot_commands_result.json
+
+- name: set bot webhook url
+  uri:
+    url: https://api.telegram.org/bot{{ telegram_api_key }}/setWebhook
+    method: POST
+    body_format: json
+    body:
+      url: "{{ telegram_webhook_url }}"
+      max_connections: "{{ telegram_max_connections }}"
+
+- name: set bot commands
+  uri:
+    url: https://api.telegram.org/bot{{ telegram_api_key }}/setMyCommands
+    method: POST
+    body_format: json
+    body: "{{ lookup('file', telegram_commands_json) }}"
+
+- name: get bot commands
+  uri:
+    url: https://api.telegram.org/bot{{ telegram_api_key }}/getMyCommands
+    method: GET
+  register: get_bot_commands_result
+
+- name: print get_bot_commands_result
+  debug:
+    var: get_bot_commands_result.json
+
+- name: get bot webhook url
+  uri:
+    url: https://api.telegram.org/bot{{ telegram_api_key }}/getWebhookInfo
+    method: GET
+  register: get_bot_webhook_result
+
+- name: print get_bot_webhook_result
+  debug:
+    var: get_bot_webhook_result.json
+
+- name: get bot commands
+  uri:
+    url: https://api.telegram.org/bot{{ telegram_api_key }}/getMyCommands
+    method: GET
+  register: get_bot_commands_result
+
+- name: print get_bot_commands_result
+  debug:
+    var: get_bot_commands_result.json

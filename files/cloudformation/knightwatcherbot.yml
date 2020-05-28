@@ -142,6 +142,9 @@ Resources:
       Code:
         S3Bucket: !Ref LambdaFunctionsBucket
         S3Key: !Sub ${ServiceName}.zip
+      Environment:
+        Variables:
+          NODE_ENV: !Ref VersionName
       Handler: lib.proxyRouter
       Runtime: nodejs12.x
       MemorySize: 128

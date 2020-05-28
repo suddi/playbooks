@@ -13,11 +13,13 @@
     user: "{{ runtime_user }}"
 
     node_version: v12
+    deployment_env: prod
 
     upload_root_dir: "{{ work_dir }}/build"
 
     aws_s3_bucket_name: "{{ lambda_domain }}"
     aws_lambda_runtime: nodejs12.x
+    aws_lambda_environment_variables: NODE_ENV={{ deployment_env }}
 
   roles:
     - role: nodejs/assert_node_version
@@ -38,7 +40,7 @@
           ParameterKey=ProjectName,ParameterValue={{ project_name }}
           ParameterKey=ServiceName,ParameterValue={{ service_name }}
           ParameterKey=LambdaFunctionsBucket,ParameterValue={{ lambda_domain }}
-          ParameterKey=VersionName,ParameterValue=prod
+          ParameterKey=VersionName,ParameterValue={{ deployment_env }}
           ParameterKey=DynamoDBTableName,ParameterValue={{ knightwatcherbot_config_tablename }}
           ParameterKey=DynamoDBTableUsernameIndex,ParameterValue={{ knightwatcherbot_config_table_username_index }}
       aws_stack_capabilities: CAPABILITY_NAMED_IAM

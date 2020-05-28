@@ -1,0 +1,50 @@
+- name: generate telegram commands json
+  hosts: local
+  gather_facts: no
+
+  vars:
+    project_name: "{{ general_project_name }}-io"
+    service_name: "{{ knightwatcherbot_project_name }}"
+
+    repo_name: "{{ service_name }}"
+    repo_url: "{{ github_account }}/{{ repo_name }}.git"
+    repo_version: master
+
+  tasks:
+    - name: get source code
+      git:
+        repo: "{{ repo_url }}"
+        dest: "{{ work_dir }}"
+        force: yes
+        update: yes
+        version: "{{ repo_version }}"
+
+    - name: install npm dependencies for build
+      command: npm install
+      args:
+        chdir: "{{ work_dir }}"
+
+    - name: generate telegram bot commands json
+      command: node scripts/generate-commands-json.js {{ service_name }}
+      args:
+        chdir: "{{ work_dir }}"
+
+- name: setup telegram bot
+  hosts: local
+  gather_facts: no
+
+  vars:
+    project_name: "{{ general_project_name }}-io"
+    service_name: "{{ knightwatcherbot_project_name }}"
+
+    repo_name: "{{ service_name }}"
+
+    telegram_api_key: "{{ knightwatcherbot_config_telegram_api_key }}"
+    telegram_webhook_url: "{{ knightwatcherbot_config_telegram_webhook_url }}"
+    telegram_max_connections: 5
+    telegram_commands_json: "{{ work_dir }}/scripts/{{ service_name }}.json"
+
+  roles:
+    - role: telegram/setup_bot
+
+    - role: utils/empty_work_dir

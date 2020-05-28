@@ -133,24 +133,14 @@ Resources:
       RouteKey: GET /favicon.ico
       Target: !Sub integrations/${KnightwatcherBotApiGatewayIntegration}
 
-  CircleCIHookRoute:
+  HookProcessorRoute:
     DependsOn: KnightwatcherBotApiGatewayIntegration
     Type: AWS::ApiGatewayV2::Route
     Properties:
       ApiId: !Ref ApiGateway
       AuthorizationType: NONE
-      OperationName: CircleCIHook
-      RouteKey: POST /v1/hooks/circleci
-      Target: !Sub integrations/${KnightwatcherBotApiGatewayIntegration}
-
-  TelegramHookRoute:
-    DependsOn: KnightwatcherBotApiGatewayIntegration
-    Type: AWS::ApiGatewayV2::Route
-    Properties:
-      ApiId: !Ref ApiGateway
-      AuthorizationType: NONE
-      OperationName: TelegramHook
-      RouteKey: POST /v1/hooks/telegram
+      OperationName: HookProcessor
+      RouteKey: POST /v1/{botName}/hooks/{hookType}
       Target: !Sub integrations/${KnightwatcherBotApiGatewayIntegration}
 
   MessageRoute:
@@ -160,7 +150,7 @@ Resources:
       ApiId: !Ref ApiGateway
       AuthorizationType: NONE
       OperationName: Message
-      RouteKey: POST /v1/messages
+      RouteKey: POST /v1/{botName}/messages
       Target: !Sub integrations/${KnightwatcherBotApiGatewayIntegration}
 
   UnknownEndpointRoute:
@@ -182,8 +172,7 @@ Resources:
       - WhoamiRoute
       - HealthCheckRoute
       - FaviconRoute
-      - CircleCIHookRoute
-      - TelegramHookRoute
+      - HookProcessorRoute
       - MessageRoute
       - UnknownEndpointRoute
     Properties:
@@ -252,23 +241,14 @@ Resources:
       Principal: apigateway.amazonaws.com
       SourceArn: !Sub arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/favicon.ico
 
-  CircleCIHookLambdaFunctionPermission:
+  HookProcessorLambdaFunctionPermission:
     Type: AWS::Lambda::Permission
     DependsOn: ApiGateway
     Properties:
       FunctionName: !ImportValue KnightwatcherBotLambdaFunctionArn
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
-      SourceArn: !Sub arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/v1/hooks/circleci
-
-  TelegramHookLambdaFunctionPermission:
-    Type: AWS::Lambda::Permission
-    DependsOn: ApiGateway
-    Properties:
-      FunctionName: !ImportValue KnightwatcherBotLambdaFunctionArn
-      Action: lambda:InvokeFunction
-      Principal: apigateway.amazonaws.com
-      SourceArn: !Sub arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/v1/hooks/telegram
+      SourceArn: !Sub arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/v1/*/hooks/*
 
   MessageLambdaFunctionPermission:
     Type: AWS::Lambda::Permission
@@ -277,7 +257,7 @@ Resources:
       FunctionName: !ImportValue KnightwatcherBotLambdaFunctionArn
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
-      SourceArn: !Sub arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/v1/messages
+      SourceArn: !Sub arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/v1/*/messages
 
   UnknownEndpointLambdaPermissions:
     Type: AWS::Lambda::Permission

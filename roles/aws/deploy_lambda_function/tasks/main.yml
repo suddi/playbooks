@@ -60,7 +60,7 @@
     --timeout {{ aws_lambda_timeout }}
     --memory-size {{ aws_lambda_memory }}
     {% if aws_lambda_environment_variables is defined %}
-      --environment Variables="{{ aws_lambda_environment_variables }}"
+      --environment Variables="{ {{ aws_lambda_environment_variables }} }"
     {% endif %}
   args:
     chdir: "{{ work_dir }}"

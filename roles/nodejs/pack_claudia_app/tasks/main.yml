@@ -19,7 +19,7 @@
 
 - name: generate lib/config.js from config.js.j2 template
   template:
-    src: "{{ work_dir }}/config.js.j2"
+    src: "{{ files_dir }}/{{ service_name }}/config.js.j2"
     dest: "{{ work_dir }}/lib/config.js"
     mode: "0644"
 

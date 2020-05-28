@@ -84,6 +84,7 @@ google_site_verification_text: "{{ vault_google_site_verification_text }}"
 
 bot_project_name: bot
 bot_service_url: "{{ vault_bot_service_url }}"
+bot_telegram_webhook_url: "{{ vault_bot_telegram_webhook_url }}"
 
 # KnightwatcherBot
 knightwatcherbot_project_name: knightwatcherbot
@@ -91,6 +92,8 @@ knightwatcherbot_project_name: knightwatcherbot
 knightwatcherbot_config_tablename: "{{ vault_knightwatcherbot_config_tablename }}"
 knightwatcherbot_config_table_username_index: "{{ vault_knightwatcherbot_config_table_username_index }}"
 knightwatcherbot_config_telegram_api_key: "{{ vault_knightwatcherbot_config_telegram_api_key }}"
+knightwatcherbot_config_telegram_webhook_api_key: "{{ vault_knightwatcherbot_config_telegram_webhook_api_key }}"
+knightwatcherbot_config_telegram_webhook_url: "{{ vault_knightwatcherbot_config_telegram_webhook_url }}"
 
 # Kobe
 kobe_project_name: kobe
@@ -103,6 +106,8 @@ kobe_config_microsoft_app_password: "{{ vault_kobe_config_microsoft_app_password
 memoriesbot_project_name: memoriesbot
 
 memoriesbot_config_telegram_api_key: "{{ vault_memoriesbot_config_telegram_api_key }}"
+memoriesbot_config_telegram_webhook_api_key: "{{ vault_memoriesbot_config_telegram_webhook_api_key }}"
+memoriesbot_config_telegram_webhook_url: "{{ vault_memoriesbot_config_telegram_webhook_url }}"
 
 # CICD
 cicd_project_name: cicd
