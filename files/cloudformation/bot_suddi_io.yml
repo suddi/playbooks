@@ -133,6 +133,16 @@ Resources:
       RouteKey: GET /favicon.ico
       Target: !Sub integrations/${KnightwatcherBotApiGatewayIntegration}
 
+  CircleCIHookProcessorRoute:
+    DependsOn: KnightwatcherBotApiGatewayIntegration
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ApiGateway
+      AuthorizationType: NONE
+      OperationName: CircleCIHookProcessorRoute
+      RouteKey: POST /hooks/circle
+      Target: !Sub integrations/${KnightwatcherBotApiGatewayIntegration}
+
   HookProcessorRoute:
     DependsOn: KnightwatcherBotApiGatewayIntegration
     Type: AWS::ApiGatewayV2::Route
@@ -172,6 +182,7 @@ Resources:
       - WhoamiRoute
       - HealthCheckRoute
       - FaviconRoute
+      - CircleCIHookProcessorRoute
       - HookProcessorRoute
       - MessageRoute
       - UnknownEndpointRoute
@@ -240,6 +251,15 @@ Resources:
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
       SourceArn: !Sub arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/favicon.ico
+
+  CircleCIHookProcessorLambdaFunctionPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn: ApiGateway
+    Properties:
+      FunctionName: !ImportValue KnightwatcherBotLambdaFunctionArn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/hooks/circle
 
   HookProcessorLambdaFunctionPermission:
     Type: AWS::Lambda::Permission
