@@ -19,7 +19,7 @@
 
     aws_s3_bucket_name: "{{ lambda_domain }}"
     aws_lambda_runtime: nodejs12.x
-    aws_lambda_environment_variables: NODE_ENV={{ deployment_env }}
+    aws_lambda_environment_variables: NODE_ENV={{ deployment_env }},VERSION={{ deployment_version }}
 
   roles:
     - role: nodejs/assert_node_version
@@ -41,6 +41,7 @@
           ParameterKey=ServiceName,ParameterValue={{ service_name }}
           ParameterKey=LambdaFunctionsBucket,ParameterValue={{ lambda_domain }}
           ParameterKey=VersionName,ParameterValue={{ deployment_env }}
+          ParameterKey=DeploymentVersion,ParameterValue={{ deployment_version }}
           ParameterKey=DynamoDBTableName,ParameterValue={{ knightwatcherbot_config_tablename }}
           ParameterKey=DynamoDBTableUsernameIndex,ParameterValue={{ knightwatcherbot_config_table_username_index }}
       aws_stack_capabilities: CAPABILITY_NAMED_IAM

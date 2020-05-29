@@ -78,7 +78,7 @@ describe('Unit tests for utils/knightwatcher', function () {
             });
 
             return nock(url)
-                .post('/v1/messages', body)
+                .post('/v1/knightwatcherbot/messages', body)
                 .once()
                 .reply(statusCode, responseBody);
         }

@@ -5,6 +5,11 @@
     force: yes
     update: yes
     version: "{{ repo_version }}"
+  register: git_result
+
+- name: store git commit hash
+  set_fact:
+    deployment_version: "{{ git_result.after | truncate(7, True, '') }}"
 
 # - name: switch to .nvmrc node version
 #   shell: nvm use

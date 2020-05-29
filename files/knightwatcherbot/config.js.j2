@@ -3,6 +3,7 @@
 function get() {
     return {
         ENV: process.env.NODE_ENV,
+        VERSION: process.env.VERSION,
 
         REGION: process.env.AWS_REGION,
         TABLENAME: '{{ knightwatcherbot_config_tablename }}',

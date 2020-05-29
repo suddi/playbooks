@@ -19,6 +19,9 @@ Parameters:
   VersionName:
     Description: Version name for the deployment
     Type: String
+  DeploymentVersion:
+    Description: Deployment version set by the Git commit HASH
+    Type: String
   DynamoDBTableName:
     Description: DynamoDB table name to hold bot users
     Type: String
@@ -145,6 +148,7 @@ Resources:
       Environment:
         Variables:
           NODE_ENV: !Ref VersionName
+          VERSION: !Ref DeploymentVersion
       Handler: lib.proxyRouter
       Runtime: nodejs12.x
       MemorySize: 128
