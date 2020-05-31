@@ -51,6 +51,14 @@ Resources:
                   - s3:ListObjects
                 Resource: !Sub arn:aws:s3:::${LambdaFunctionsBucket}
                 Effect: Allow
+        - PolicyName: InvokeLambdaPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Action:
+                  - lambda:InvokeFunction
+                Resource: !ImportValue KnightwatcherBotLambdaFunctionArn
+                Effect: Allow
       Tags:
         - Key: Name
           Value: !Sub ${ServiceName}-lambda-executor
