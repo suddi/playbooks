@@ -143,6 +143,26 @@ Resources:
       RouteKey: POST /hooks/circle
       Target: !Sub integrations/${KnightwatcherBotApiGatewayIntegration}
 
+  GoogleAuthRoute:
+    DependsOn: MemoriesBotApiGatewayIntegration
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ApiGateway
+      AuthorizationType: NONE
+      OperationName: GoogleAuth
+      RouteKey: GET /v1/auth/google
+      Target: !Sub integrations/${MemoriesBotApiGatewayIntegration}
+
+  GoogleExchangeAuthCodeRoute:
+    DependsOn: MemoriesBotApiGatewayIntegration
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ApiGateway
+      AuthorizationType: NONE
+      OperationName: GoogleExchangeAuthCode
+      RouteKey: GET /v1/auth/google/code
+      Target: !Sub integrations/${MemoriesBotApiGatewayIntegration}
+
   HookProcessorRoute:
     DependsOn: KnightwatcherBotApiGatewayIntegration
     Type: AWS::ApiGatewayV2::Route
@@ -183,6 +203,8 @@ Resources:
       - HealthCheckRoute
       - FaviconRoute
       - CircleCIHookProcessorRoute
+      - GoogleAuthRoute
+      - GoogleExchangeAuthCodeRoute
       - HookProcessorRoute
       - MessageRoute
       - UnknownEndpointRoute
@@ -260,6 +282,24 @@ Resources:
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
       SourceArn: !Sub arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/hooks/circle
+
+  GoogleAuthLambdaFunctionPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn: ApiGateway
+    Properties:
+      FunctionName: !ImportValue MemoriesBotLambdaFunctionArn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/v1/auth/google
+
+  GoogleExchangeAuthCodeLambdaFunctionPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn: ApiGateway
+    Properties:
+      FunctionName: !ImportValue MemoriesBotLambdaFunctionArn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/v1/auth/google/code
 
   HookProcessorLambdaFunctionPermission:
     Type: AWS::Lambda::Permission

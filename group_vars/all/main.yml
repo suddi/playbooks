@@ -112,6 +112,7 @@ memoriesbot_config_telegram_webhook_url: "{{ vault_memoriesbot_config_telegram_w
 memoriesbot_config_photos_client_id: "{{ vault_memoriesbot_config_photos_client_id }}"
 memoriesbot_config_photos_client_secret: "{{ vault_memoriesbot_config_photos_client_secret }}"
 memoriesbot_config_photos_redirect_url: "{{ vault_memoriesbot_config_photos_redirect_url }}"
+memoriesbot_config_photos_access_token: "{{ vault_memoriesbot_config_photos_access_token }}"
 
 # CICD
 cicd_project_name: cicd
