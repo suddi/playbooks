@@ -19,6 +19,9 @@ Parameters:
   VersionName:
     Description: Version name for the deployment
     Type: String
+  DeploymentVersion:
+    Description: Deployment version set by the Git commit HASH
+    Type: String
 
 Resources:
 # ------------------------------------------------------------------------------
@@ -70,6 +73,10 @@ Resources:
       Code:
         S3Bucket: !Ref LambdaFunctionsBucket
         S3Key: !Sub ${ServiceName}.zip
+      Environment:
+        Variables:
+          GO_ENV: !Ref VersionName
+          VERSION: !Ref DeploymentVersion
       Handler: main
       Runtime: go1.x
       MemorySize: 128

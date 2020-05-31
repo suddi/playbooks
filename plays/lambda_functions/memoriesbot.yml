@@ -12,11 +12,13 @@
     bin_file: "{{ work_dir }}/build/{{ service_name }}.zip"
 
     user: "{{ runtime_user }}"
+    deployment_env: prod
 
     upload_root_dir: "{{ work_dir }}/build"
 
     aws_s3_bucket_name: "{{ lambda_domain }}"
     aws_lambda_runtime: go1.x
+    aws_lambda_environment_variables: GO_ENV={{ deployment_env }},VERSION={{ deployment_version }}
 
   roles:
     - role: utils/empty_work_dir
@@ -37,12 +39,12 @@
           ParameterKey=ProjectName,ParameterValue={{ project_name }}
           ParameterKey=ServiceName,ParameterValue={{ service_name }}
           ParameterKey=LambdaFunctionsBucket,ParameterValue={{ lambda_domain }}
-          ParameterKey=VersionName,ParameterValue=prod
+          ParameterKey=VersionName,ParameterValue={{ deployment_env }}
+          ParameterKey=DeploymentVersion,ParameterValue={{ deployment_version }}
       aws_stack_capabilities: CAPABILITY_NAMED_IAM
 
     - role: aws/deploy_lambda_function
       s3_key: "{{ service_name }}.zip"
-
 
     - role: utils/empty_work_dir
 
