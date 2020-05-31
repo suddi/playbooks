@@ -109,6 +109,10 @@ memoriesbot_config_telegram_api_key: "{{ vault_memoriesbot_config_telegram_api_k
 memoriesbot_config_telegram_webhook_api_key: "{{ vault_memoriesbot_config_telegram_webhook_api_key }}"
 memoriesbot_config_telegram_webhook_url: "{{ vault_memoriesbot_config_telegram_webhook_url }}"
 
+memoriesbot_config_photos_client_id: "{{ vault_memoriesbot_config_photos_client_id }}"
+memoriesbot_config_photos_client_secret: "{{ vault_memoriesbot_config_photos_client_secret }}"
+memoriesbot_config_photos_redirect_url: "{{ vault_memoriesbot_config_photos_redirect_url }}"
+
 # CICD
 cicd_project_name: cicd
 cicd_service_url: "{{ vault_cicd_service_url }}"

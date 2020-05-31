@@ -25,6 +25,10 @@
 
     - role: git/get_source_code
 
+    - role: utils/generate_from_template
+      template_file: "{{ files_dir }}/{{ service_name }}/config.go.j2"
+      destination_file: "{{ work_dir }}/pkg/config/config.go"
+
     - role: golang/build_go_package
       make_zip: yes
 

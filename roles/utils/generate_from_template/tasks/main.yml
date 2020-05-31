@@ -1,0 +1,5 @@
+- name: generate file at {{ destination_file }} from template
+  template:
+    src: "{{ template_file }}"
+    dest: "{{ destination_file }}"
+    mode: "0644"
