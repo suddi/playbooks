@@ -1,25 +1,23 @@
-applications_to_install:
-  - communication:
-    - skype
-    - whatsapp
-    - zoom
-  - multimedia:
-    - spotify
-    - vlc
-  - organization:
-    - microsoft_todo
-  - programming:
-    - docker
-    - postman
-    - visual_studio_code
-  - security:
-    - authy
-    - keypass
-    - macpass
-    - nordvpn
-  - storage:
-    - google_backup
-    - spideroak_one
-  - tools:
-    - clipmenu
-    - spectacle
+brew_dependencies:
+  # for jumping through file paths
+  - fasd 
+  # for version control
+  - git
+  # for ssh
+  - openssl
+  # for gpg
+  - gnupg
+  - gnupg2
+  - pinentry-mac
+  # general
+  - make
+  - wget
+  # for python
+  - readline
+  - sqlite3
+  - xz
+  - zlib
+  - pyenv
+  - pyenv-virtualenvwrapper
+  # shell
+  - zsh

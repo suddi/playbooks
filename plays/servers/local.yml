@@ -4,6 +4,9 @@
   vars:
     user: "{{ default_user }}"
     user_email: "{{ default_user_email }}"
+    user_home_dir: "~"
+    user_shell: /bin/zsh
+    user_shell_rc_file: "{{ user_home_dir }}/.zshrc"
 
     python_versions:
       - "3.8.2"
@@ -26,4 +29,13 @@
 
     - role: general/install_general_dependencies
       dependency_make_install: yes
-      dependency_zsh_install: yes
+
+    - role: user/generate_ssh_keys
+      
+    - role: shell/setup_zsh
+
+    - role: python/install_python_dependencies
+      add_rc_initialization: false
+
+    - role: nodejs/install_node_dependencies
+      add_rc_initialization: false

@@ -1,0 +1,7 @@
+- name: install python dependencies
+  apt:
+    name: "{{ item }}"
+    state: present
+    autoclean: yes
+    autoremove: yes
+  with_items: "{{ python_dependencies }}"

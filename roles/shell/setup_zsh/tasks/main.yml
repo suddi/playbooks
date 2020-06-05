@@ -2,21 +2,17 @@
   package:
     name: zsh
     state: present
-  become: yes
 
 - name: add .zshrc to ~/.zshrc
   template:
     src: zshrc.j2
     dest: ~/.zshrc
-    owner: "{{ user }}"
-    group: "{{ user }}"
     mode: "0644"
-  become: yes
-  become_user: "{{ user }}"
 
 - name: clone oh-my-zsh repo
   git:
     repo: "{{ dependency_oh_my_zsh_url }}"
     dest: "{{ dependency_oh_my_zsh_dir }}"
     force: yes
+    update: yes
     version: "{{ dependency_oh_my_zsh_version }}"

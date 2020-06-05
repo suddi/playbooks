@@ -1,3 +1,5 @@
 ssh_directory: .ssh
 ssh_key_file: "id_rsa"
 ssh_pub_key_file: "{{ ssh_key_file }}.pub"
+
+user_machine_name: ansible_facts["ansible_hostname"]

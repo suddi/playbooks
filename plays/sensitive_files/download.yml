@@ -6,7 +6,7 @@
     project_name: ansible
     service_name: "{{ project_name }}-sensitive-files"
 
-    aws_s3_bucket_name: "{{ vault_domain }}"
+    aws_s3_bucket_name: vault.suddi.io
 
     download_root_dir: "{{ project_root_dir }}"
     files: "{{ sensitive_files }}"

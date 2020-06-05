@@ -1,0 +1,7 @@
+python_dependencies:
+    - gcc
+    - libssl-dev
+    - zlib1g-dev
+    - libbz2-dev
+    - libsqlite3-dev
+    - libreadline-dev

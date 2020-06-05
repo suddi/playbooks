@@ -4,13 +4,30 @@
     state: present
 
 - name: set git user
-  command: git config --global user.name "{{ user }}"
+  command: git config 
+    --global user.name "{{ user }}"
 
 - name: set git user email
-  command: git config --global user.email "{{ user_email }}"
+  command: git config 
+    --global user.email "{{ user_email }}"
 
 - name: set git editor
-  command: git config --global core.editor "nano"
+  command: git config 
+    --global core.editor "nano"
 
 - name: set git push nature
-  command: git config --global push.default simple
+  command: git config 
+    --global push.default simple
+
+- name: set git commit signing application
+  command: git config 
+    --global gpg.program gpg
+  
+- name: set git commit signing
+  command: git config 
+    --global commit.gpgsign true
+
+- name: set git commit signing key
+  debug: 
+    msg: "Once you have a GPG key setup, please run the following command:\n\n
+      $ git config --global user.signingkey <GPG_SIGNING_KEY_ID>\n\n"

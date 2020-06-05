@@ -1,8 +1,10 @@
 - name: install macos dependencies
   block:
-    - name: print applications to install as a reminder
-      debug:
-        msg: "Make sure to install the following:\n{{ applications_to_install | to_nice_yaml }}"
+    - name: install xcode dependencies
+      command: xcode-select --install
+      register: xcode_install_result
+      failed_when: "xcode_install_result.rc != 0 and
+        'command line tools are already installed' not in xcode_install_result.stderr"
 
     - name: install homebrew
       block:
@@ -12,7 +14,17 @@
           register: homebrew_check
 
         - name: install homebrew
-          command: mkdir homebrew && curl -L https://github.com/Homebrew/brew/tarball/master | tar xz --strip 1 -C homebrew
+          command: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
           when: not homebrew_check.stat.exists
+
+        - name: update brew
+          command: brew update
+
+    - name: install {{ item }}
+      package:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - "{{ brew_dependencies }}"
 
   when: ansible_facts["os_family"] == "Darwin"
