@@ -49,7 +49,7 @@
     "upload": "npm run encrypt && ansible-playbook plays/sensitive_files/upload.yml"
   },
   "dependencies": {
-    "axios": "^0.19.2",
+    "axios": "^1.6.4",
     "commander": "^5.1.0"
   },
   "devDependencies": {
